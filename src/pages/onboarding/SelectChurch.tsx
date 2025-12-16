@@ -1,0 +1,148 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useNavigate } from 'react-router-dom';
+import { Search, MapPin, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface Church {
+    id: string;
+    name: string;
+    slug: string;
+    city: string;
+    state: string;
+    cover_image_url?: string;
+    theme_color?: string;
+}
+
+export default function SelectChurch() {
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const [churches, setChurches] = useState<Church[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [joining, setJoining] = useState<string | null>(null);
+
+    useEffect(() => {
+        loadChurches();
+    }, []);
+
+    const loadChurches = async () => {
+        try {
+            // Using Edge Function as requested
+            const { data, error } = await supabase.functions.invoke('public-churches-list');
+            if (error) throw error;
+            setChurches(data || []);
+        } catch (err: any) {
+            console.error('Error loading churches:', err);
+            // Fallback for dev/demo if function not deployed yet
+            // alert('Erro ao carregar igrejas via Edge Function. Verifique o console.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleJoinChurch = async (church: Church) => {
+        if (!user) return;
+        setJoining(church.id);
+        try {
+            // 1. Update Profile (User selects their "Home Church")
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .update({ church_id: church.id })
+                .eq('id', user.id);
+
+            if (profileError) throw profileError;
+
+            // 2. Also ensure they are in the members table (as pending or active?)
+            // For now, linking profile is enough to get them redirected, 
+            // but MembershipContext checks 'members' table.
+            // Let's create a pending member record if not exists.
+            const { error: memberError } = await supabase
+                .from('members')
+                .upsert({
+                    church_id: church.id,
+                    user_id: user.id,
+                    status: 'pendente', // Requires approval or 'active' for auto-join
+                    full_name: user.email?.split('@')[0] || 'Novo Membro'
+                }, { onConflict: 'user_id, church_id' });
+
+            // If error, ignore for now as RLS might block if not permitted
+            if (memberError) console.log("Member creation warning:", memberError);
+
+            // 3. Redirect
+            navigate(`/c/${church.slug}`);
+
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao selecionar igreja.');
+        } finally {
+            setJoining(null);
+        }
+    };
+
+    const filteredChurches = churches.filter(c =>
+        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.city.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div className="min-h-screen bg-slate-50 p-4 pb-24">
+            <header className="mb-8 mt-4">
+                <h1 className="text-2xl font-heading font-bold text-slate-900 mb-2">Bem-vindo à Família</h1>
+                <p className="text-slate-500">Escolha sua igreja para começar.</p>
+            </header>
+
+            <div className="relative mb-6">
+                <Search className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                <input
+                    type="text"
+                    placeholder="Buscar por nome ou cidade..."
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white shadow-sm"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            {loading ? (
+                <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                </div>
+            ) : (
+                <div className="grid gap-4">
+                    {filteredChurches.map(church => (
+                        <div key={church.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                            {church.cover_image_url && (
+                                <div className="h-32 bg-slate-200 w-full relative">
+                                    <img src={church.cover_image_url} alt={church.name} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                </div>
+                            )}
+                            <div className="p-5 flex flex-col gap-3">
+                                <div>
+                                    <h3 className="font-bold text-lg text-slate-900">{church.name}</h3>
+                                    <div className="flex items-center text-slate-500 text-sm gap-1 mt-1">
+                                        <MapPin className="w-4 h-4" />
+                                        {church.city}, {church.state}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleJoinChurch(church)}
+                                    disabled={!!joining}
+                                    className="w-full mt-2 bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-70 flex items-center justify-center"
+                                >
+                                    {joining === church.id ? <Loader2 className="animate-spin w-5 h-5" /> : 'Participar desta Igreja'}
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+
+                    {filteredChurches.length === 0 && (
+                        <div className="text-center py-12 text-slate-400">
+                            Nenhuma igreja encontrada.
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
