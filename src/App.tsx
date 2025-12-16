@@ -46,6 +46,7 @@ import RadioPage from '@/pages/public/RadioPage';
 import StudiesPage from '@/pages/Content/StudiesPage';
 
 import PartnersPage from '@/pages/public/PartnersPage';
+import ComingSoon from '@/pages/ComingSoon';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 export default function App() {
@@ -73,6 +74,7 @@ export default function App() {
                 <Route path={APP_ROUTES.PARTNERS} element={<PartnersPage />} />
                 <Route path={APP_ROUTES.MURAL} element={<NoticeList />} />
                 <Route path={APP_ROUTES.STUDIES} element={<StudiesPage />} />
+                <Route path="/coming-soon" element={<ComingSoon />} />
               </Route>
 
               {/* Redirects */}

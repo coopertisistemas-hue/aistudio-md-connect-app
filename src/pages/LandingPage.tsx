@@ -6,6 +6,8 @@ import { VerseCard } from '@/components/home/VerseCard';
 import { QuickActions } from '@/components/ui/QuickActions';
 import { MonetizationBlock } from '@/components/home/MonetizationBlock';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FLAGS } from '@/lib/flags';
+import { ChurchPartnersBlock } from '@/components/home/ChurchPartnersBlock';
 
 export default function LandingPage() {
     const [data, setData] = useState<HomeData | null>(null);
@@ -121,10 +123,19 @@ export default function LandingPage() {
                 )}
 
                 {/* 3. Quick Actions (Glass Grid) */}
-                <QuickActions actions={data.quick_actions} />
+                {FLAGS.FEATURE_HOME_QUICK_ACTIONS && (
+                    <QuickActions actions={data.quick_actions} />
+                )}
+
+                {/* 3.1 Church & Partners Premium Section (NEW) */}
+                {FLAGS.FEATURE_HOME_PARTNERS_SECTION && (
+                    <ChurchPartnersBlock />
+                )}
 
                 {/* 4. Monetization (Glass & Discrete) */}
-                <MonetizationBlock monetization={data.monetization} churchId={data.church?.id} />
+                {FLAGS.FEATURE_HOME_DONATE_SECTION && (
+                    <MonetizationBlock monetization={data.monetization} churchId={data.church?.id} />
+                )}
 
                 {/* 5. Verse Card (Simple Card at Bottom) */}
                 <VerseCard verse={data.daily_verse} />
