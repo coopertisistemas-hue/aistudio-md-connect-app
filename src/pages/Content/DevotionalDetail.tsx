@@ -5,7 +5,7 @@ import { devotionalsApi } from '@/lib/api/devotionals';
 import type { Post } from '@/types/content';
 import { Calendar, BookOpen, Quote, Loader2 } from 'lucide-react';
 import { FLAGS } from '@/lib/flags';
-import { BackLink } from '@/components/ui/BackLink';
+import { PageIntro } from '@/components/layout/PageIntro';
 
 
 // Fallback Data for V1
@@ -141,7 +141,15 @@ export default function DevotionalDetail() {
 
     return (
         <div className="w-full animate-fade-in relative z-10 pb-4">
-            {/* Header Removed as per UI request */}
+            {/* Standardized Header */}
+            <div className="px-5 pt-8">
+                <PageIntro
+                    title="Devocional"
+                    subtitle="Leia, medite e compartilhe."
+                    icon={BookOpen}
+                    iconClassName="text-indigo-600"
+                />
+            </div>
 
             {/* Hero Section (Refactored to match Home transparency) */}
             <div className="w-full relative group rounded-b-3xl overflow-hidden shadow-sm mb-6">
