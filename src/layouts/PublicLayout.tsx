@@ -34,15 +34,22 @@ export const PublicLayout: React.FC = () => {
                 {/* Main Content */}
                 <main className="flex-1 w-full pb-12">
                     {/* Global Back Button (Except Home) */}
-
-
                     <Outlet />
                 </main>
 
                 {/* Footers (Inside the glass wrapper) */}
                 <HomeReturnPill />
-                {!isHome && <SupportFooter />}
-                <AppFooter />
+
+                {/* 
+                    Legacy Footer Handling:
+                    For pages NOT using InternalPageLayout, we render footers here.
+                    For pages using InternalPageLayout (listed below), we skip them here 
+                    so the layout can handle them (preventing duplicates).
+                */}
+                {!isHome && !location.pathname.startsWith('/devocionais') && <SupportFooter />}
+
+                {/* AppFooter is also handled by InternalPageLayout for these routes */}
+                {!location.pathname.startsWith('/devocionais') && <AppFooter />}
             </div>
         </div>
     );

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { contentService } from '@/services/content';
 import type { Post } from '@/types/content';
 import { Heart } from 'lucide-react';
-import { PageIntro } from '@/components/layout/PageIntro';
+import { PageIntro } from '@/components/layout/PageIntro'; // Kept if needed, but likely replaced by InternalPageLayout usage. Ideally clean up.
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function DevotionalsList() {
     const navigate = useNavigate();
@@ -26,19 +27,13 @@ export default function DevotionalsList() {
     };
 
     return (
-        <div className="min-h-screen bg-transparent flex flex-col">
-            {/* Header */}
-            {/* Header */}
-            <div className="px-5 pt-8">
-                <PageIntro
-                    title="Devocionais"
-                    subtitle="Reflexões diárias para o seu coração."
-                    icon={Heart}
-                    iconClassName="text-rose-500 fill-rose-500/20"
-                />
-            </div>
-
-            <div className="p-4 space-y-4 flex-1">
+        <InternalPageLayout
+            title="Devocionais"
+            subtitle="Reflexões diárias para o seu coração."
+            icon={Heart}
+            iconClassName="text-rose-500 fill-rose-500/20"
+        >
+            <div className="p-4 space-y-4">
                 {isLoading ? (
                     <div className="grid gap-4">
                         {[1, 2, 3, 4, 5].map(i => (
@@ -71,6 +66,6 @@ export default function DevotionalsList() {
                     ))
                 )}
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
