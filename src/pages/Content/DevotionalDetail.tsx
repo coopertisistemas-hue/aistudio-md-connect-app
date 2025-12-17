@@ -130,7 +130,7 @@ export default function DevotionalDetail() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+            <div className="min-h-screen bg-transparent flex items-center justify-center">
                 <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
             </div>
         );
@@ -142,21 +142,22 @@ export default function DevotionalDetail() {
         <div className="w-full animate-fade-in relative z-10 pb-4">
             {/* Header Removed as per UI request */}
 
-            {/* Hero Section */}
-            <div className="w-full relative bg-slate-900 group rounded-b-3xl overflow-hidden shadow-sm">
+            {/* Hero Section (Refactored to match Home transparency) */}
+            <div className="w-full relative group rounded-b-3xl overflow-hidden shadow-sm mb-6">
                 <div className="w-full h-72 md:h-96 relative overflow-hidden">
                     {item.cover_image_url ? (
                         <img
                             src={item.cover_image_url}
                             alt={item.title}
-                            className="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-indigo-900 text-indigo-300">
+                        <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-300">
                             <BookOpen className="w-16 h-16 opacity-50" />
                         </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+                    {/* Standard Home-like scrim for text legibility if needed, but keeping it minimal as requested */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
 
                 <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 text-white z-10">
@@ -164,11 +165,11 @@ export default function DevotionalDetail() {
                         <Calendar className="w-3 h-3" />
                         {new Date(item.published_at).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-serif font-bold leading-tight mb-2 tracking-tight text-shadow-sm">
+                    <h1 className="text-3xl md:text-4xl font-serif font-bold leading-tight mb-2 tracking-tight text-shadow-sm text-white">
                         {item.title}
                     </h1>
                     {item.subtitle && (
-                        <p className="text-indigo-100 text-sm md:text-base opacity-90 font-medium tracking-wide">
+                        <p className="text-indigo-100 text-sm md:text-base opacity-90 font-medium tracking-wide text-white/90">
                             {item.subtitle}
                         </p>
                     )}
@@ -180,43 +181,43 @@ export default function DevotionalDetail() {
 
                 {/* 1. Key Verse Block */}
                 {parsedContent.verseKey && (
-                    <div className="bg-slate-50/80 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-white/40 relative overflow-hidden">
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
                         <Quote className="absolute top-4 right-4 text-indigo-500/10 w-12 h-12 -rotate-12" />
-                        <p className="font-serif text-lg md:text-xl text-slate-800 italic leading-relaxed relative z-10">
+                        <p className="font-serif text-lg md:text-xl text-foreground italic leading-relaxed relative z-10">
                             “{parsedContent.verseKey.replace(/^['"]|['"]$/g, '')}”
                         </p>
                         {item.subtitle && (
-                            <p className="text-xs font-bold text-indigo-600 mt-3 uppercase tracking-wider text-right">
+                            <p className="text-xs font-bold text-brand-primary mt-3 uppercase tracking-wider text-right">
                                 — {item.subtitle}
                             </p>
                         )}
                     </div>
                 )}
 
-                <div className="bg-slate-50/60 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-sm border border-white/40">
+                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
 
                     {/* 2. Reflection Label */}
                     <div className="flex items-center gap-3 mb-6">
                         <div className="h-px bg-slate-200/50 flex-1" />
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Reflexão Guiada</span>
+                        <span className="text-xs font-bold text-foreground uppercase tracking-widest">Reflexão Guiada</span>
                         <div className="h-px bg-slate-200/50 flex-1" />
                     </div>
 
                     {/* 3. Body Text */}
-                    <div className="prose prose-slate prose-lg max-w-none text-slate-700 leading-relaxed">
+                    <div className="prose prose-slate prose-lg max-w-none text-muted-foreground leading-relaxed">
                         {parsedContent.reflectionParagraphs.map((p, idx) => (
-                            <p key={idx} className="mb-4 text-[1.05rem]">{p}</p>
+                            <p key={idx} className="mb-4 text-[1.05rem] text-muted-foreground font-medium">{p}</p>
                         ))}
                     </div>
 
                     {/* 4. Prayer Block */}
                     {parsedContent.prayer && (
                         <div className="mt-8 bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100/50">
-                            <h3 className="flex items-center gap-2 text-sm font-bold text-indigo-800 uppercase tracking-wider mb-3">
+                            <h3 className="flex items-center gap-2 text-sm font-bold text-brand-primary uppercase tracking-wider mb-3">
                                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                                 Oração
                             </h3>
-                            <p className="text-indigo-900/80 italic font-medium leading-relaxed">
+                            <p className="text-indigo-900 font-medium leading-relaxed italic">
                                 "{parsedContent.prayer.trim()}"
                             </p>
                         </div>
@@ -225,15 +226,14 @@ export default function DevotionalDetail() {
                     {/* 5. Signature Footer */}
                     <div className="mt-8 pt-6 border-t border-slate-200/50">
                         <div className="flex flex-col items-center text-center">
-                            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Escrito e supervisionado por</p>
+                            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Escrito e supervisionado por</p>
                             <div className="flex items-center gap-2 mt-2">
-                                <p className="text-slate-800 font-serif font-medium">
+                                <p className="text-foreground font-serif font-bold">
                                     Equipe Projeto MD – Momento Devocional
                                 </p>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 

@@ -6,8 +6,8 @@ export function AppBackground() {
     const [videoLoaded, setVideoLoaded] = useState(false);
     const location = useLocation();
 
-    // Determine variant based on route
-    const isHome = location.pathname === '/' || location.pathname === '/home';
+    // Global Video Style: All pages now share the same 'Home' glass/video style
+    const isHome = true;
 
     useEffect(() => {
         // Check OS preference

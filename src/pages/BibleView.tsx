@@ -81,15 +81,15 @@ export default function BibleView() {
 
 
     return (
-        <div className="flex flex-col h-full bg-white">
+        <div className="flex flex-col h-full bg-transparent">
             {/* Header Sticky */}
-            <div className="sticky top-0 z-20 bg-white border-b border-slate-100 p-3 flex items-center justify-between shadow-sm">
+            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-100 p-3 flex items-center justify-between shadow-sm">
 
                 <div className="flex gap-2 w-full justify-center md:justify-start">
                     <select
                         value={book}
                         onChange={(e) => { setBook(e.target.value); setChapter(1); }}
-                        className="h-9 px-3 py-1 rounded-lg border border-slate-200 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="h-9 px-3 py-1 rounded-lg border border-slate-200 text-sm bg-white/50 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
                         <option disabled>Antigo Testamento</option>
                         {OLD_TESTAMENT.map(b => <option key={b} value={b}>{b}</option>)}
@@ -100,7 +100,7 @@ export default function BibleView() {
                     <select
                         value={chapter}
                         onChange={(e) => setChapter(Number(e.target.value))}
-                        className="h-9 px-3 py-1 rounded-lg border border-slate-200 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="h-9 px-3 py-1 rounded-lg border border-slate-200 text-sm bg-white/50 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
                         {Array.from({ length: 150 }, (_, i) => i + 1).map(n => (
                             <option key={n} value={n}>{n}</option>
@@ -109,7 +109,7 @@ export default function BibleView() {
                 </div>
             </div>
 
-            {/* Content */}
+            {/* Content using Cards for Legibility */}
             <div className="flex-1 p-5 overflow-y-auto pb-24 font-serif">
                 {isLoading ? (
                     <div className="flex justify-center py-10">
@@ -117,45 +117,44 @@ export default function BibleView() {
                     </div>
                 ) : data ? (
                     <div className="space-y-4 max-w-2xl mx-auto">
-                        <h2 className="text-2xl font-bold text-center mb-6 text-slate-900">{data.reference}</h2>
-                        <div className="space-y-4 text-lg leading-loose text-slate-800">
-                            {data.verses.map((v) => (
-                                <span key={v.verse} className="inline mr-1">
-                                    <sup className="text-[10px] text-primary font-sans mr-0.5 font-bold opacity-70">{v.verse}</sup>
-                                    <span className={v.text.includes('Jesus') ? "text-red-700" : ""}>{v.text} </span>
-                                </span>
-                            ))}
+                        {/* Title Card */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-6">
+                            <h2 className="text-2xl font-bold text-center text-slate-900 mb-0">{data.reference}</h2>
                         </div>
 
-                        <div className="flex justify-between mt-10 pt-6 border-t border-slate-100">
+                        {/* Text Card relative to video */}
+                        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100">
+                            <div className="space-y-4 text-lg leading-loose text-slate-800">
+                                {data.verses.map((v) => (
+                                    <span key={v.verse} className="inline mr-1">
+                                        <sup className="text-[10px] text-primary font-sans mr-0.5 font-bold opacity-70">{v.verse}</sup>
+                                        <span className={v.text.includes('Jesus') ? "text-red-700 font-medium" : "font-medium text-slate-700"}>{v.text} </span>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between mt-6">
                             <button
                                 onClick={handlePrev}
                                 disabled={chapter <= 1}
-                                className="flex items-center px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50"
+                                className="flex items-center px-4 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 disabled:opacity-50 shadow-sm"
                             >
                                 <ChevronLeft className="mr-1 h-4 w-4" /> Anterior
                             </button>
                             <button
                                 onClick={handleNext}
-                                className="flex items-center px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50"
+                                className="flex items-center px-4 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 shadow-sm"
                             >
                                 Próximo <ChevronRight className="ml-1 h-4 w-4" />
                             </button>
                         </div>
-
-                        <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                            <h3 className="font-bold text-blue-800 mb-2">Planos de Leitura</h3>
-                            <p className="text-sm text-blue-600 mb-4">
-                                Siga um plano anual ou temático para manter sua constância.
-                            </p>
-                            <button className="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg w-full flex items-center justify-center gap-2 opacity-75 cursor-not-allowed">
-                                Em breve
-                            </button>
-                        </div>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                        <p>Selecione um capítulo para ler.</p>
+                    <div className="flex flex-col items-center justify-center h-full text-white/80">
+                        <div className="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 text-center">
+                            <p className="font-medium text-lg">Selecione um capítulo para ler.</p>
+                        </div>
                     </div>
                 )}
             </div>
