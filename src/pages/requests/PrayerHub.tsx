@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PageIntro } from '@/components/layout/PageIntro';
 import { useAuth } from '@/contexts/AuthContext';
 import { Heart, Send, Loader2, Lock, Globe, ShieldCheck } from 'lucide-react';
 
@@ -68,12 +69,14 @@ export default function PrayerHub() {
 
     return (
         <div className="min-h-screen bg-transparent flex flex-col pb-safe">
-            {/* Header */}
-            <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-                <h1 className="text-xl font-serif font-bold text-slate-900 flex items-center gap-2">
-                    <Heart className="w-6 h-6 text-rose-500 fill-rose-500" />
-                    Pedidos de Oração
-                </h1>
+            {/* Header (Standardized) */}
+            <div className="px-6 pt-6">
+                <PageIntro
+                    title="Pedidos de Oração"
+                    icon={Heart}
+                    iconClassName="text-rose-500 fill-rose-500/20"
+                    backLink={true}
+                />
             </div>
 
             {/* Tabs */}
