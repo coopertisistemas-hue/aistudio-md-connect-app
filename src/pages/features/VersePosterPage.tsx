@@ -192,7 +192,40 @@ export default function VersePosterPage() {
         // Draw Lines (Centered Vertically)
         const lineHeight = fontSize * 1.4;
         const totalTextHeight = lines.length * lineHeight;
-        let startY = (height / 2) - (totalTextHeight / 2) - 50; // Slight offset up
+        let startY = (height / 2) - (totalTextHeight / 2) - 50;
+
+        // --- NEW: Halo/Mist Overlay for Legibility ---
+        if (bgImage) {
+            const centerX = width / 2;
+            const centerY = startY + (totalTextHeight / 2);
+
+            // Radius covers the text area generously
+            const radius = Math.max(effectiveWidth, totalTextHeight) * 0.8;
+
+            // Create Radial Gradient
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+
+            // Color logic: "Black mist" if text is white (most cases), "White mist" if text is dark
+            // Since our templates default to white text on generated images (as we force solid backgrounds logic usually), 
+            // but AI generation uses user selected template color, we should check `selectedTemplate.textColor`.
+            // For AI generated images, we usually want White Text.
+            // Let's assume best practice for AI images is Dark Halo + White Text.
+
+            // "Premium Halo": Very subtle in center, fades out.
+            // 0.4 opacity at center, 0 at edge.
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+            gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.3)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            ctx.fillStyle = gradient;
+            // Draw a rect covering the central area or full canvas? 
+            // Full canvas fill with radial gradient centered on text looks best and smoothest.
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Ensure text is white for contrast against dark halo
+            ctx.fillStyle = '#ffffff';
+        }
 
         lines.forEach((line) => {
             ctx.fillText(line, width / 2, startY);
@@ -209,12 +242,12 @@ export default function VersePosterPage() {
         ctx.fillStyle = selectedTemplate.accentColor;
         ctx.fillText(reference, width / 2, startY + 40);
 
-        // 5. Footer Branding
+        // 5. Footer Branding (Modified to standard watermark)
         const footerY = height - 80;
         ctx.font = `500 30px sans-serif`;
         ctx.fillStyle = selectedTemplate.accentColor;
         ctx.globalAlpha = 0.7;
-        ctx.fillText("Projeto MD • Momento Devocional", width / 2, footerY);
+        ctx.fillText("@projetomomentodevocional", width / 2, footerY);
         ctx.globalAlpha = 1.0;
     };
 
