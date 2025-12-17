@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, MapPin, Clock, CalendarX } from 'lucide-react';
 import { toast } from 'sonner';
-import { BackLink } from '@/components/ui/BackLink';
+import { PageIntro } from '@/components/layout/PageIntro';
 
 interface CalendarEvent {
     id: string;
@@ -80,21 +80,15 @@ const SchedulePage: React.FC = () => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto py-6 px-4 pt-20 animate-in slide-in-from-bottom-4 duration-500 space-y-6">
-            <div className="flex items-center gap-2 mb-2">
-                <BackLink />
-            </div>
+        <div className="max-w-2xl mx-auto px-4 pt-8 pb-10 animate-in slide-in-from-bottom-4 duration-500 space-y-6">
+            <PageIntro
+                title="Agenda"
+                subtitle="Próximos cultos e eventos"
+                icon={Calendar}
+                iconClassName="text-amber-600"
+            />
 
             <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-amber-100 rounded-2xl">
-                        <Calendar className="h-8 w-8 text-amber-600" />
-                    </div>
-                    <div>
-                        <h1 className="text-3xl font-bold text-slate-900">Agenda</h1>
-                        <p className="text-slate-500">Próximos cultos e eventos</p>
-                    </div>
-                </div>
 
                 {/* Filters */}
                 <div className="flex gap-2 pb-2 overflow-x-auto no-scrollbar mask-gradient">

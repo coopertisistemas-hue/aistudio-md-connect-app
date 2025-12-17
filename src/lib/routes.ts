@@ -14,6 +14,9 @@ export const APP_ROUTES = {
     MURAL: '/mural',       // Unified: was /notices or /news
     DEVOTIONALS: '/devocionais',
     STUDIES: '/estudos',   // New placeholder
+    WORSHIP: '/louvor',
+    HARP: '/harpa',
+    LYRICS: '/letras',
     VERSE_POSTER: '/versiculo-para-postar',
 
     // Institutional
