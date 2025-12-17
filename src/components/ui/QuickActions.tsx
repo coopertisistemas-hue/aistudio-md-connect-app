@@ -45,8 +45,8 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             label: 'Devocional',
             icon: Users, // Using Users as generic "community/devotional" icon if needed, or maybe BookOpen
             onClick: () => {
-                trackAction('devocional', APP_ROUTES.HOME); // Assuming Home is Devotional hub
-                navigate(APP_ROUTES.HOME);
+                trackAction('devocional', '/devocionais/today');
+                navigate('/devocionais/today');
             },
             color: 'text-emerald-600',
             bg: 'bg-emerald-50'

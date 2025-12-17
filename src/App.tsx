@@ -8,6 +8,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ChurchScopedRoute } from '@/components/auth/ChurchScopedRoute';
 import { APP_ROUTES } from '@/lib/routes'; // Central Source of Truth
 import { AnalyticsTracker } from '@/components/AnalyticsTracker'; // [NEW]
+import { FLAGS } from '@/lib/flags';
 
 import LandingPage from '@/pages/LandingPage'; // Now App Home
 import PublicContentPage from '@/pages/public/PublicContentPage'; // Generic Content Page
@@ -63,7 +64,13 @@ export default function App() {
                 <Route path={APP_ROUTES.HOME} element={<LandingPage />} />
                 <Route path={APP_ROUTES.ABOUT} element={<PublicContentPage slug="entenda" />} />
                 <Route path={APP_ROUTES.BIBLE} element={<BibleView />} />
-                <Route path={APP_ROUTES.PRAYER} element={<PrayerRequestPage />} />
+
+                {FLAGS.FEATURE_PRAYER_REQUESTS_V1 ? (
+                  <Route path={APP_ROUTES.PRAYER} element={<PrayerHub />} />
+                ) : (
+                  <Route path={APP_ROUTES.PRAYER} element={<PrayerRequestPage />} />
+                )}
+
                 <Route path={APP_ROUTES.AGENDA} element={<SchedulePage />} />
                 <Route path={APP_ROUTES.RADIO} element={<RadioPage />} />
                 <Route path={APP_ROUTES.DONATE} element={<DonatePage />} />
@@ -74,6 +81,11 @@ export default function App() {
                 <Route path={APP_ROUTES.PARTNERS} element={<PartnersPage />} />
                 <Route path={APP_ROUTES.MURAL} element={<NoticeList />} />
                 <Route path={APP_ROUTES.STUDIES} element={<StudiesPage />} />
+
+                {FLAGS.FEATURE_DEVOTIONAL_V1 && (
+                  <Route path="/devocionais/:id" element={<DevotionalDetail />} />
+                )}
+
                 <Route path="/coming-soon" element={<ComingSoon />} />
               </Route>
 
