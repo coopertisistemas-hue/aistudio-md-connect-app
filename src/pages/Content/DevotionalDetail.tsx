@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { contentService } from '@/services/content';
+import { devotionalsApi } from '@/lib/api/devotionals'; // [NEW]
 import type { Post } from '@/types/content';
 import { ArrowLeft, Loader2, Share2, Calendar, BookOpen } from 'lucide-react';
 import { FLAGS } from '@/lib/flags';
