@@ -78,21 +78,21 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 w-full max-w-sm">
+        <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
+            <div className="bg-white/95 backdrop-blur-xl p-8 rounded-3xl shadow-lg border border-white/50 w-full max-w-sm">
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-bold text-slate-900">{mode === 'signin' ? 'Bem-vindo' : 'Criar Conta'}</h1>
-                    <p className="text-slate-400 text-sm">Acesse o MD Connect</p>
+                    <p className="text-slate-500 font-medium text-sm">Acesse o MD Connect</p>
                 </div>
 
                 <form onSubmit={handleAuth} className="space-y-4">
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 mb-1 ml-1">Email</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1 ml-1">Email</label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-300" />
+                            <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                             <input
                                 type="email"
-                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300"
                                 placeholder="seu@email.com"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
@@ -101,12 +101,12 @@ export default function Login() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 mb-1 ml-1">Senha</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1 ml-1">Senha</label>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-300" />
+                            <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                             <input
                                 type="password"
-                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
@@ -115,19 +115,19 @@ export default function Login() {
                         </div>
                     </div>
 
-                    {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+                    {error && <p className="text-red-500 text-xs text-center font-bold bg-red-50 py-2 rounded-lg">{error}</p>}
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-transform active:scale-95 disabled:opacity-70 flex justify-center"
+                        className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-transform active:scale-95 disabled:opacity-70 flex justify-center shadow-lg shadow-slate-900/10"
                     >
                         {loading ? <Loader2 className="animate-spin" /> : (mode === 'signin' ? 'Entrar' : 'Cadastrar')}
                     </button>
                 </form>
 
                 <div className="mt-6 text-center text-sm text-slate-500">
-                    <button onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')} className="hover:text-primary underline">
+                    <button onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')} className="hover:text-indigo-600 font-bold underline decoration-2 underline-offset-2 transition-colors">
                         {mode === 'signin' ? 'Não tem conta? Cadastre-se' : 'Já tenho conta. Entrar'}
                     </button>
                 </div>

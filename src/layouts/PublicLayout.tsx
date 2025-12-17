@@ -29,8 +29,8 @@ export const PublicLayout: React.FC = () => {
             {/* Standard Public Header (formerly TopBar) */}
             <PublicHeader />
 
-            {/* Unified Glass Wrapper for Page Content + Footers */}
-            <div className={!isHome ? 'surface-glass flex-1 flex flex-col min-h-[calc(100vh-80px)]' : 'flex-1 flex flex-col'}>
+            {/* Unified Transparent Wrapper (Video Background visible on all pages) */}
+            <div className="flex-1 flex flex-col min-h-[calc(100vh-80px)]">
                 {/* Main Content */}
                 <main className="flex-1 w-full pb-12">
                     {/* Global Back Button (Except Home) */}
@@ -51,7 +51,7 @@ export const PublicLayout: React.FC = () => {
 
                 {/* Footers (Inside the glass wrapper) */}
                 <HomeReturnPill />
-                <SupportFooter />
+                {!isHome && <SupportFooter />}
                 <AppFooter />
             </div>
         </div>
