@@ -1,12 +1,11 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
+import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts'
 
 serve(async (req) => {
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders })
-    }
+    // 1. Handle CORS Preflight
+    const corsResponse = handleCors(req);
+    if (corsResponse) return corsResponse;
 
     try {
         const supabaseClient = createClient(
@@ -18,25 +17,13 @@ serve(async (req) => {
             .from('partners')
             .select('*')
             .eq('is_active', true)
-            .order('tier', { ascending: false }) // Platinum first? logic might need adjustment if strings, but roughly OK
+            .order('tier', { ascending: false })
             .order('name', { ascending: true })
 
         if (error) throw error
 
-        return new Response(
-            JSON.stringify({ partners }),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200,
-            }
-        )
-    } catch (error) {
-        return new Response(
-            JSON.stringify({ error: error.message }),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 400,
-            }
-        )
+        return jsonResponse({ partners }, 200)
+    } catch (error: any) {
+        return jsonResponse({ error: error.message }, 400)
     }
 })
