@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MobileContainer } from '@/components/MobileContainer';
 import { DesktopOverlay } from '@/components/DesktopOverlay';
+import { Music, Book, FileText } from 'lucide-react';
 import { ChurchLayout } from '@/layouts/ChurchLayout';
 import { PublicLayout } from '@/layouts/PublicLayout';
 // Auth Guards
@@ -50,7 +51,7 @@ import StudiesPage from '@/pages/Content/StudiesPage';
 import PartnersPage from '@/pages/public/PartnersPage';
 import PartnerLeadPage from '@/pages/public/PartnerLeadPage';
 import VersePosterPage from '@/pages/features/VersePosterPage';
-import ComingSoon from '@/pages/ComingSoon';
+import ComingSoon from '@/pages/member/ComingSoonPage';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 export default function App() {
@@ -84,7 +85,10 @@ export default function App() {
                 <Route path={APP_ROUTES.PARTNERS} element={<PartnersPage />} />
                 <Route path={APP_ROUTES.PARTNER_JOIN} element={<PartnerLeadPage />} />
                 <Route path={APP_ROUTES.MURAL} element={<NoticeList />} />
-                <Route path={APP_ROUTES.STUDIES} element={<ComingSoon />} />
+                <Route path={APP_ROUTES.STUDIES} element={<StudiesPage />} />
+                <Route path={APP_ROUTES.WORSHIP} element={<ComingSoon title="Louvor" description="Playlists e recursos musicais em breve." icon={Music} />} />
+                <Route path={APP_ROUTES.HARP} element={<ComingSoon title="Harpa Cristã" description="Hinos e cifras para adoração em breve." icon={Book} />} />
+                <Route path={APP_ROUTES.LYRICS} element={<ComingSoon title="Letras" description="Acervo de letras para louvor em breve." icon={FileText} />} />
                 <Route path={APP_ROUTES.VERSE_POSTER} element={<VersePosterPage />} />
 
                 {FLAGS.FEATURE_DEVOTIONAL_V1 && (
