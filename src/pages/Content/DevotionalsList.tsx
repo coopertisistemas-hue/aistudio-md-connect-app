@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { contentService } from '@/services/content';
 import type { Post } from '@/types/content';
 import { Heart } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
+import { PageIntro } from '@/components/layout/PageIntro';
 
 export default function DevotionalsList() {
     const navigate = useNavigate();
@@ -28,13 +28,14 @@ export default function DevotionalsList() {
     return (
         <div className="min-h-screen bg-transparent flex flex-col">
             {/* Header */}
-            <div className="px-5 pt-8 mb-2">
-                <BackLink className="mb-4" />
-                <h1 className="text-2xl font-bold text-slate-900 mb-1 flex items-center gap-2">
-                    <Heart className="w-6 h-6 text-rose-500" />
-                    Devocionais
-                </h1>
-                <p className="text-slate-500 text-sm">Reflexões diárias para o seu coração.</p>
+            {/* Header */}
+            <div className="px-5 pt-8">
+                <PageIntro
+                    title="Devocionais"
+                    subtitle="Reflexões diárias para o seu coração."
+                    icon={Heart}
+                    iconClassName="text-rose-500 fill-rose-500/20"
+                />
             </div>
 
             <div className="p-4 space-y-4 flex-1">

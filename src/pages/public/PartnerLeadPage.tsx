@@ -7,7 +7,7 @@ import { MessageCircle, CheckCircle } from 'lucide-react';
 import { partnersApi } from '@/lib/api/partners';
 import { toast } from 'sonner';
 import { analytics } from '@/lib/analytics';
-import { BackLink } from '@/components/ui/BackLink';
+import { PageIntro } from '@/components/layout/PageIntro';
 
 export default function PartnerLeadPage() {
     const navigate = useNavigate();
@@ -53,13 +53,10 @@ export default function PartnerLeadPage() {
     return (
         <div className="min-h-screen bg-slate-50/50 pb-20">
             <main className="container max-w-md mx-auto px-5 pt-8 animate-in slide-in-from-bottom-5 duration-500">
-
-                <BackLink className="mb-6" />
-
-                <h1 className="text-2xl font-bold text-slate-900 mb-1">Seja um Parceiro</h1>
-                <p className="text-slate-500 mb-8">
-                    Preencha seus dados para receber nosso contato oficial.
-                </p>
+                <PageIntro
+                    title="Seja um Parceiro"
+                    subtitle="Preencha seus dados para receber nosso contato oficial."
+                />
 
                 <Card className="border-slate-100 shadow-sm bg-white">
                     <CardContent className="p-6">

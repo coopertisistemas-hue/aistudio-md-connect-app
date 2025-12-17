@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { bibleService, type BibleChapter, OLD_TESTAMENT, NEW_TESTAMENT } from '@/services/bible';
 import { ChevronLeft, ChevronRight, Loader2, BookOpen } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
+import { PageIntro } from '@/components/layout/PageIntro';
 import { useSearchParams } from 'react-router-dom';
 
 export default function BibleView() {
@@ -82,33 +82,34 @@ export default function BibleView() {
 
 
     return (
-        <div className="flex flex-col h-full bg-slate-50">
-            {/* Header Sticky */}
-            {/* Header Sticky - Matching "Image 2" aesthetics but keeping sticky for utility */}
-            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-4 py-4 flex items-center gap-3 shadow-sm transition-all">
-                <BackLink className="-ml-2" />
+        <div className="flex flex-col h-full bg-slate-50/50">
+            {/* Standardized Header */}
+            <div className="px-5 pt-8 pb-2">
+                <PageIntro
+                    title="Bíblia Sagrada"
+                    subtitle="Leia a Palavra com foco e clareza."
+                    icon={BookOpen}
+                    iconClassName="text-indigo-600"
+                    className="mb-4"
+                />
 
-                <div className="mr-auto flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-indigo-600 hidden xs:block" />
-                    <h1 className="font-bold text-lg text-slate-900 leading-none">Bíblia Sagrada</h1>
-                </div>
-
-                <div className="flex gap-2">
+                {/* Selectors Line */}
+                <div className="flex gap-2 w-full md:w-auto mt-2">
                     <select
                         value={book}
                         onChange={(e) => { setBook(e.target.value); setChapter(1); }}
-                        className="h-9 px-3 py-1 rounded-xl border border-slate-200 text-sm bg-white text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 max-w-[130px] shadow-sm"
+                        className="h-10 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white/80 backdrop-blur-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 flex-1 md:flex-none md:min-w-[140px] shadow-sm cursor-pointer transition-all hover:bg-white"
                     >
-                        <option disabled>Antigo Testamento</option>
+                        <option disabled>AT</option>
                         {OLD_TESTAMENT.map(b => <option key={b} value={b}>{b}</option>)}
-                        <option disabled>Novo Testamento</option>
+                        <option disabled>NT</option>
                         {NEW_TESTAMENT.map(b => <option key={b} value={b}>{b}</option>)}
                     </select>
 
                     <select
                         value={chapter}
                         onChange={(e) => setChapter(Number(e.target.value))}
-                        className="h-9 px-3 py-1 rounded-xl border border-slate-200 text-sm bg-white text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-18 shadow-sm"
+                        className="h-10 px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white/80 backdrop-blur-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-20 shadow-sm cursor-pointer transition-all hover:bg-white"
                     >
                         {Array.from({ length: 150 }, (_, i) => i + 1).map(n => (
                             <option key={n} value={n}>{n}</option>

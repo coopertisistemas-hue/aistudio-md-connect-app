@@ -7,7 +7,7 @@ import { Download, Share2, Sparkles, RefreshCcw, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { analytics } from '@/lib/analytics';
 import { FLAGS } from '@/lib/flags';
-import { BackLink } from '@/components/ui/BackLink';
+import { PageIntro } from '@/components/layout/PageIntro';
 import { versePostersApi } from '@/lib/api/versePosters';
 
 // Template Definitions
@@ -333,13 +333,12 @@ export default function VersePosterPage() {
     return (
         <div className="min-h-screen bg-slate-50/50 pb-20">
             <main className="container max-w-lg mx-auto px-5 pt-8 animate-in fade-in duration-500">
-                <BackLink className="mb-4" />
-
-                <h1 className="text-2xl font-bold text-slate-900 mb-1 flex items-center gap-2">
-                    <Sparkles className="w-6 h-6 text-amber-500" />
-                    Gerador de Cards
-                </h1>
-                <p className="text-slate-500 mb-6 text-sm">Crie imagens inspiradoras para compartilhar.</p>
+                <PageIntro
+                    title="Gerador de Cards"
+                    subtitle="Crie imagens inspiradoras para compartilhar."
+                    icon={Sparkles}
+                    iconClassName="text-amber-500 fill-amber-500/20"
+                />
 
                 {/* Input Area */}
                 <div className="space-y-4 mb-8">
