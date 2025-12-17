@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { FLAGS } from '@/lib/flags';
 import { analytics } from '@/lib/analytics';
+import { prayerApi } from '@/lib/api/prayer'; // [NEW]
 
 export default function PrayerHub() {
     const { user } = useAuth();
@@ -79,15 +80,29 @@ export default function PrayerHub() {
 
         // Mock Success for V1 if backend not updated yet, or use invoke
         // We will assume invoke works, but if it fails we might show mock success for UI testing
-        const { error } = await supabase.functions.invoke('pastoral-request-create', {
-            body: {
+        let error = null;
+
+        if (FLAGS.FEATURE_PRAYER_API) {
+            const res = await prayerApi.create({
                 request_type: type,
                 description,
-                preferred_contact: contact,
                 is_anonymous: isAnonymous,
-                visibility: visibility
-            }
-        });
+                visibility,
+                preferred_contact: contact
+            });
+            error = res.error;
+        } else {
+            const res = await supabase.functions.invoke('pastoral-request-create', {
+                body: {
+                    request_type: type,
+                    description,
+                    preferred_contact: contact,
+                    is_anonymous: isAnonymous,
+                    visibility: visibility
+                }
+            });
+            error = res.error;
+        }
 
         setSubmitting(false);
 
