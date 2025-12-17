@@ -10,6 +10,10 @@ export interface Post {
     author_id?: string;
     published_at: string;
     is_pinned?: boolean;
+    author?: {
+        name: string;
+        avatar_url?: string | null;
+    };
 }
 
 export interface ContentSeries {

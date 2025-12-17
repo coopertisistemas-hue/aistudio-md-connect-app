@@ -19,6 +19,7 @@ import BibleView from '@/pages/BibleView';
 import ContentHub from '@/pages/Content/Hub';
 import DevotionalsList from '@/pages/Content/DevotionalsList';
 import DevotionalDetail from '@/pages/Content/DevotionalDetail';
+import DevotionalList from '@/pages/Content/DevotionalList';
 import SeriesList from '@/pages/Content/SeriesList';
 import SeriesDetail from '@/pages/Content/SeriesDetail';
 import MessageDetail from '@/pages/Content/MessageDetail';
@@ -83,7 +84,10 @@ export default function App() {
                 <Route path={APP_ROUTES.STUDIES} element={<StudiesPage />} />
 
                 {FLAGS.FEATURE_DEVOTIONAL_V1 && (
-                  <Route path="/devocionais/:id" element={<DevotionalDetail />} />
+                  <>
+                    <Route path="/devocionais" element={<DevotionalList />} />
+                    <Route path="/devocionais/:id" element={<DevotionalDetail />} />
+                  </>
                 )}
 
                 <Route path="/coming-soon" element={<ComingSoon />} />

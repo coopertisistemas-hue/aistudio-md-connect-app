@@ -5,7 +5,10 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
+    // Debug: Log incoming request
+    console.log(`[devotionals-get] ${req.method} request received`);
+
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
@@ -24,11 +27,13 @@ Deno.serve(async (req) => {
             id = body.id;
             latest = body.latest;
             lang = body.lang;
+            console.log('[devotionals-get] POST body params:', { id, latest, lang });
         } else {
             const url = new URL(req.url)
             id = url.searchParams.get('id')
             latest = url.searchParams.get('latest')
             lang = url.searchParams.get('lang')
+            console.log('[devotionals-get] GET URL params:', { id, latest, lang });
         }
 
         lang = lang || 'pt';
@@ -44,7 +49,7 @@ Deno.serve(async (req) => {
                 .from('devotionals')
                 .select('*')
                 .eq('id', id)
-                .single()
+                .maybeSingle()
 
             if (error) throw error
             return new Response(JSON.stringify(data), {
@@ -56,7 +61,7 @@ Deno.serve(async (req) => {
             const { data, error } = await query
                 .order('published_at', { ascending: false })
                 .limit(1)
-                .single()
+                .maybeSingle()
 
             if (error) throw error
             return new Response(JSON.stringify(data), {
@@ -76,8 +81,13 @@ Deno.serve(async (req) => {
             })
         }
 
-    } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
+    } catch (error: any) {
+        console.error('[devotionals-get] Error:', error);
+        return new Response(JSON.stringify({
+            error: error.message || 'Unknown error',
+            stack: error.stack, // Return stack for debugging
+            details: error
+        }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,
         })
