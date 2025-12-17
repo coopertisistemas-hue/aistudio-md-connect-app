@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, MapPin, Clock, Search } from 'lucide-react';
+import { Calendar, MapPin, Clock, Search } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { eventService, type ChurchEvent } from '@/services/event';
@@ -44,13 +45,13 @@ export default function Agenda() {
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
             {/* Header */}
-            <div className="bg-white px-4 pt-12 pb-4 shadow-sm sticky top-0 z-10">
-                <div className="flex items-center gap-3 mb-4">
-                    <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="-ml-2">
-                        <ArrowLeft className="h-6 w-6 text-slate-700" />
-                    </Button>
-                    <h1 className="text-xl font-bold text-slate-800">Agenda Completa</h1>
-                </div>
+            <div className="px-5 pt-8 pb-4">
+                <BackLink className="mb-4" />
+                <h1 className="text-2xl font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <Calendar className="w-6 h-6 text-orange-500" />
+                    Agenda Completa
+                </h1>
+                <p className="text-slate-500 text-sm mb-6">Fique por dentro de todos os eventos e programações.</p>
 
                 {/* Search & Filter */}
                 <div className="space-y-3">

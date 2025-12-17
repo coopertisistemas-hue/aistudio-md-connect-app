@@ -5,6 +5,7 @@ import { devotionalsApi } from '@/lib/api/devotionals';
 import type { Post } from '@/types/content';
 import { Calendar, BookOpen, Quote, Loader2 } from 'lucide-react';
 import { FLAGS } from '@/lib/flags';
+import { BackLink } from '@/components/ui/BackLink';
 
 
 // Fallback Data for V1

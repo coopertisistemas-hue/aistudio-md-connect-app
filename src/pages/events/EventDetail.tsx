@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, Clock, Share2 } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 import { Button } from '@/components/ui/button';
 import { eventService, type ChurchEvent } from '@/services/event';
 import { format, parseISO } from 'date-fns';
@@ -75,9 +76,7 @@ export default function EventDetail() {
 
                 {/* Navbar over image */}
                 <div className="absolute top-0 left-0 right-0 p-4 pt-12 flex justify-between items-center text-white">
-                    <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="hover:bg-white/20 text-white rounded-full">
-                        <ArrowLeft className="h-6 w-6" />
-                    </Button>
+                    <BackLink className="hover:bg-white/20 text-white rounded-full hover:text-white/80" />
                     <Button variant="ghost" size="icon" onClick={handleShare} className="hover:bg-white/20 text-white rounded-full">
                         <Share2 className="h-6 w-6" />
                     </Button>

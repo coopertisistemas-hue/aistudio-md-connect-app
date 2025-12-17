@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, MessageCircle, CheckCircle2 } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 import { useNavigate, useParams } from 'react-router-dom';
 import { monetizationService } from '@/services/monetization';
 import type { Service } from '@/types/monetization';
@@ -33,9 +34,7 @@ export default function ServiceDetail() {
         <div className="min-h-screen bg-slate-50 pb-24">
             {/* Header Image/Gradient Placeholder - Could use an image field if added later */}
             <div className="h-40 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
-                <button onClick={() => navigate(-1)} className="absolute top-4 left-4 p-2 bg-white/20 backdrop-blur rounded-full text-white">
-                    <ArrowLeft className="w-5 h-5" />
-                </button>
+                <BackLink className="absolute top-4 left-4 text-white hover:text-white/80 hover:bg-white/20" />
                 <div className="absolute -bottom-6 left-4 bg-white p-4 rounded-xl shadow-lg border border-slate-100">
                     <h1 className="font-bold text-xl text-slate-900">{service.title}</h1>
                 </div>

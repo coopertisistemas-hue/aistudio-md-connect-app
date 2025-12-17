@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Volume2, VolumeX, Radio as RadioIcon, WifiOff, Loader2, ArrowLeft } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -138,14 +139,7 @@ const RadioPage: React.FC = () => {
             <div className="w-full max-w-md space-y-8 text-center mt-4 relative flex-1 flex flex-col items-center justify-center">
                 {/* Back Button - Floating Top Left relative to content */}
                 <div className="absolute left-0 top-0 w-full flex justify-start -translate-y-12">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-slate-400 hover:text-slate-900"
-                        onClick={() => navigate(-1)}
-                    >
-                        <ArrowLeft className="w-6 h-6" />
-                    </Button>
+                    <BackLink />
                 </div>
 
                 <div className="space-y-2">

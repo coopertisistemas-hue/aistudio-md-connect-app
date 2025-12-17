@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { contentService } from '@/services/content';
 import type { ReadingPlan, ReadingPlanDay } from '@/types/content';
 import { ArrowLeft, CheckCircle2, Circle, Loader2 } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 
 export default function PlanDetail() {
     const { id } = useParams();
@@ -52,9 +53,7 @@ export default function PlanDetail() {
         <div className="min-h-screen bg-slate-50 flex flex-col">
             {/* Header */}
             <div className="bg-white border-b sticky top-0 z-10 px-4 py-3 flex items-center gap-3 shadow-sm">
-                <button onClick={() => navigate(-1)} className="p-1 -ml-1">
-                    <ArrowLeft className="h-6 w-6 text-slate-600" />
-                </button>
+                <BackLink className="-ml-2" />
                 <div className="flex-1">
                     <h1 className="font-bold text-base line-clamp-1">{plan.title}</h1>
                     <div className="w-full bg-slate-100 h-1.5 rounded-full mt-1 overflow-hidden">

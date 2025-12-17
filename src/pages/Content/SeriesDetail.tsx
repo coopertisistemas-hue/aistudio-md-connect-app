@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { contentService } from '@/services/content';
 import type { ContentSeries, ContentMessage } from '@/types/content';
 import { ArrowLeft, Loader2, PlayCircle, Clock } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 
 export default function SeriesDetail() {
     const { id } = useParams();
@@ -40,9 +41,7 @@ export default function SeriesDetail() {
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col">
             <div className="bg-white border-b sticky top-0 z-10 px-4 py-3 flex items-center gap-3">
-                <button onClick={() => navigate(-1)} className="p-1 -ml-1">
-                    <ArrowLeft className="h-6 w-6 text-slate-600" />
-                </button>
+                <BackLink className="-ml-2" />
                 <h1 className="font-bold text-lg truncate">{series?.title || 'Detalhes da Série'}</h1>
             </div>
 

@@ -16,4 +16,7 @@ export const FLAGS = {
   FEATURE_DONATE_PAGE: true,
   FEATURE_PARTNERS_API: true,
   FEATURE_PARTNER_LEADS: true,
+  // Sprint 6: Verse Poster
+  FEATURE_VERSE_POSTER_V1: true,
+  FEATURE_VERSE_POSTER_AI_BG: false, // Sprint 7 (Default false until verified)
 };

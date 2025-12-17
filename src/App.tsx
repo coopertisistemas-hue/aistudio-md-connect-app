@@ -49,6 +49,7 @@ import StudiesPage from '@/pages/Content/StudiesPage';
 
 import PartnersPage from '@/pages/public/PartnersPage';
 import PartnerLeadPage from '@/pages/public/PartnerLeadPage';
+import VersePosterPage from '@/pages/features/VersePosterPage';
 import ComingSoon from '@/pages/ComingSoon';
 import { AuthProvider } from '@/contexts/AuthContext';
 
@@ -83,7 +84,8 @@ export default function App() {
                 <Route path={APP_ROUTES.PARTNERS} element={<PartnersPage />} />
                 <Route path={APP_ROUTES.PARTNER_JOIN} element={<PartnerLeadPage />} />
                 <Route path={APP_ROUTES.MURAL} element={<NoticeList />} />
-                <Route path={APP_ROUTES.STUDIES} element={<StudiesPage />} />
+                <Route path={APP_ROUTES.STUDIES} element={<ComingSoon />} />
+                <Route path={APP_ROUTES.VERSE_POSTER} element={<VersePosterPage />} />
 
                 {FLAGS.FEATURE_DEVOTIONAL_V1 && (
                   <>
