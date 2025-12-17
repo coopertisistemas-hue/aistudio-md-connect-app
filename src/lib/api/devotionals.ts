@@ -26,5 +26,16 @@ export const devotionalsApi = {
             console.error('API Error [devotionals-get latest]:', err);
             throw err;
         }
+    },
+
+    getList: async (): Promise<Post[]> => {
+        try {
+            const { data, error } = await supabase.functions.invoke('devotionals-get'); // No body = list default
+            if (error) throw error;
+            return (data as Post[]) || [];
+        } catch (err) {
+            console.error('API Error [devotionals-get list]:', err);
+            throw err;
+        }
     }
 };

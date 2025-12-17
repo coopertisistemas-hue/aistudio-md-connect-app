@@ -5,16 +5,12 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
 
     try {
-        // Use Service Role for Insert if we want to bypass RLS or do extra checks
-        // But since we have public INSERT policy, Anon key is fine.
-        // However, sticking to strict contract, we might want to use Service Role for "trusted" operations 
-        // or just rely on the API Gateway nature of Edge Functions.
         const supabase = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
             Deno.env.get('SUPABASE_ANON_KEY') ?? ''
@@ -22,10 +18,24 @@ Deno.serve(async (req) => {
 
         const { request_type, description, is_anonymous, visibility, preferred_contact } = await req.json()
 
-        // Validation
-        if (!description || description.length < 10) {
-            throw new Error("Description too short (min 10 chars).")
+        // 1. Validation (Hardened)
+        if (!description || description.trim().length < 10) {
+            return new Response(JSON.stringify({ error: "Descrição muito curta (min 10 caracteres)." }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 400,
+            })
         }
+
+        if (description.length > 500) {
+            return new Response(JSON.stringify({ error: "Descrição muito longa (max 500 caracteres)." }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 400,
+            })
+        }
+
+        // 2. Anti-Spam / Rate Limit (Primitive)
+        // Ideally we use Redis or DB to track IPs. For now, we add a delay to slow down bruteforce.
+        await new Promise(r => setTimeout(r, 800));
 
         const { data, error } = await supabase
             .from('prayer_requests')
@@ -48,8 +58,8 @@ Deno.serve(async (req) => {
             status: 201, // Created
         })
 
-    } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
+    } catch (error: any) {
+        return new Response(JSON.stringify({ error: error.message || 'Unknown error' }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,
         })

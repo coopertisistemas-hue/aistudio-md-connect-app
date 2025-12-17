@@ -15,6 +15,9 @@ export default function LandingPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        // Mark that user has visited home
+        sessionStorage.setItem('has_visited_home', 'true');
+
         const load = async () => {
             // TODO: In production, Slug should be derived from subdomain or context.
             const slug = 'sede';

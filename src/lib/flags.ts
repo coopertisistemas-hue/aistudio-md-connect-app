@@ -5,6 +5,11 @@ export const FLAGS = {
   FEATURE_DEVOTIONAL_V1: true,
   FEATURE_PRAYER_REQUESTS_V1: true,
   // Sprint 3: API Integration
-  FEATURE_DEVOTIONAL_API: false, // Default false until implemented
-  FEATURE_PRAYER_API: false,
+  FEATURE_DEVOTIONAL_API: true,
+  FEATURE_PRAYER_API: true,
+  // Sprint X: Monetization
+  FEATURE_DEVOTIONAL_SUPPORT_BLOCK: true,
+  FEATURE_DEVOTIONAL_SPONSOR_HIGHLIGHT: true,
+  FEATURE_SUPPORT_FOOTER: true,
+  FEATURE_HOME_RETURN_PILL: true,
 };

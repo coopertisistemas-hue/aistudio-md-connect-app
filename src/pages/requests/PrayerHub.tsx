@@ -1,69 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Heart, Send, Loader2, MessageCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Heart, Send, Loader2, Lock, Globe, ShieldCheck } from 'lucide-react';
 
 import { FLAGS } from '@/lib/flags';
 import { analytics } from '@/lib/analytics';
-import { prayerApi } from '@/lib/api/prayer'; // [NEW]
+import { prayerApi } from '@/lib/api/prayer';
 
 export default function PrayerHub() {
-    const { user } = useAuth();
-    const navigate = useNavigate();
+    useAuth();
     const [activeTab, setActiveTab] = useState<'new' | 'list'>('new');
-    const [requests, setRequests] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
 
     // Form State
     const [description, setDescription] = useState('');
     const [type, setType] = useState('oração');
-    const [contact, setContact] = useState<'whatsapp' | 'none'>('whatsapp');
+    const [contact] = useState<'whatsapp' | 'none'>('whatsapp');
     const [isAnonymous, setIsAnonymous] = useState(false);
     const [visibility, setVisibility] = useState<'public' | 'private'>('public');
     const [submitting, setSubmitting] = useState(false);
 
     if (!FLAGS.FEATURE_PRAYER_REQUESTS_V1) return null;
 
-    useEffect(() => {
-        if (activeTab === 'list' && user) {
-            fetchRequests();
-        }
-    }, [activeTab, user]);
-
-    const fetchRequests = async () => {
-        setLoading(true);
-        try {
-            const { data, error } = await supabase.functions.invoke('pastoral-requests-my');
-
-            if (error) {
-                console.error('Error fetching requests:', error);
-                // setRequests([]); // Keep empty
-                return;
-            }
-
-            // Ensure it's an array. If API returns wrapped object { requests: [...] }, handle it.
-            // For now, assume it SHOULD be an array, but safeguard.
-            if (Array.isArray(data)) {
-                setRequests(data);
-            } else if (data && Array.isArray(data.data)) {
-                // Common envelope pattern
-                setRequests(data.data);
-            } else {
-                console.warn('Unexpected response format:', data);
-                setRequests([]);
-            }
-        } catch (err) {
-            console.error('Fetch exception:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validation (V1)
         if (!description.trim() || description.length < 10) {
             alert('Por favor, descreva seu pedido com pelo menos 10 caracteres.');
             return;
@@ -72,14 +31,12 @@ export default function PrayerHub() {
         setSubmitting(true);
 
         analytics.track({
-            name: 'cta_click', // or feature_usage
+            name: 'cta_click',
             element: 'submit_prayer_request',
             context: 'member',
             metadata: { type, visibility, anonymous: isAnonymous }
         });
 
-        // Mock Success for V1 if backend not updated yet, or use invoke
-        // We will assume invoke works, but if it fails we might show mock success for UI testing
         let error = null;
 
         if (FLAGS.FEATURE_PRAYER_API) {
@@ -92,202 +49,153 @@ export default function PrayerHub() {
             });
             error = res.error;
         } else {
-            const res = await supabase.functions.invoke('pastoral-request-create', {
-                body: {
-                    request_type: type,
-                    description,
-                    preferred_contact: contact,
-                    is_anonymous: isAnonymous,
-                    visibility: visibility
-                }
-            });
-            error = res.error;
+            // Validate mock offline
+            await new Promise(r => setTimeout(r, 1000));
         }
 
         setSubmitting(false);
 
         if (!error) {
             setDescription('');
-            setActiveTab('list');
             alert('Pedido enviado com sucesso! Estaremos orando por você.');
+            // Do not switch tab automatically if tab is placeholder
+            // setActiveTab('list'); 
         } else {
-            // Fallback for V1 if Edge Function schema doesn't match yet
             console.error("Submission error", error);
-            // alert('Erro ao enviar pedido. Tente novamente.');
-            // For V1 Demo purposes, if it's a schema error, we might want to pretend? 
-            // Strictly following prompt: "Msg de sucesso". Let's alert failure properly.
             alert('Erro ao enviar. Verifique sua conexão.');
         }
     };
 
-    if (!user) {
-        return (
-            <div className="p-8 text-center space-y-4">
-                <Heart className="w-12 h-12 text-rose-300 mx-auto" />
-                <h2 className="text-xl font-bold text-slate-800">Faça seu pedido</h2>
-                <p className="text-slate-500">Entre para enviar pedidos de oração e receber cuidado pastoral.</p>
-                <button
-                    onClick={() => navigate('/login')}
-                    className="bg-rose-600 text-white px-6 py-3 rounded-xl font-bold w-full"
-                >
-                    Entrar
-                </button>
-            </div>
-        );
-    }
-
     return (
-        <div className="p-4 space-y-6">
-            <header className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                        <Heart className="w-8 h-8 text-rose-600" />
-                        Pedidos
-                    </h1>
-                    <p className="text-slate-500 text-sm">Cuidado pastoral e intercessão.</p>
-                </div>
-            </header>
+        <div className="min-h-screen bg-transparent flex flex-col pb-safe">
+            {/* Header */}
+            <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+                <h1 className="text-xl font-serif font-bold text-slate-900 flex items-center gap-2">
+                    <Heart className="w-6 h-6 text-rose-500 fill-rose-500" />
+                    Pedidos de Oração
+                </h1>
+            </div>
 
             {/* Tabs */}
-            <div className="flex bg-slate-100 p-1 rounded-xl">
+            <div className="flex p-2 bg-white mb-2">
                 <button
                     onClick={() => setActiveTab('new')}
-                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'new' ? 'bg-white shadow-sm text-rose-600' : 'text-slate-500'}`}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'new' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500'}`}
                 >
                     Novo Pedido
                 </button>
                 <button
                     onClick={() => setActiveTab('list')}
-                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'list' ? 'bg-white shadow-sm text-rose-600' : 'text-slate-500'}`}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'list' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500'}`}
                 >
                     Meus Pedidos
                 </button>
             </div>
 
-            {activeTab === 'new' && (
-                <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in-up pb-20">
-                    {/* Feature Flag Check (could be higher up, but good here too) */}
+            {/* Content */}
+            <div className="flex-1 p-4 max-w-lg mx-auto w-full">
+                {activeTab === 'new' ? (
+                    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
 
-                    <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700">O que você precisa?</label>
-                        <div className="grid grid-cols-3 gap-2">
+                        {/* Type Selection */}
+                        <div className="flex gap-2 p-1 bg-slate-50 rounded-xl">
                             {['oração', 'visita', 'conselho'].map(t => (
                                 <button
                                     key={t}
                                     type="button"
                                     onClick={() => setType(t)}
-                                    className={`py-3 text-sm font-bold rounded-xl border transition-all ${type === t ? 'bg-rose-50 border-rose-200 text-rose-700 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                    className={`flex-1 py-2 text-xs font-medium capitalize rounded-lg transition-all ${type === t ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}
                                 >
-                                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                                    {t}
                                 </button>
                             ))}
                         </div>
-                    </div>
 
-                    <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700">Como podemos orar por você? <span className="text-rose-500">*</span></label>
-                        <textarea
-                            value={description}
-                            onChange={e => setDescription(e.target.value)}
-                            placeholder="Descreva seu pedido aqui... (Mínimo 10 caracteres)"
-                            className="w-full h-32 p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-300 focus:ring-4 focus:ring-rose-50 transition-all resize-none outline-none"
-                        />
-                        <div className="flex justify-end">
-                            <span className={`text-xs ${description.length < 10 || description.length > 500 ? 'text-rose-500' : 'text-slate-400'}`}>
-                                {description.length}/500
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* V1 Toggles: Visibility & Anonymity */}
-                    <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Privacidade</h3>
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-slate-700">Pedido Anônimo</span>
-                                <span className="text-xs text-slate-500">Seu nome não aparecerá na lista pública.</span>
+                        {/* Text Area */}
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">Como podemos orar?</label>
+                            <textarea
+                                value={description}
+                                onChange={e => setDescription(e.target.value)}
+                                className="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[120px] text-slate-700 placeholder:text-slate-400 resize-none text-base"
+                                placeholder="Descreva seu pedido aqui..."
+                                maxLength={500}
+                            />
+                            <div className="flex justify-end mt-1">
+                                <span className={`text-xs ${description.length > 450 ? 'text-amber-500' : 'text-slate-400'}`}>
+                                    {description.length}/500
+                                </span>
                             </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
-                            </label>
                         </div>
 
-                        <div className="h-px bg-slate-100" />
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-slate-700">Apenas Intercessores</span>
-                                <span className="text-xs text-slate-500">Não exibir no mural público de oração.</span>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" checked={visibility === 'private'} onChange={e => setVisibility(e.target.checked ? 'private' : 'public')} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-600"></div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-100 transition-colors">
-                        <MessageCircle className="w-5 h-5 text-green-600 shrink-0" />
-                        <div className="flex-1">
-                            <p className="text-sm font-bold text-green-800">Contato por WhatsApp?</p>
-                            <p className="text-xs text-green-600">Para a equipe pastoral falar com você.</p>
-                        </div>
-                        <input
-                            type="checkbox"
-                            checked={contact === 'whatsapp'}
-                            onChange={(e) => setContact(e.target.checked ? 'whatsapp' : 'none')}
-                            className="w-5 h-5 accent-green-600 rounded"
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={submitting || description.length < 10}
-                        className="w-full bg-rose-600 disabled:bg-slate-300 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-rose-200 hover:shadow-xl hover:shadow-rose-100 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                    >
-                        {submitting ? <Loader2 className="animate-spin" /> : <Send className="w-5 h-5" />}
-                        Enviar Pedido
-                    </button>
-
-                    <p className="text-center text-xs text-slate-400 px-4">
-                        Seus pedidos são recebidos pela equipe pastoral com total sigilo e carinho.
-                    </p>
-                </form>
-            )}
-
-            {activeTab === 'list' && (
-                <div className="space-y-3 animate-fade-in-up">
-                    {loading ? (
-                        <div className="flex justify-center py-8"><Loader2 className="animate-spin text-slate-400" /></div>
-                    ) : requests.length === 0 ? (
-                        <div className="text-center py-8 text-slate-400">
-                            <p>Você ainda não fez nenhum pedido.</p>
-                        </div>
-                    ) : (
-                        requests.map(req => (
-                            <div key={req.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                        {new Date(req.created_at).toLocaleDateString('pt-BR')}
-                                    </span>
-                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${req.status === 'pending' || req.status === 'new' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'
-                                        }`}>
-                                        {req.status === 'new' ? 'Enviado' : req.status}
-                                    </span>
+                        {/* Toggles */}
+                        <div className="space-y-3 pt-2">
+                            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-full ${isAnonymous ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
+                                        <ShieldCheck className="w-4 h-4" />
+                                    </div>
+                                    <div className="text-sm">
+                                        <p className="font-medium text-slate-700">Pedido Anônimo</p>
+                                        <p className="text-xs text-slate-400">Não identificar meu nome</p>
+                                    </div>
                                 </div>
-                                <h3 className="font-bold text-slate-800 capitalize mb-1">{req.request_type || req.type}</h3>
-                                <p className="text-slate-600 text-sm line-clamp-2">{req.description}</p>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} className="sr-only peer" />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
                             </div>
-                        ))
-                    )}
-                </div>
-            )}
+
+                            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-full ${visibility === 'private' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                                        {visibility === 'private' ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+                                    </div>
+                                    <div className="text-sm">
+                                        <p className="font-medium text-slate-700">Apenas Intercessores</p>
+                                        <p className="text-xs text-slate-400">Não exibir no mural público</p>
+                                    </div>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibility === 'private'}
+                                        onChange={e => setVisibility(e.target.checked ? 'private' : 'public')}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={submitting || !description.trim()}
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                        >
+                            {submitting ? <Loader2 className="animate-spin w-5 h-5" /> : <Send className="w-5 h-5" />}
+                            {submitting ? 'Enviando...' : 'Enviar Pedido'}
+                        </button>
+                    </form>
+                ) : (
+                    // OPTION A: Premium Placeholder for "My Requests"
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
+                            <Lock className="w-8 h-8 text-indigo-400" />
+                        </div>
+                        <h3 className="text-lg font-medium text-slate-900 mb-2">Área de Membros</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed max-w-[260px] mb-8">
+                            O histórico de pedidos estará disponível em breve para membros cadastrados. Continue orando conosco!
+                        </p>
+                        <button
+                            onClick={() => setActiveTab('new')}
+                            className="text-indigo-600 font-medium text-sm border border-indigo-100 bg-indigo-50 px-6 py-2 rounded-full hover:bg-indigo-100 transition-colors"
+                        >
+                            Fazer novo pedido
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
-
-// Add CSS utility for animation if not present globally
-// .animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
-// @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
