@@ -1,14 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts'
 
 Deno.serve(async (req: Request) => {
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders })
-    }
+    // 1. Handle CORS Preflight
+    const corsResponse = handleCors(req);
+    if (corsResponse) return corsResponse;
 
     try {
         const supabase = createClient(
@@ -20,21 +16,14 @@ Deno.serve(async (req: Request) => {
 
         // 1. Validation (Hardened)
         if (!description || description.trim().length < 10) {
-            return new Response(JSON.stringify({ error: "Descrição muito curta (min 10 caracteres)." }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 400,
-            })
+            return jsonResponse({ error: "Descrição muito curta (min 10 caracteres)." }, 400)
         }
 
         if (description.length > 500) {
-            return new Response(JSON.stringify({ error: "Descrição muito longa (max 500 caracteres)." }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 400,
-            })
+            return jsonResponse({ error: "Descrição muito longa (max 500 caracteres)." }, 400)
         }
 
-        // 2. Anti-Spam / Rate Limit (Primitive)
-        // Ideally we use Redis or DB to track IPs. For now, we add a delay to slow down bruteforce.
+        // 2. Anti-Spam
         await new Promise(r => setTimeout(r, 800));
 
         const { data, error } = await supabase
@@ -53,15 +42,9 @@ Deno.serve(async (req: Request) => {
 
         if (error) throw error
 
-        return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 201, // Created
-        })
+        return jsonResponse(data, 201)
 
     } catch (error: any) {
-        return new Response(JSON.stringify({ error: error.message || 'Unknown error' }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400,
-        })
+        return jsonResponse({ error: error.message || 'Unknown error' }, 400)
     }
 })
