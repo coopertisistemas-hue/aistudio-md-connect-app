@@ -1,26 +1,57 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { FLAGS } from '@/lib/flags';
 import { analytics } from '@/lib/analytics';
-import { SPONSORS } from '@/lib/data/sponsors';
+import { SPONSORS, type Sponsor } from '@/lib/data/sponsors';
 import { SponsorsModal } from './SponsorsModal';
+import { partnersApi } from '@/lib/api/partners';
 
 export function SponsorOfTheDay() {
     const [showAll, setShowAll] = useState(false);
+    const [apiPartners, setApiPartners] = useState<Sponsor[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    if (!FLAGS.FEATURE_DEVOTIONAL_SPONSOR_HIGHLIGHT || SPONSORS.length === 0) return null;
+    useEffect(() => {
+        if (FLAGS.FEATURE_PARTNERS_API) {
+            partnersApi.getActive().then(res => {
+                if (res.data && res.data.length > 0) {
+                    // Normalize DB Parter to local Sponsor interface
+                    const normalized: Sponsor[] = res.data.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        logo: p.logo_url || '',
+                        url: p.link_url,
+                        tagline: p.tagline || ''
+                    }));
+                    setApiPartners(normalized);
+                }
+                setLoading(false);
+            });
+        } else {
+            setLoading(false);
+        }
+    }, []);
+
+    if (!FLAGS.FEATURE_DEVOTIONAL_SPONSOR_HIGHLIGHT) return null;
+
+    // Use API data if available, otherwise local Fallback
+    const sourceData = apiPartners.length > 0 ? apiPartners : SPONSORS;
+    if (sourceData.length === 0 && !loading) return null;
 
     // Deterministic selection based on date hash
     const sponsor = useMemo(() => {
+        if (sourceData.length === 0) return null;
         const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
         let hash = 0;
         for (let i = 0; i < today.length; i++) {
             hash = ((hash << 5) - hash) + today.charCodeAt(i);
             hash |= 0;
         }
-        const index = Math.abs(hash) % SPONSORS.length;
-        return SPONSORS[index];
-    }, []);
+        const index = Math.abs(hash) % sourceData.length;
+        return sourceData[index];
+    }, [sourceData]); // Re-calculate when sourceData changes
+
+    if (!sponsor) return null;
 
     const handleSponsorClick = () => {
         analytics.track({

@@ -48,6 +48,7 @@ import RadioPage from '@/pages/public/RadioPage';
 import StudiesPage from '@/pages/Content/StudiesPage';
 
 import PartnersPage from '@/pages/public/PartnersPage';
+import PartnerLeadPage from '@/pages/public/PartnerLeadPage';
 import ComingSoon from '@/pages/ComingSoon';
 import { AuthProvider } from '@/contexts/AuthContext';
 
@@ -80,6 +81,7 @@ export default function App() {
                 <Route path={APP_ROUTES.TERMS} element={<PublicContentPage slug="termos" />} />
                 <Route path={APP_ROUTES.HELP} element={<PublicContentPage slug="ajuda" />} />
                 <Route path={APP_ROUTES.PARTNERS} element={<PartnersPage />} />
+                <Route path={APP_ROUTES.PARTNER_JOIN} element={<PartnerLeadPage />} />
                 <Route path={APP_ROUTES.MURAL} element={<NoticeList />} />
                 <Route path={APP_ROUTES.STUDIES} element={<StudiesPage />} />
 
