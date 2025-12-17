@@ -12,4 +12,8 @@ export const FLAGS = {
   FEATURE_DEVOTIONAL_SPONSOR_HIGHLIGHT: true,
   FEATURE_SUPPORT_FOOTER: true,
   FEATURE_HOME_RETURN_PILL: true,
+  // Sprint 5: Monetization Operacional
+  FEATURE_DONATE_PAGE: true,
+  FEATURE_PARTNERS_API: true,
+  FEATURE_PARTNER_LEADS: true,
 };

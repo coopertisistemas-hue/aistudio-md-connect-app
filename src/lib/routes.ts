@@ -19,6 +19,7 @@ export const APP_ROUTES = {
     ABOUT: '/entenda',
     DONATE: '/doe',
     PARTNERS: '/parceiros',
+    PARTNER_JOIN: '/seja-parceiro',
 
     // Legal
     PRIVACY: '/privacidade',
