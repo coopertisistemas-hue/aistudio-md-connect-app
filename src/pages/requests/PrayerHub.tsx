@@ -4,6 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Heart, Send, Loader2, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { FLAGS } from '@/lib/flags';
+import { analytics } from '@/lib/analytics';
+
 export default function PrayerHub() {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -15,7 +18,11 @@ export default function PrayerHub() {
     const [description, setDescription] = useState('');
     const [type, setType] = useState('oração');
     const [contact, setContact] = useState<'whatsapp' | 'none'>('whatsapp');
+    const [isAnonymous, setIsAnonymous] = useState(false);
+    const [visibility, setVisibility] = useState<'public' | 'private'>('public');
     const [submitting, setSubmitting] = useState(false);
+
+    if (!FLAGS.FEATURE_PRAYER_REQUESTS_V1) return null;
 
     useEffect(() => {
         if (activeTab === 'list' && user) {
@@ -25,23 +32,60 @@ export default function PrayerHub() {
 
     const fetchRequests = async () => {
         setLoading(true);
-        const { data, error } = await supabase.functions.invoke('pastoral-requests-my');
-        if (!error && data) {
-            setRequests(data);
+        try {
+            const { data, error } = await supabase.functions.invoke('pastoral-requests-my');
+
+            if (error) {
+                console.error('Error fetching requests:', error);
+                // setRequests([]); // Keep empty
+                return;
+            }
+
+            // Ensure it's an array. If API returns wrapped object { requests: [...] }, handle it.
+            // For now, assume it SHOULD be an array, but safeguard.
+            if (Array.isArray(data)) {
+                setRequests(data);
+            } else if (data && Array.isArray(data.data)) {
+                // Common envelope pattern
+                setRequests(data.data);
+            } else {
+                console.warn('Unexpected response format:', data);
+                setRequests([]);
+            }
+        } catch (err) {
+            console.error('Fetch exception:', err);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!description.trim()) return;
+
+        // Validation (V1)
+        if (!description.trim() || description.length < 10) {
+            alert('Por favor, descreva seu pedido com pelo menos 10 caracteres.');
+            return;
+        }
 
         setSubmitting(true);
+
+        analytics.track({
+            name: 'cta_click', // or feature_usage
+            element: 'submit_prayer_request',
+            context: 'member',
+            metadata: { type, visibility, anonymous: isAnonymous }
+        });
+
+        // Mock Success for V1 if backend not updated yet, or use invoke
+        // We will assume invoke works, but if it fails we might show mock success for UI testing
         const { error } = await supabase.functions.invoke('pastoral-request-create', {
             body: {
                 request_type: type,
                 description,
-                preferred_contact: contact
+                preferred_contact: contact,
+                is_anonymous: isAnonymous,
+                visibility: visibility
             }
         });
 
@@ -50,9 +94,14 @@ export default function PrayerHub() {
         if (!error) {
             setDescription('');
             setActiveTab('list');
-            // Show success toast?
+            alert('Pedido enviado com sucesso! Estaremos orando por você.');
         } else {
-            alert('Erro ao enviar pedido. Tente novamente.');
+            // Fallback for V1 if Edge Function schema doesn't match yet
+            console.error("Submission error", error);
+            // alert('Erro ao enviar pedido. Tente novamente.');
+            // For V1 Demo purposes, if it's a schema error, we might want to pretend? 
+            // Strictly following prompt: "Msg de sucesso". Let's alert failure properly.
+            alert('Erro ao enviar. Verifique sua conexão.');
         }
     };
 
@@ -101,8 +150,10 @@ export default function PrayerHub() {
             </div>
 
             {activeTab === 'new' && (
-                <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in-up">
-                    <div className="space-y-2">
+                <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in-up pb-20">
+                    {/* Feature Flag Check (could be higher up, but good here too) */}
+
+                    <div className="space-y-3">
                         <label className="text-sm font-bold text-slate-700">O que você precisa?</label>
                         <div className="grid grid-cols-3 gap-2">
                             {['oração', 'visita', 'conselho'].map(t => (
@@ -110,7 +161,7 @@ export default function PrayerHub() {
                                     key={t}
                                     type="button"
                                     onClick={() => setType(t)}
-                                    className={`py-3 text-sm font-bold rounded-xl border ${type === t ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-white border-slate-200 text-slate-500'}`}
+                                    className={`py-3 text-sm font-bold rounded-xl border transition-all ${type === t ? 'bg-rose-50 border-rose-200 text-rose-700 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                                 >
                                     {t.charAt(0).toUpperCase() + t.slice(1)}
                                 </button>
@@ -118,18 +169,52 @@ export default function PrayerHub() {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700">Como podemos orar por você?</label>
+                    <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700">Como podemos orar por você? <span className="text-rose-500">*</span></label>
                         <textarea
                             value={description}
                             onChange={e => setDescription(e.target.value)}
-                            placeholder="Descreva seu pedido aqui..."
-                            className="w-full h-32 p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white resize-none"
+                            placeholder="Descreva seu pedido aqui... (Mínimo 10 caracteres)"
+                            className="w-full h-32 p-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-300 focus:ring-4 focus:ring-rose-50 transition-all resize-none outline-none"
                         />
+                        <div className="flex justify-end">
+                            <span className={`text-xs ${description.length < 10 || description.length > 500 ? 'text-rose-500' : 'text-slate-400'}`}>
+                                {description.length}/500
+                            </span>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-100">
-                        <MessageCircle className="w-5 h-5 text-green-600" />
+                    {/* V1 Toggles: Visibility & Anonymity */}
+                    <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Privacidade</h3>
+
+                        <div className="flex items-center justify-between">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-slate-700">Pedido Anônimo</span>
+                                <span className="text-xs text-slate-500">Seu nome não aparecerá na lista pública.</span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} className="sr-only peer" />
+                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+                            </label>
+                        </div>
+
+                        <div className="h-px bg-slate-100" />
+
+                        <div className="flex items-center justify-between">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-slate-700">Apenas Intercessores</span>
+                                <span className="text-xs text-slate-500">Não exibir no mural público de oração.</span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked={visibility === 'private'} onChange={e => setVisibility(e.target.checked ? 'private' : 'public')} className="sr-only peer" />
+                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-600"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-100 transition-colors">
+                        <MessageCircle className="w-5 h-5 text-green-600 shrink-0" />
                         <div className="flex-1">
                             <p className="text-sm font-bold text-green-800">Contato por WhatsApp?</p>
                             <p className="text-xs text-green-600">Para a equipe pastoral falar com você.</p>
@@ -138,18 +223,22 @@ export default function PrayerHub() {
                             type="checkbox"
                             checked={contact === 'whatsapp'}
                             onChange={(e) => setContact(e.target.checked ? 'whatsapp' : 'none')}
-                            className="w-5 h-5 accent-green-600"
+                            className="w-5 h-5 accent-green-600 rounded"
                         />
                     </div>
 
                     <button
                         type="submit"
-                        disabled={submitting}
-                        className="w-full bg-rose-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-rose-200 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                        disabled={submitting || description.length < 10}
+                        className="w-full bg-rose-600 disabled:bg-slate-300 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-rose-200 hover:shadow-xl hover:shadow-rose-100 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                     >
                         {submitting ? <Loader2 className="animate-spin" /> : <Send className="w-5 h-5" />}
                         Enviar Pedido
                     </button>
+
+                    <p className="text-center text-xs text-slate-400 px-4">
+                        Seus pedidos são recebidos pela equipe pastoral com total sigilo e carinho.
+                    </p>
                 </form>
             )}
 
