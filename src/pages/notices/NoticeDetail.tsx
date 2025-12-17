@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { feedService, type FeedItem } from '@/services/feed';
 import { ArrowLeft, Calendar, Share2, AlertTriangle } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 
 
 export default function NoticeDetail() {
@@ -36,9 +37,7 @@ export default function NoticeDetail() {
         <div className="min-h-screen bg-white pb-safe">
             {/* Header */}
             <div className="sticky top-0 bg-white/90 backdrop-blur-md z-20 border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-                <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-50 text-slate-700">
-                    <ArrowLeft className="h-6 w-6" />
-                </button>
+                <BackLink className="-ml-2" />
                 <div className="flex gap-2">
                     <button onClick={handleShare} className="p-2 rounded-full hover:bg-slate-50 text-slate-700">
                         <Share2 className="h-5 w-5" />

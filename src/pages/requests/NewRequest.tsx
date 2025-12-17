@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Lock, Users, Eye, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { BackLink } from '@/components/ui/BackLink';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
 
@@ -98,11 +99,11 @@ export default function NewRequest() {
     return (
         <div className="min-h-screen bg-white pb-24">
             {/* Header */}
-            <div className="bg-white px-4 pt-12 pb-4 shadow-sm sticky top-0 z-10 flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="-ml-2">
-                    <ArrowLeft className="h-6 w-6 text-slate-700" />
-                </Button>
-                <h1 className="text-lg font-bold text-slate-800">{getTitle()}</h1>
+            {/* Header */}
+            <div className="px-5 pt-8 mb-6">
+                <BackLink className="mb-4" />
+                <h1 className="text-2xl font-bold text-slate-900 mb-1">{getTitle()}</h1>
+                <p className="text-slate-500 text-sm">Preencha os detalhes da sua solicitação.</p>
             </div>
 
             <div className="p-6 space-y-8 animate-in slide-in-from-right duration-300">

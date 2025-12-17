@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { contentService } from '@/services/content';
 import type { Post } from '@/types/content';
-import { ArrowLeft } from 'lucide-react';
+import { Heart } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 
 export default function DevotionalsList() {
     const navigate = useNavigate();
@@ -27,11 +28,13 @@ export default function DevotionalsList() {
     return (
         <div className="min-h-screen bg-transparent flex flex-col">
             {/* Header */}
-            <div className="bg-white border-b sticky top-0 z-10 px-4 py-3 flex items-center gap-3">
-                <button onClick={() => navigate(-1)} className="p-1 -ml-1">
-                    <ArrowLeft className="h-6 w-6 text-slate-600" />
-                </button>
-                <h1 className="font-bold text-lg">Devocionais</h1>
+            <div className="px-5 pt-8 mb-2">
+                <BackLink className="mb-4" />
+                <h1 className="text-2xl font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <Heart className="w-6 h-6 text-rose-500" />
+                    Devocionais
+                </h1>
+                <p className="text-slate-500 text-sm">Reflexões diárias para o seu coração.</p>
             </div>
 
             <div className="p-4 space-y-4 flex-1">

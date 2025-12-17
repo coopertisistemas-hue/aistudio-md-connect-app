@@ -1,4 +1,4 @@
-import { MessageCircleHeart, Calendar, ChevronRight, Book, Users, LayoutGrid, Music, FileText, Youtube } from 'lucide-react';
+import { MessageCircleHeart, Calendar, ChevronRight, Book, Users, LayoutGrid, Music, FileText, Youtube, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES, EXTERNAL_LINKS } from '@/lib/routes';
 import { analytics } from '@/lib/analytics';
@@ -60,6 +60,16 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             },
             color: 'text-blue-600',
             bg: 'bg-blue-50'
+        },
+        {
+            label: 'Cards',
+            icon: Sparkles,
+            onClick: () => {
+                trackAction('verse_poster', APP_ROUTES.VERSE_POSTER);
+                navigate(APP_ROUTES.VERSE_POSTER);
+            },
+            color: 'text-amber-600',
+            bg: 'bg-amber-50'
         },
         {
             label: 'Louvor',

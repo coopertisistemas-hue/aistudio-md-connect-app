@@ -7,9 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, Send, CheckCircle, ChevronLeft, Lock } from 'lucide-react';
+import { Heart, Send, CheckCircle, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { createPrayerRequest } from '@/lib/api/member';
+import { BackLink } from '@/components/ui/BackLink';
 
 interface PrayerForm {
     name: string;
@@ -78,9 +79,7 @@ export default function PrayerRequestPage() {
     return (
         <div className="max-w-2xl mx-auto py-6 px-4 pt-20 animate-in slide-in-from-bottom-4 duration-500 space-y-6">
             <div className="flex items-center gap-2 mb-2">
-                <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="pl-0 hover:bg-transparent text-slate-500 hover:text-slate-800">
-                    <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
-                </Button>
+                <BackLink />
             </div>
 
             <div className="text-center space-y-2 mb-8">

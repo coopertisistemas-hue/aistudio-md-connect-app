@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Calendar, MessageCircle, AlertCircle } from 'lucide-react';
+import { Heart, Calendar, MessageCircle, AlertCircle, HeartHandshake } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 import { Button } from '@/components/ui/button';
 
 export default function RequestsHub() {
@@ -8,16 +9,14 @@ export default function RequestsHub() {
     return (
         <div className="min-h-screen bg-slate-50 pb-24">
             {/* Header */}
-            <div className="bg-white px-4 pt-12 pb-6 shadow-sm sticky top-0 z-10">
-                <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="-ml-2">
-                        <ArrowLeft className="h-6 w-6 text-slate-700" />
-                    </Button>
-                    <div>
-                        <h1 className="text-xl font-bold text-slate-800">Cuidado Pastoral</h1>
-                        <p className="text-xs text-slate-500">Estamos aqui por você. Como podemos ajudar?</p>
-                    </div>
-                </div>
+            {/* Header */}
+            <div className="px-5 pt-8 mb-6">
+                <BackLink className="mb-4" />
+                <h1 className="text-2xl font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <HeartHandshake className="w-6 h-6 text-rose-500" />
+                    Cuidado Pastoral
+                </h1>
+                <p className="text-slate-500 text-sm">Estamos aqui por você. Como podemos ajudar?</p>
             </div>
 
             <div className="p-4 space-y-6">

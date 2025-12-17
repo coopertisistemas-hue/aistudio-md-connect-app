@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Clock, ChevronLeft, CalendarX } from 'lucide-react';
+import { Calendar, MapPin, Clock, CalendarX } from 'lucide-react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { BackLink } from '@/components/ui/BackLink';
 
 interface CalendarEvent {
     id: string;
@@ -25,7 +24,6 @@ const SchedulePage: React.FC = () => {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'upcoming' | 'month' | 'all'>('upcoming');
-    const navigate = useNavigate();
 
     useEffect(() => {
         const load = async () => {
@@ -84,9 +82,7 @@ const SchedulePage: React.FC = () => {
     return (
         <div className="max-w-2xl mx-auto py-6 px-4 pt-20 animate-in slide-in-from-bottom-4 duration-500 space-y-6">
             <div className="flex items-center gap-2 mb-2">
-                <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="pl-0 hover:bg-transparent text-slate-500 hover:text-slate-800">
-                    <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
-                </Button>
+                <BackLink />
             </div>
 
             <div className="flex flex-col gap-4">

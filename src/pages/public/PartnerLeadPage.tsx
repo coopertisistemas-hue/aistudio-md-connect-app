@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, MessageCircle, CheckCircle } from 'lucide-react';
+import { MessageCircle, CheckCircle } from 'lucide-react';
 import { partnersApi } from '@/lib/api/partners';
 import { toast } from 'sonner';
 import { analytics } from '@/lib/analytics';
+import { BackLink } from '@/components/ui/BackLink';
 
 export default function PartnerLeadPage() {
     const navigate = useNavigate();
@@ -53,9 +54,7 @@ export default function PartnerLeadPage() {
         <div className="min-h-screen bg-slate-50/50 pb-20">
             <main className="container max-w-md mx-auto px-5 pt-8 animate-in slide-in-from-bottom-5 duration-500">
 
-                <Button variant="ghost" className="mb-6 pl-0 hover:bg-transparent" onClick={() => navigate(-1)}>
-                    <ChevronLeft className="w-5 h-5 mr-1" /> Voltar
-                </Button>
+                <BackLink className="mb-6" />
 
                 <h1 className="text-2xl font-bold text-slate-900 mb-1">Seja um Parceiro</h1>
                 <p className="text-slate-500 mb-8">

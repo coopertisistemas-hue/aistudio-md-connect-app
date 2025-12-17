@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PublicApi, type PublicPage } from '@/lib/api/public'; // Assuming this exists from previous step
 import { Loader2, AlertCircle, FileText } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 
 interface PublicContentPageProps {
     slug?: string; // Optional: if used as a standalone component
@@ -73,12 +74,7 @@ export default function PublicContentPage({ slug: propSlug }: PublicContentPageP
                 <p className="text-slate-500 text-sm max-w-xs mx-auto mb-6">
                     Não conseguimos carregar esta página no momento. Pode ser que ela ainda não tenha sido publicada.
                 </p>
-                <button
-                    onClick={() => navigate(-1)}
-                    className="px-6 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-sm rounded-full shadow-sm hover:bg-slate-50 transition-colors"
-                >
-                    Voltar
-                </button>
+                <BackLink />
             </div>
         );
     }

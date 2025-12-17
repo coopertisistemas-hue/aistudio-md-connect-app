@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { contentService } from '@/services/content'; // Need getMessageById
 import type { ContentMessage } from '@/types/content';
 import { ArrowLeft, Loader2, Youtube } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 
 export default function MessageDetail() {
     const { id } = useParams();
@@ -33,9 +34,7 @@ export default function MessageDetail() {
         <div className="min-h-screen bg-slate-900 text-white flex flex-col">
             <div className="bg-transparent absolute top-0 w-full z-10 px-4 py-3 flex items-center justify-between pointer-events-none">
                 {/* Back button with pointer-events-auto */}
-                <button onClick={() => navigate(-1)} className="p-1 -ml-1 pointer-events-auto bg-black/20 rounded-full backdrop-blur-sm">
-                    <ArrowLeft className="h-6 w-6 text-white" />
-                </button>
+                <BackLink className="pointer-events-auto bg-black/20 rounded-full backdrop-blur-sm text-white hover:bg-black/40 hover:text-white/90" />
             </div>
 
             <div className="flex-1 flex flex-col">

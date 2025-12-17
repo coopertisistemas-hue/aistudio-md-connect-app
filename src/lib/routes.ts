@@ -14,6 +14,7 @@ export const APP_ROUTES = {
     MURAL: '/mural',       // Unified: was /notices or /news
     DEVOTIONALS: '/devocionais',
     STUDIES: '/estudos',   // New placeholder
+    VERSE_POSTER: '/versiculo-para-postar',
 
     // Institutional
     ABOUT: '/entenda',

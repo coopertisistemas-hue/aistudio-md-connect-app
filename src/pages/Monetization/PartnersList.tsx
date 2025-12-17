@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Handshake } from 'lucide-react';
+import { BackLink } from '@/components/ui/BackLink';
 import { monetizationService } from '@/services/monetization';
 import type { Partner } from '@/types/monetization';
 import AffiliateCard from '@/components/monetization/AffiliateCard';
 
 export default function PartnersList() {
-    const navigate = useNavigate();
     const [partners, setPartners] = useState<Partner[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -19,12 +18,14 @@ export default function PartnersList() {
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
-            <header className="bg-white sticky top-0 z-10 border-b border-slate-100 px-4 py-3 flex items-center">
-                <button onClick={() => navigate(-1)} className="mr-3 p-1 rounded-full hover:bg-slate-100">
-                    <ArrowLeft className="w-5 h-5 text-slate-700" />
-                </button>
-                <h1 className="font-bold text-slate-800 text-lg">Parceiros & Ofertas</h1>
-            </header>
+            <div className="px-5 pt-8 mb-4">
+                <BackLink className="mb-4" />
+                <h1 className="text-2xl font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <Handshake className="w-6 h-6 text-emerald-600" />
+                    Parceiros & Ofertas
+                </h1>
+                <p className="text-slate-500 text-sm">Empresas que apoiam a obra de Deus.</p>
+            </div>
 
             <div className="p-4">
                 <p className="text-xs text-slate-500 mb-4 px-2 bg-yellow-50 text-yellow-800 py-2 rounded">
