@@ -4,15 +4,14 @@
  */
 
 // Regex Breakdown:
-// 1. (?:[123I]{1,3}\s?)? -> Optional prefix: "1 ", "2", "3", "I ", "II " (with or without space)
+// 1. (?:[123I]{1,3}\s*)? -> Optional prefix: "1 ", "2", "3", "I ", "II " (with or without space)
 // 2. [A-Za-zÀ-ÿ]{2,}     -> Book name/abbreviation (at least 2 chars): "Pe", "Jo", "Gênesis"
 // 3. \.?                 -> Optional dot
-// 4. \s?                 -> Optional space
-// 5. \d+                 -> Chapter number
-// 6. (?::\d+(?:-\d+)?)?  -> Optional Verse range: ":1", ":1-2"
-// 7. (?:[;,]\s?(?:[123I]{1,3}\s?)?[A-Za-zÀ-ÿ]{2,}\s?\d+(?::\d+(?:-\d+)?)?)* -> Optional chained references (future proofing, simplified here)
-// Note: We capture the main reference.
-export const BIBLE_REF_REGEX = /((?:[123I]{1,3}\s?)?[A-Za-zÀ-ÿ]{2,}\.?\s?\d+(?::\d+(?:-\d+)?)?)/g;
+// 4. \s*                 -> Optional space before chapter
+// 5. \d+(?!\w)            -> Chapter number (must not be followed immediately by word chars, e.g. "2Tm")
+// 6. (?::\d+(?:[-–—]\d+)?)?  -> Optional Verse range: ":1", ":1-2", ":1–2" (supports en-dash/em-dash)
+// Notes: We capture the main reference.
+export const BIBLE_REF_REGEX = /((?:[123I]{1,3}\s*)?[A-Za-zÀ-ÿ]{2,}\.?\s*\d+(?!\w)(?:[:.]\d+(?:[-–—]\d+)?)?)/g;
 
 // List of valid prefixes to reduce false positives (like "E a paz...")
 const VALID_BOOKS_PREFIX = [
@@ -30,11 +29,14 @@ export function isBibleRef(text: string): boolean {
     if (!new RegExp(`^${BIBLE_REF_REGEX.source}$`).test(clean)) return false;
 
     // 2. Must start with a valid book prefix
-    // Normalize: "1 Pe" -> "Pe", "2Tm" -> "Tm"
-    const prefixPart = clean.split(/[\s.:]/)[0]; // "1Pe"
-    const bookName = prefixPart.replace(/^[123I]+\s?/, '').toLowerCase(); // "pe"
+    // Normalize: remove spaces inside book name "1 Pe" -> "1Pe"
+    // Heuristic: take everything before the first digit, strip spaces and dots.
+    const match = clean.match(/^((?:[123I]{1,3}\s*)?[A-Za-zÀ-ÿ]{2,})/);
+    if (!match) return false;
 
-    return VALID_BOOKS_PREFIX.some(p => bookName.startsWith(p.toLowerCase()));
+    const bookPart = match[1].replace(/[\s.]/g, '').toLowerCase(); // "1 Pe" -> "1pe"
+
+    return VALID_BOOKS_PREFIX.some(p => bookPart.startsWith(p.toLowerCase()));
 }
 
 export function parseBibleRefs(text: string): { type: 'text' | 'ref', content: string }[] {
