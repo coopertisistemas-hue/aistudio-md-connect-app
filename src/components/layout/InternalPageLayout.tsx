@@ -2,7 +2,8 @@ import React, { ReactNode } from 'react';
 import { type LucideIcon } from 'lucide-react';
 import { PageIntro } from '@/components/layout/PageIntro';
 import { AppFooter } from '@/components/layout/AppFooter';
-import { SupportFooter } from '@/components/monetization/SupportFooter';
+import { SponsorOfTheDay } from '@/components/monetization/SponsorOfTheDay';
+import { DonateBlock } from '@/components/monetization/DonateBlock';
 
 interface InternalPageLayoutProps {
     title: string;
@@ -11,11 +12,9 @@ interface InternalPageLayoutProps {
     iconClassName?: string;
     children: ReactNode;
     // Options
-    showSponsor?: boolean; // Controls SupportFooter visibility
-    showDoe?: boolean;     // Passed to SupportFooter if it supported granular control, but SupportFooter is a block. 
-                           // For now, showSponsor controls the entire SupportFooter block presence.
-                           // If granular control inside SupportFooter is needed, we'd need props there too.
-                           // Based on current SupportFooter, it just renders.
+    showSponsor?: boolean; // Controls SponsorOfTheDay visibility
+    showDoe?: boolean;     // Controls DonateBlock visibility
+    showFooter?: boolean;  // Controls AppFooter visibility
     
     backPath?: string;
     actions?: ReactNode;
@@ -29,6 +28,8 @@ export function InternalPageLayout({
     iconClassName,
     children,
     showSponsor = true,
+    showDoe = true,
+    showFooter = true,
     backPath,
     actions,
     className
@@ -54,8 +55,20 @@ export function InternalPageLayout({
 
             {/* Footers Padronizados */}
             <div className="mt-auto">
-                {showSponsor && <SupportFooter />}
-                <AppFooter />
+                {/* Monetization / Support Section */}
+                {(showSponsor || showDoe) && (
+                    <div className="w-full bg-transparent border-t border-slate-100/50">
+                        <div className="max-w-2xl mx-auto px-4 py-6">
+                            <div className="flex flex-col gap-6">
+                                {showSponsor && <SponsorOfTheDay />}
+                                {showDoe && <DonateBlock />}
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {/* Global App Footer */}
+                {showFooter && <AppFooter />}
             </div>
         </div>
     );

@@ -14,6 +14,7 @@ export interface Post {
         name: string;
         avatar_url?: string | null;
     };
+    author_name?: string;
 }
 
 export interface ContentSeries {
