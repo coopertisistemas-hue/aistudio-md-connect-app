@@ -287,7 +287,9 @@ export const bibleService = {
     getBookContext: async (reference: string) => {
         try {
             // Extract generic book abbreviation (e.g. "1 Pe 1:2" -> "1pe")
-            const cleanRef = reference.split(/[\d:]/)[0].trim().toLowerCase().replace('.', '');
+            // Naive split fails for "1Pe". Use regex to capture book part:
+            const match = reference.match(/^((?:[123I]{1,3}\s*)?[A-Za-zÀ-ÿ]+)/);
+            const cleanRef = match ? match[1].toLowerCase().replace(/\./g, '') : '';
             const normalizedInput = cleanRef.replace(/\s+/g, '');
             // normalizedInput: '1pe', 'rm', 'jo', etc.
 

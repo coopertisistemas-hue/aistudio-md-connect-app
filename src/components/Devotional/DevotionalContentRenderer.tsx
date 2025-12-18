@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Quote, BookOpen, Sparkles } from 'lucide-react';
 import { parseBibleRefs } from '@/utils/bibleParser';
-import { bibleService } from '@/services/bible';
 import { VerseContextModal } from '@/components/Bible/VerseContextModal';
 
 interface DevotionalContentRendererProps {
@@ -45,9 +44,10 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
 
         let verseKey = '';
         let reflectionLines: string[] = [];
+        let applicationLines: string[] = [];
         let prayer = '';
         let readings: string[] = [];
-        let signature = '';
+        // Signature is now handled exclusively by props/fallback, ignored from content
 
         let currentBlockIndex = 0;
         // Key Verse Heuristic: First block if not a header
@@ -56,7 +56,7 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
             currentBlockIndex = 1;
         }
 
-        let currentSection: 'reflection' | 'prayer' | 'readings' | 'signature' = 'reflection';
+        let currentSection: 'reflection' | 'application' | 'prayer' | 'readings' = 'reflection';
 
         for (let i = currentBlockIndex; i < blocks.length; i++) {
             const block = blocks[i].trim();
@@ -74,12 +74,24 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
                 if (inline) prayer += (prayer ? '\n\n' : '') + inline;
                 continue;
             }
-            if (lowerBlock.startsWith('### leituras') || lowerBlock.startsWith('## leituras')) {
+            if (lowerBlock.startsWith('## leituras') || lowerBlock.startsWith('## leituras')) {
                 currentSection = 'readings'; continue;
             }
-            if (block.startsWith('---') || lowerBlock.includes('escrito por')) {
-                currentSection = 'signature';
-                // Don't continue, might be the line itself
+            // Application Section Detection (Case Insensitive, with or without ##)
+            const appMatch = block.match(/^(?:##\s*)?aplicaç[ãa]o pr[áa]tica:?(.*)/i);
+            if (appMatch) {
+                currentSection = 'application';
+                // Handle inline content
+                const inline = appMatch[1].trim();
+                if (inline) applicationLines.push(inline);
+                continue;
+            }
+            // Signature Detection (Ignore these lines)
+            if (block.match(/^(?:---|___)?\s*(?:escrito|supervisionado|autor)\s*(?:por|:)?\s+.*$/i)) {
+                continue;
+            }
+            if (block.startsWith('---')) {
+                continue;
             }
 
             // Content Accumulation
@@ -87,14 +99,14 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
                 if (!block.startsWith('#')) reflectionLines.push(block);
             } else if (currentSection === 'prayer') {
                 if (!block.startsWith('#')) prayer += (prayer ? '\n\n' : '') + block;
+            } else if (currentSection === 'application') {
+                if (!block.startsWith('#')) applicationLines.push(block);
             } else if (currentSection === 'readings') {
                 if (!block.startsWith('#')) readings.push(block);
-            } else if (currentSection === 'signature') {
-                if (!block.startsWith('---')) signature += block;
             }
         }
 
-        return { verseKey, reflectionLines, prayer, readings, signature };
+        return { verseKey, reflectionLines, applicationLines, prayer, readings };
     }, [content]);
 
     // --- Renderers ---
@@ -181,33 +193,55 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
                 )}
             </div>
 
-            {/* 4. Prayer */}
-            {parsedContent.prayer && (
-                <div className="relative overflow-hidden rounded-3xl group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-700 opacity-95" />
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
+            {/* 3. Application (Practical Application) */}
+            {parsedContent.applicationLines.length > 0 && (
+                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="h-0.5 w-8 bg-indigo-500 rounded-full" />
+                        <span className="text-sm font-bold text-indigo-900 uppercase tracking-widest">Aplicação Prática</span>
+                    </div>
 
-                    <div className="relative p-8 md:p-10 border border-white/10 rounded-3xl">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="flex items-center gap-2 text-sm font-bold text-white/90 uppercase tracking-widest">
-                                <Sparkles className="w-4 h-4 text-amber-300" />
-                                Oração
-                            </h3>
-                        </div>
-
-                        <p className="text-lg md:text-xl text-white/95 font-medium leading-relaxed font-serif italic relative z-10 selection:bg-indigo-400 selection:text-white">
-                            "{renderRichText(parsedContent.prayer.trim())}"
-                        </p>
+                    <div className="prose prose-slate prose-lg md:prose-xl max-w-none text-slate-600 leading-8 tracking-wide">
+                        {parsedContent.applicationLines.map((line, idx) => (
+                            <p key={idx} className="mb-6 last:mb-0">
+                                {renderRichText(line)}
+                            </p>
+                        ))}
                     </div>
                 </div>
             )}
 
-            {/* 5. Author Signature */}
+            {/* 4. Readings (Moved outside Reflection card or keep inside? User wants "Mesmo destaque", implying main card. Code shows Readings inside Reflection card. I'll keep Readings logic as is but note the comment numbers changed) */}
+
+
+
+            {/* 4. Prayer */}
+            {parsedContent.prayer && (
+                <div className="bg-slate-50/80 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
+                    {/* Decorative Background Icon */}
+                    <div className="absolute -right-2 -top-2 opacity-[0.03] transform rotate-12">
+                        <Sparkles className="w-24 h-24 text-indigo-900" />
+                    </div>
+
+                    <div className="flex items-center gap-3 mb-6 relative z-10">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 rounded-full border border-indigo-100">
+                            <Sparkles className="w-3 h-3 text-indigo-500" />
+                            <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-widest leading-none mt-0.5">Oração</span>
+                        </div>
+                    </div>
+
+                    <p className="text-lg md:text-xl text-slate-700 font-serif italic leading-relaxed relative z-10">
+                        <span className="text-indigo-300 font-sans text-4xl leading-none absolute -left-4 -top-2 select-none opacity-50">“</span>
+                        {renderRichText(parsedContent.prayer.trim())}
+                    </p>
+                </div>
+            )}
+
             <div className="flex justify-center pb-8">
                 <div className="flex flex-col items-center text-center">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Escrito por</p>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">SUPERVISIONADO POR</p>
                     <p className="text-slate-800 font-serif font-bold text-lg">
-                        {parsedContent.signature || author?.name || 'Equipe Pastoral'}
+                        {author?.name || 'MD — Momento Devocional'}
                     </p>
                 </div>
             </div>
