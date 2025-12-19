@@ -384,9 +384,8 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
             <VerseContextModal
                 isOpen={modalState.isOpen}
                 onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
-                reference={modalState.ref}
+                verseRef={modalState.ref}
                 passageText={modalState.text}
-                isLoading={modalState.isLoading}
             />
 
             {/* Sticky Audio Player */}
