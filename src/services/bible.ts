@@ -417,5 +417,24 @@ export const bibleService = {
             // Even on error, return fallback
             return buildVerseExplanation(bookId, chapter, verse, verseText);
         }
+    },
+
+    // [New for Devotional Modal]
+    getBookIdFromRaw: (raw: string): string | null => {
+        const lower = raw.toLowerCase().replace(/[\.\s]/g, '');
+        // 1. Try direct map
+        if (PT_TO_EN_BOOKS[lower]) return PT_TO_EN_BOOKS[lower];
+
+        // 2. Try English keys
+        const directMatch = Object.keys(ENGLISH_TO_PORTUGUESE).find(k => k.toLowerCase() === lower);
+        if (directMatch) return directMatch;
+        return null;
+    },
+
+    getPassageText: async (params: { book: string, chapter: number, verseStart: number, verseEnd?: number }): Promise<BibleVerse[] | null> => {
+        // Construct reference string for reuse of existing getPassage logic
+        const refStr = `${params.book} ${params.chapter}:${params.verseStart}${params.verseEnd ? `-${params.verseEnd}` : ''}`;
+        const data = await bibleService.getPassage(refStr);
+        return data?.verses || null;
     }
 };

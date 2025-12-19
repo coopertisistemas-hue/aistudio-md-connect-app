@@ -29,7 +29,7 @@ export function isBibleRef(text: string): boolean {
     if (!new RegExp(`^${BIBLE_REF_REGEX.source}$`).test(clean)) return false;
 
     // 2. Must start with a valid book prefix
-    // Normalize: remove spaces inside book name "1 Pe" -> "1Pe"
+    // Normalize: remove spaces inside book name "1 Pe" -> "1pe"
     // Heuristic: take everything before the first digit, strip spaces and dots.
     const match = clean.match(/^((?:[123I]{1,3}\s*)?[A-Za-zÀ-ÿ]{2,})/);
     if (!match) return false;
@@ -37,6 +37,40 @@ export function isBibleRef(text: string): boolean {
     const bookPart = match[1].replace(/[\s.]/g, '').toLowerCase(); // "1 Pe" -> "1pe"
 
     return VALID_BOOKS_PREFIX.some(p => bookPart.startsWith(p.toLowerCase()));
+}
+
+export interface ParsedReference {
+    bookRaw: string;
+    chapter: number;
+    verseStart: number;
+    verseEnd?: number;
+    isValid: boolean;
+}
+
+export function parseReferenceDetails(text: string): ParsedReference | null {
+    if (!isBibleRef(text)) return null;
+
+    // Regex to capture parts:
+    // Group 1: Book (words before digit)
+    // Group 2: Chapter (digits)
+    // Group 3: Verse part (optional, incl. separator)
+    const detailRegex = /^((?:[123I]{1,3}\s*)?[A-Za-zÀ-ÿ]{2,}\.?)\s*(\d+)(?:[:.](\d+)(?:[-–—](\d+))?)?$/;
+    const match = text.trim().match(detailRegex);
+
+    if (!match) return null;
+
+    const bookRaw = match[1].trim().replace(/\.$/, '');
+    const chapter = parseInt(match[2], 10);
+    const verseStart = match[3] ? parseInt(match[3], 10) : 1;
+    const verseEnd = match[4] ? parseInt(match[4], 10) : undefined;
+
+    return {
+        bookRaw,
+        chapter,
+        verseStart,
+        verseEnd,
+        isValid: true
+    };
 }
 
 export function parseBibleRefs(text: string): { type: 'text' | 'ref', content: string }[] {

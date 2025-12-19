@@ -19,28 +19,13 @@ interface DevotionalContentRendererProps {
 }
 
 export function DevotionalContentRenderer({ id, title, subtitle, content, author, coverUrl }: DevotionalContentRendererProps) {
-    const [modalState, setModalState] = useState<{ isOpen: boolean; ref: string | null; text: string | null; isLoading: boolean }>({
+    const [modalState, setModalState] = useState<{ isOpen: boolean; ref: string | null }>({
         isOpen: false,
-        ref: null,
-        text: null,
-        isLoading: false
+        ref: null
     });
 
-    const handleOpenModal = async (ref: string) => {
-        setModalState({ isOpen: true, ref, text: null, isLoading: true });
-        try {
-            // Lazy load the service to avoid circular deps if any (though standard import is fine)
-            const { bibleService } = await import('@/services/bible');
-            const data = await bibleService.getPassage(ref);
-            setModalState(prev => ({
-                ...prev,
-                text: data?.text || null,
-                isLoading: false
-            }));
-        } catch (error) {
-            console.error('Failed to fetch passage', error);
-            setModalState(prev => ({ ...prev, isLoading: false }));
-        }
+    const handleOpenModal = (ref: string) => {
+        setModalState({ isOpen: true, ref });
     };
 
     // --- Parsing Logic ---
@@ -385,7 +370,7 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
                 isOpen={modalState.isOpen}
                 onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
                 verseRef={modalState.ref}
-                passageText={modalState.text}
+                passageText={null} // Let modal fetch it
             />
 
             {/* Sticky Audio Player */}
@@ -393,4 +378,3 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
         </article>
     );
 }
-
