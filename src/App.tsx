@@ -20,7 +20,9 @@ import Home from '@/pages/Home';
 // Lazy Load Internal/Heavy Pages
 const PublicContentPage = lazy(() => import('@/pages/public/PublicContentPage'));
 const Perfil = lazy(() => import('@/pages/Placeholders').then(m => ({ default: m.Perfil })));
-const BibleView = lazy(() => import('@/pages/BibleView'));
+const BibleHome = lazy(() => import('@/pages/Bible/BibleHome'));
+const BibleBook = lazy(() => import('@/pages/Bible/BibleBook'));
+const BibleReader = lazy(() => import('@/pages/Bible/BibleReader'));
 
 // Content Pages
 const ContentHub = lazy(() => import('@/pages/Content/Hub'));
@@ -86,7 +88,9 @@ export default function App() {
                 <Route element={<PublicLayout />}>
                   <Route path={APP_ROUTES.HOME} element={<LandingPage />} />
                   <Route path={APP_ROUTES.ABOUT} element={<PublicContentPage slug="entenda" />} />
-                  <Route path={APP_ROUTES.BIBLE} element={<BibleView />} />
+                  <Route path="biblia" element={<BibleHome />} />
+                  <Route path="biblia/:bookId" element={<BibleBook />} />
+                  <Route path="biblia/:bookId/:chapterId" element={<BibleReader />} />
 
                   {FLAGS.FEATURE_PRAYER_REQUESTS_V1 ? (
                     <Route path={APP_ROUTES.PRAYER} element={<PrayerHub />} />
@@ -171,7 +175,9 @@ export default function App() {
                   <Route path="conteudos/mensagens/:id" element={<MessageDetail />} />
                   <Route path="conteudos/planos" element={<PlansList />} />
                   <Route path="conteudos/planos/:id" element={<PlanDetail />} />
-                  <Route path="biblia" element={<BibleView />} />
+                  <Route path="biblia" element={<BibleHome />} />
+                  <Route path="biblia/:bookId" element={<BibleBook />} />
+                  <Route path="biblia/:bookId/:chapterId" element={<BibleReader />} />
                   <Route path="bible" element={<Navigate to="biblia" replace />} />
 
                   <Route path="perfil" element={<Perfil />} />
