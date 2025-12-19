@@ -1,82 +1,51 @@
 
 import { supabase } from '@/lib/supabase';
 
+
+
 export const interactionService = {
     // --- Devotionals ---
 
-    // Toggle Reaction (Like/Amém)
+    // Toggle Reaction (Like/Amém) via RPC
     toggleDevotionalReaction: async (devotionalId: string, userId: string): Promise<{ reacted: boolean, count: number } | null> => {
         try {
-            // Check if exists
-            const { data: existing } = await supabase
-                .from('devotional_reactions')
-                .select('id')
-                .eq('devotional_id', devotionalId)
-                .eq('user_id', userId)
-                .single();
+            const { data, error } = await supabase.rpc('toggle_devotional_reaction', {
+                _devotional_id: devotionalId,
+                _user_id: userId
+            });
 
-            if (existing) {
-                // Remove (Unlike)
-                await supabase
-                    .from('devotional_reactions')
-                    .delete()
-                    .eq('id', existing.id);
-            } else {
-                // Add (Like)
-                await supabase
-                    .from('devotional_reactions')
-                    .insert({ devotional_id: devotionalId, user_id: userId });
-            }
-
-            // Get updated count
-            const { count } = await supabase
-                .from('devotional_reactions')
-                .select('*', { count: 'exact', head: true })
-                .eq('devotional_id', devotionalId);
-
-            return { reacted: !existing, count: count || 0 };
-
+            if (error) throw error;
+            return data as { reacted: boolean, count: number };
         } catch (error) {
             console.error('Error toggling reaction:', error);
             return null;
         }
     },
 
-    // Get Reaction State
-    getDevotionalReaction: async (devotionalId: string, userId?: string) => {
+    // Get Devotional Details (Likes + Views) via RPC
+    // Replaces getDevotionalReaction and getDevotionalReadsToday
+    getDevotionalDetails: async (devotionalId: string, userId?: string) => {
         try {
-            const { count } = await supabase
-                .from('devotional_reactions')
-                .select('*', { count: 'exact', head: true })
-                .eq('devotional_id', devotionalId);
+            const { data, error } = await supabase.rpc('get_devotional_details', {
+                _devotional_id: devotionalId,
+                _user_id: userId || null
+            });
 
-            let hasReacted = false;
-            if (userId) {
-                const { data } = await supabase
-                    .from('devotional_reactions')
-                    .select('id')
-                    .eq('devotional_id', devotionalId)
-                    .eq('user_id', userId)
-                    .single();
-                hasReacted = !!data;
-            }
-
-            return { count: count || 0, hasReacted };
+            if (error) throw error;
+            return data as { likes: number, has_liked: boolean, views_today: number };
         } catch (error) {
-            return { count: 0, hasReacted: false };
+            console.error('Error fetching details:', error);
+            return { likes: 0, has_liked: false, views_today: 0 };
         }
     },
 
-    // Log Read (View)
+    // Log Read (View) - Direct Insert (Public Policy)
     logDevotionalRead: async (devotionalId: string, userId?: string) => {
         try {
             const sessionId = localStorage.getItem('md_session_id') || crypto.randomUUID();
             if (!localStorage.getItem('md_session_id')) {
                 localStorage.setItem('md_session_id', sessionId);
             }
-
-            // Simple idempotency check for today (client-side optimization + server check ideally)
-            // We'll just insert, strict counting can be done in analysis query
 
             await supabase
                 .from('devotional_reads')
@@ -85,51 +54,46 @@ export const interactionService = {
                     user_id: userId || null,
                     session_id: sessionId
                 });
-
         } catch (error) {
+            // Ignore duplicate/error logs silently
             console.error('Error logging read:', error);
-        }
-    },
-
-    // Get Today's Read Count
-    getDevotionalReadsToday: async (devotionalId: string) => {
-        try {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const { count } = await supabase
-                .from('devotional_reads')
-                .select('*', { count: 'exact', head: true })
-                .eq('devotional_id', devotionalId)
-                .gte('created_at', today.toISOString());
-
-            return count || 0;
-        } catch (error) {
-            return 0;
         }
     },
 
     // --- Verses ---
 
-    toggleVerseReaction: async (verseRef: string, userId: string): Promise<boolean> => {
+    // Toggle Verse Reaction via RPC
+    toggleVerseReaction: async (book: string, chapter: number, verse: number, userId: string): Promise<{ reacted: boolean, count: number } | null> => {
         try {
-            const { data: existing } = await supabase
-                .from('verse_reactions')
-                .select('id')
-                .eq('verse_ref', verseRef)
-                .eq('user_id', userId)
-                .single();
+            const { data, error } = await supabase.rpc('toggle_verse_reaction', {
+                _book: book,
+                _chapter: chapter,
+                _verse: verse,
+                _user_id: userId
+            });
 
-            if (existing) {
-                await supabase.from('verse_reactions').delete().eq('id', existing.id);
-                return false;
-            } else {
-                await supabase.from('verse_reactions').insert({ verse_ref: verseRef, user_id: userId });
-                return true;
-            }
+            if (error) throw error;
+            return data as { reacted: boolean, count: number };
         } catch (error) {
             console.error('Verse reaction error:', error);
-            return false;
+            return null;
+        }
+    },
+
+    // Get Chapter Stats (Bulk Likes)
+    getChapterStats: async (book: string, chapter: number, userId?: string) => {
+        try {
+            const { data, error } = await supabase.rpc('get_chapter_stats', {
+                _book: book,
+                _chapter: chapter,
+                _user_id: userId || null
+            });
+
+            if (error) throw error;
+            return data as Array<{ verse: number, count: number, user_has_liked: boolean }>;
+        } catch (error) {
+            console.error('Chapter stats error:', error);
+            return [];
         }
     }
 };

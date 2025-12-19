@@ -5,7 +5,7 @@ import { Loader2, Volume2 } from 'lucide-react';
 import { bibleService, type BibleChapter, type BibleVerse } from '@/services/bible';
 import { BibleNavigation } from '@/components/Bible/BibleNavigation';
 import { VerseActionMenu } from '@/components/Bible/VerseActionMenu';
-import { VerseExplainModal } from '@/components/Bible/VerseExplainModal';
+import { VerseContextModal } from '@/components/Bible/VerseContextModal';
 import { BibleAudioPlayer } from '@/components/Bible/BibleAudioPlayer';
 import { BackLink } from '@/components/ui/BackLink';
 import { useBibleProgress } from '@/hooks/useBibleProgress';
@@ -31,13 +31,7 @@ export default function BibleReader() {
     const displayBookName = bookId ? bibleService.expandBookName(bookId) : '';
 
     const [explainModal, setExplainModal] = useState<{ isOpen: boolean; verse: BibleVerse | null }>({ isOpen: false, verse: null });
-    const [bookContext, setBookContext] = useState<any>(null); // Cache context
 
-    // Fetch context on book change
-    useEffect(() => {
-        if (!bookId) return;
-        bibleService.getBookContext(bookId).then(data => setBookContext(data));
-    }, [bookId]);
 
     const handleExplain = (verse: BibleVerse) => {
         setExplainModal({ isOpen: true, verse });
@@ -91,37 +85,75 @@ export default function BibleReader() {
 
     // Verse Likes
     const [likedVerses, setLikedVerses] = useState<Set<string>>(new Set());
+    const [verseCounts, setVerseCounts] = useState<Record<number, number>>({});
 
     // Load Likes functionality
     useEffect(() => {
-        // Since we don't have a bulk fetch for verses yet, and MVP is fine, 
-        // we might leave this empty or fetch for specific verses if needed.
-        // For now, let's just track locally for session or implement a bulk check if critical.
-        // Actually, let's just allow toggling. State persistence on reload requires fetching.
-        // TODO: Bulk fetch likes for this chapter
-    }, [bookId, currentChapter, user]);
+        if (!bookId || !currentChapter) return;
+
+        const fetchLikes = async () => {
+            const stats = await interactionService.getChapterStats(bookId, currentChapter, user?.id);
+
+            const newLiked = new Set<string>();
+            const newCounts: Record<number, number> = {};
+
+            stats.forEach(s => {
+                if (s.user_has_liked) {
+                    // Key format: "DisplayBook Chapter:Verse" (e.g. "João 3:16")
+                    newLiked.add(`${displayBookName} ${currentChapter}:${s.verse}`);
+                }
+                newCounts[s.verse] = s.count;
+            });
+
+            setLikedVerses(newLiked);
+            setVerseCounts(newCounts);
+        };
+
+        fetchLikes();
+    }, [bookId, currentChapter, user, displayBookName]);
 
     const handleLikeVerse = async (verse: BibleVerse) => {
         if (!user) return;
         const verseRef = `${displayBookName} ${currentChapter}:${verse.verse}`;
         const isLiked = likedVerses.has(verseRef);
 
-        // Optimistic
+        // Optimistic UI
         const newSet = new Set(likedVerses);
-        if (isLiked) newSet.delete(verseRef);
-        else newSet.add(verseRef);
-        setLikedVerses(newSet);
+        const newCounts = { ...verseCounts };
+        const currentCount = newCounts[verse.verse] || 0;
 
-        // API
-        const success = await interactionService.toggleVerseReaction(verseRef, user.id);
-        if (!success) {
-            // Revert
+        if (isLiked) {
+            newSet.delete(verseRef);
+            newCounts[verse.verse] = Math.max(0, currentCount - 1);
+        } else {
+            newSet.add(verseRef);
+            newCounts[verse.verse] = currentCount + 1;
+        }
+
+        setLikedVerses(newSet);
+        setVerseCounts(newCounts);
+
+        // API Call (using bookId slug)
+        const res = await interactionService.toggleVerseReaction(bookId!, currentChapter, verse.verse, user.id);
+
+        if (!res) {
+            // Revert on error
             setLikedVerses(prev => {
                 const revert = new Set(prev);
                 if (isLiked) revert.add(verseRef);
                 else revert.delete(verseRef);
                 return revert;
             });
+            setVerseCounts(prev => ({
+                ...prev,
+                [verse.verse]: currentCount
+            }));
+        } else {
+            // Update with accurate server count
+            setVerseCounts(prev => ({
+                ...prev,
+                [verse.verse]: res.count
+            }));
         }
     };
 
@@ -195,6 +227,7 @@ export default function BibleReader() {
                             onListen={() => handlePlayVerse(v)}
                             onLike={() => handleLikeVerse(v)}
                             isLiked={likedVerses.has(`${displayBookName} ${currentChapter}:${v.verse}`)}
+                            likeCount={verseCounts[v.verse]}
                         >
                             <span
                                 className={cn(
@@ -223,13 +256,12 @@ export default function BibleReader() {
             />
 
             {/* Explain Modal */}
-            <VerseExplainModal
+            <VerseContextModal
                 isOpen={explainModal.isOpen}
                 onClose={() => setExplainModal({ ...explainModal, isOpen: false })}
                 verseRef={`${displayBookName} ${currentChapter}:${explainModal.verse?.verse}`}
-                text={explainModal.verse?.text || ''}
-                bookData={bookContext}
-                isLoading={!bookContext}
+                passageText={explainModal.verse?.text || null}
+                verseBookId={bookId}
             />
 
             {/* Audio Player */}
