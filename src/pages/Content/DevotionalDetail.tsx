@@ -93,6 +93,8 @@ export default function DevotionalDetail() {
                     <img
                         src={item.cover_image_url || 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=1000&auto=format&fit=crop'}
                         alt={item.title}
+                        fetchPriority="high"
+                        loading="eager"
                         className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${!item.cover_image_url ? 'opacity-80 sepia-[0.3]' : ''}`}
                     />
 
@@ -159,10 +161,12 @@ export default function DevotionalDetail() {
                 {/* Main Content Container with Renderer */}
                 <div className="px-4 md:px-8 max-w-2xl mx-auto -mt-6 relative z-20">
                     <DevotionalContentRenderer
+                        id={item.id}
                         title={item.title}
                         subtitle={item.subtitle}
                         content={item.content_body || ''}
                         author={item.author}
+                        coverUrl={item.cover_image_url}
                     />
                 </div>
             </div>
