@@ -1,4 +1,4 @@
-import { MessageCircleHeart, Calendar, ChevronRight, Book, Users, LayoutGrid, Music, FileText, Youtube, Sparkles } from 'lucide-react';
+import { MessageCircleHeart, Calendar, ChevronRight, Book, Users, LayoutGrid, Music, FileText, Youtube, Sparkles, BookOpen, Megaphone, Share2, Lightbulb, UserPlus, Mic2, Music4, HeartHandshake, Handshake, ShoppingBag, Database, Home, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES, EXTERNAL_LINKS } from '@/lib/routes';
 import { analytics } from '@/lib/analytics';
@@ -30,84 +30,75 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
 
     if (!FLAGS.FEATURE_HOME_QUICK_ACTIONS) return null;
 
-    const actions = [
+    // Category Data Structure
+    const categories = [
         {
-            label: 'Estudos',
-            icon: FileText,
-            onClick: () => {
-                trackAction('estudos', APP_ROUTES.STUDIES);
-                navigate(APP_ROUTES.STUDIES);
-            },
-            color: 'text-blue-600',
-            bg: 'bg-blue-50'
+            id: 'palavra',
+            title: 'Palavra',
+            categoryIcon: Book,
+            categoryIconColor: 'text-blue-500',
+            items: [
+                { label: 'Estudo Bíblico', icon: FileText, route: APP_ROUTES.STUDIES, color: 'text-blue-600', bg: 'bg-blue-50' },
+                { label: 'Versículo do Dia', icon: Sparkles, route: APP_ROUTES.VERSE_POSTER, color: 'text-amber-600', bg: 'bg-amber-50' },
+                { label: 'Plano de Leitura', icon: Book, route: '/plans', color: 'text-indigo-600', bg: 'bg-indigo-50', comingSoon: true },
+            ]
         },
         {
-            label: 'Cards',
-            icon: Sparkles,
-            onClick: () => {
-                trackAction('verse_poster', APP_ROUTES.VERSE_POSTER);
-                navigate(APP_ROUTES.VERSE_POSTER);
-            },
-            color: 'text-amber-600',
-            bg: 'bg-amber-50'
+            id: 'crescimento',
+            title: 'Crescimento',
+            categoryIcon: TrendingUp,
+            categoryIconColor: 'text-emerald-500',
+            items: [
+                { label: 'Discipulado', icon: Users, route: '/discipleship', color: 'text-emerald-600', bg: 'bg-emerald-50', comingSoon: true },
+                { label: 'Grupo Célula', icon: Home, route: '/cells', color: 'text-orange-600', bg: 'bg-orange-50', comingSoon: true },
+            ]
         },
         {
-            label: 'Louvor',
-            icon: Youtube,
-            onClick: () => {
-                trackAction('louvor', '/coming-soon');
-                navigate('/coming-soon');
-                // Future: window.open('https://youtube.com/...', '_blank');
-            },
-            color: 'text-red-500',
-            bg: 'bg-red-50'
+            id: 'comunidade',
+            title: 'Comunidade',
+            categoryIcon: Users,
+            categoryIconColor: 'text-pink-500',
+            items: [
+                { label: 'Mural', icon: Megaphone, route: APP_ROUTES.MURAL, color: 'text-pink-600', bg: 'bg-pink-50' }, // Shortened from "Mural & Novidade"
+                { label: 'Testemunhos', icon: MessageCircleHeart, route: '/testimonies', color: 'text-cyan-600', bg: 'bg-cyan-50', comingSoon: true },
+                { label: 'Convidar', icon: Share2, route: '/invite', color: 'text-purple-600', bg: 'bg-purple-50', comingSoon: true }, // Shortened
+                { label: 'Ideias', icon: Lightbulb, route: '/feedback', color: 'text-yellow-600', bg: 'bg-yellow-50', comingSoon: true }, // Shortened
+            ]
         },
         {
-            label: 'Harpa',
-            icon: Music,
-            onClick: () => {
-                trackAction('harpa', '/coming-soon');
-                navigate('/coming-soon');
-            },
-            color: 'text-amber-600',
-            bg: 'bg-amber-50'
+            id: 'igreja',
+            title: 'Igreja',
+            categoryIcon: Home,
+            categoryIconColor: 'text-purple-500',
+            items: [
+                { label: 'Eventos', icon: Calendar, route: APP_ROUTES.AGENDA, color: 'text-red-500', bg: 'bg-red-50' },
+                { label: 'Visitas', icon: UserPlus, route: '/visits', color: 'text-teal-600', bg: 'bg-teal-50', comingSoon: true },
+            ]
         },
         {
-            label: 'Letras',
-            icon: FileText,
-            onClick: () => {
-                trackAction('letras', '/coming-soon');
-                navigate('/coming-soon');
-            },
-            color: 'text-slate-600',
-            bg: 'bg-slate-50'
+            id: 'louvor',
+            title: 'Louvor',
+            categoryIcon: Music,
+            categoryIconColor: 'text-red-500',
+            items: [
+                { label: 'Louvores', icon: Youtube, route: '/worship', color: 'text-red-600', bg: 'bg-red-50', comingSoon: true },
+                { label: 'Harpa', icon: Music, route: '/harpa', color: 'text-blue-600', bg: 'bg-blue-50', comingSoon: true },
+                { label: 'Letras', icon: Mic2, route: '/letras', color: 'text-slate-600', bg: 'bg-slate-50', comingSoon: true },
+                { label: 'Playbacks', icon: Music4, route: '/playbacks', color: 'text-purple-600', bg: 'bg-purple-50', comingSoon: true },
+            ]
         },
         {
-            label: 'Agenda',
-            icon: Calendar,
-            onClick: () => {
-                trackAction('agenda', APP_ROUTES.AGENDA);
-                navigate(APP_ROUTES.AGENDA);
-            },
-            color: 'text-purple-600',
-            bg: 'bg-purple-50'
-        },
-        {
-            label: 'WhatsApp',
-            icon: null,
-            isWhatsapp: true,
-            onClick: () => {
-                analytics.track({
-                    name: 'cta_click',
-                    element: 'quickaction_whatsapp',
-                    context: 'member',
-                    metadata: { type: 'external', destination: 'whatsapp' }
-                });
-                window.open(EXTERNAL_LINKS.SUPPORT_WHATSAPP, '_blank');
-            },
-            color: 'text-[#25D366]',
-            bg: 'bg-green-50'
-        },
+            id: 'apoio',
+            title: 'Apoio',
+            categoryIcon: HeartHandshake,
+            categoryIconColor: 'text-rose-500',
+            items: [
+                { label: 'DOE', icon: HeartHandshake, route: APP_ROUTES.DONATE, color: 'text-rose-600', bg: 'bg-rose-50' },
+                { label: 'Parceiro', icon: Handshake, route: '/parceiros', color: 'text-slate-700', bg: 'bg-slate-100', comingSoon: true },
+                { label: 'Store', icon: ShoppingBag, route: '/store', color: 'text-indigo-600', bg: 'bg-indigo-50', comingSoon: true }, // "eCommerce"
+                { label: 'ERP', icon: Database, route: '/erp', color: 'text-blue-800', bg: 'bg-blue-100', comingSoon: true }, // "MD Connect"
+            ]
+        }
     ];
 
     return (
@@ -120,15 +111,15 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             />
 
             {/* Primary Actions - Premium Highlights */}
-            <div className="flex flex-col gap-3 mb-6">
+            <div className="flex flex-col gap-3 mb-8">
                 <div className="grid grid-cols-2 gap-3">
                     <ProminentFeatureCard
                         title="Bíblia"
-                        subtitle="Leitura"
+                        subtitle="Sagrada"
                         icon={Book}
-                        gradient="from-slate-700 to-slate-900"
-                        iconBg="bg-white/20"
-                        compact={true}
+                        gradient="from-slate-800 to-slate-950" // Darker, more premium
+                        iconBg="bg-white/10"
+                        variant="vertical"
                         onClick={() => {
                             trackAction('biblia', APP_ROUTES.BIBLE);
                             navigate(APP_ROUTES.BIBLE);
@@ -138,10 +129,10 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                     <ProminentFeatureCard
                         title="Devocional"
                         subtitle="Diário"
-                        icon={Book} // Using Book as generic placeholder or BookOpen if available
-                        gradient="from-emerald-600 to-teal-600"
-                        iconBg="bg-white/20"
-                        compact={true}
+                        icon={BookOpen}
+                        gradient="from-emerald-600 to-teal-700"
+                        iconBg="bg-white/10"
+                        variant="vertical"
                         onClick={() => {
                             trackAction('devocional', '/devocionais/today');
                             navigate('/devocionais/today');
@@ -150,10 +141,10 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                 </div>
 
                 <ProminentFeatureCard
-                    title="Pedir Oração"
+                    title="Pedido de Oração"
                     subtitle="Fale com os pastores"
                     icon={MessageCircleHeart}
-                    gradient="from-blue-600 to-indigo-600"
+                    gradient="from-blue-600 to-indigo-700"
                     iconBg="bg-white/20"
                     onClick={() => {
                         analytics.track({
@@ -167,70 +158,114 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                 />
             </div>
 
-            {/* Secondary Actions Grid - Adaptive columns */}
-            <div className="grid grid-cols-4 gap-2 sm:gap-3">
-                {actions.map((action, idx) => (
-                    <SecondaryAction
-                        key={idx}
-                        icon={action.icon}
-                        label={action.label}
-                        onClick={action.onClick}
-                        color={action.color}
-                        bg={action.bg}
-                        isWhatsapp={action.isWhatsapp}
-                    />
+            {/* Categorized Menu - 2 Columns */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8">
+                {categories.map((category) => (
+                    <div key={category.id} className="flex flex-col h-full">
+                        {/* Premium Header Style */}
+                        <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2 mb-4">
+                            <category.categoryIcon className={`w-4 h-4 ${category.categoryIconColor}`} />
+                            {category.title}
+                        </h2>
+
+                        {/* 2-column grid for buttons */}
+                        <div className="grid grid-cols-2 gap-2">
+                            {category.items.map((item, idx) => (
+                                <CategoryItem
+                                    key={idx}
+                                    icon={item.icon}
+                                    label={item.label}
+                                    color={item.color}
+                                    bg={item.bg}
+                                    comingSoon={item.comingSoon}
+                                    onClick={() => {
+                                        if (item.comingSoon) {
+                                            const { toast } = require('sonner'); // Lazy load toast
+                                            toast.info("Em breve", {
+                                                description: "Esta funcionalidade estará disponível em breve."
+                                            });
+                                            return;
+                                        }
+                                        trackAction(item.label.toLowerCase(), item.route);
+                                        navigate(item.route);
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
                 ))}
             </div>
         </div>
     );
 }
 
-function ProminentFeatureCard({ title, subtitle, icon: Icon, gradient, iconBg, onClick, compact }: any) {
+function ProminentFeatureCard({ title, subtitle, icon: Icon, gradient, iconBg, onClick, variant = 'default' }: any) {
+    const isVertical = variant === 'vertical';
+
     return (
         <button
             onClick={onClick}
-            className={`w-full bg-gradient-to-r ${gradient} text-white ${compact ? 'p-3' : 'p-4'} rounded-2xl shadow-lg shadow-slate-900/5 flex items-center justify-center gap-3 relative overflow-hidden active:scale-[0.98] transition-all group`}
+            className={`w-full bg-gradient-to-br ${gradient} text-white rounded-3xl shadow-lg shadow-slate-900/5 relative overflow-hidden active:scale-[0.98] transition-all group ${isVertical ? 'p-5 h-[140px] flex flex-col justify-between items-start' : 'p-4 flex items-center justify-center gap-3'}`}
         >
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className={`flex items-center ${compact ? 'justify-start space-x-2' : 'space-x-3 justify-between'} z-10 w-full`}>
-                <div className={`flex items-center ${compact ? 'gap-2' : 'gap-3'} w-full`}>
-                    <div className={`${iconBg} ${compact ? 'p-2' : 'p-2.5'} rounded-full backdrop-blur-sm group-hover:bg-white/30 transition-colors shrink-0`}>
-                        <Icon className={`${compact ? 'w-5 h-5' : 'w-6 h-6'} text-white`} />
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            {isVertical ? (
+                // Vertical Layout (Big Tile)
+                <>
+                    <div className="w-full flex justify-between items-start z-10">
+                        <div className={`${iconBg} p-3 rounded-2xl backdrop-blur-md`}>
+                            <Icon className="w-7 h-7 text-white" />
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-white/50" />
                     </div>
-                    <div className="text-left min-w-0">
-                        <h3 className={`font-heading font-bold ${compact ? 'text-sm' : 'text-lg'} leading-tight mb-0.5 truncate`}>{title}</h3>
-                        <p className={`text-xs text-white/90 font-medium opacity-90 truncate ${compact ? 'max-w-[80px]' : ''}`}>{subtitle}</p>
+
+                    <div className="text-left z-10">
+                        <h3 className="font-heading font-bold text-xl leading-tight mb-0.5">{title}</h3>
+                        <p className="text-xs text-white/80 font-medium">{subtitle}</p>
                     </div>
-                </div>
-                {!compact && (
-                    <div className="bg-white/10 p-1.5 rounded-full z-10 shrink-0">
+                </>
+            ) : (
+                // Horizontal Layout (Banner)
+                <div className="flex items-center space-x-3 z-10 w-full justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className={`${iconBg} p-3 rounded-full backdrop-blur-md group-hover:bg-white/30 transition-colors`}>
+                            <Icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-left">
+                            <h3 className="font-heading font-bold text-lg leading-none mb-1">{title}</h3>
+                            <p className="text-xs text-white/90 font-medium opacity-90">{subtitle}</p>
+                        </div>
+                    </div>
+                    <div className="bg-white/10 p-2 rounded-full z-10">
                         <ChevronRight className="w-5 h-5 text-white/90" />
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Decoration */}
-            <div className={`absolute -right-6 -bottom-10 bg-white/10 h-28 w-28 rounded-full pointer-events-none blur-2xl ${compact ? 'opacity-50' : ''}`} />
+            <div className="absolute -right-6 -bottom-10 bg-white/10 h-32 w-32 rounded-full pointer-events-none blur-3xl opacity-60" />
         </button>
     );
 }
 
-function SecondaryAction({ icon: Icon, label, onClick, color, bg, isWhatsapp }: any) {
+function CategoryItem({ icon: Icon, label, onClick, color, bg, comingSoon }: any) {
     return (
         <button
             onClick={onClick}
-            className="flex flex-col items-center justify-start gap-2 group active:scale-95 transition-transform h-24" // Fixed height for alignment
+            className={`flex flex-col items-center justify-start gap-2 group active:scale-95 transition-transform ${comingSoon ? 'opacity-60 grayscale-[0.5]' : ''}`}
         >
-            <div className={`w-14 h-14 shrink-0 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center transition-colors ${bg} group-hover:brightness-95`}>
-                {isWhatsapp ? (
-                    <svg viewBox="0 0 24 24" fill="currentColor" className={`w-6 h-6 ${color}`}>
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                    </svg>
-                ) : (
-                    Icon && <Icon className={`w-6 h-6 ${color}`} />
+            <div className={`w-12 h-12 shrink-0 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center transition-all ${bg} group-hover:brightness-95 relative`}>
+                <Icon className={`w-5 h-5 ${color}`} />
+                {comingSoon && (
+                    <div className="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-slate-500"></span>
+                    </div>
                 )}
             </div>
-            <span className="font-bold text-[10px] text-slate-600 text-center leading-tight max-w-[4.5rem] line-clamp-2">{label}</span>
+            <span className="font-bold text-[10px] text-slate-600 text-center leading-tight max-w-[4rem] line-clamp-2 min-h-[2.5em] flex items-start justify-center">
+                {label}
+            </span>
         </button>
     );
 }
