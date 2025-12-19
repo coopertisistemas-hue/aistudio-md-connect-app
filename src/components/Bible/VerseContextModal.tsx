@@ -2,8 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { X, Sparkles, Book, Compass, Lightbulb, Scroll, User, Calendar, Target, BookOpen, Link as LinkIcon, ArrowRight, ExternalLink } from 'lucide-react';
-import { bibleService, type BibleCommentary } from '@/services/bible';
+import { bibleService, type BibleCommentary, type BibleVerse } from '@/services/bible';
 import { bibleBooksContext } from '@/data/bibleBooksContext';
+import { parseReferenceDetails } from '@/utils/bibleParser';
 
 // Helper Component for consistent section headers
 const SectionHeader = ({ icon: Icon, color, title }: { icon: React.ElementType, color: string, title: string }) => {
@@ -30,12 +31,13 @@ interface VerseContextModalProps {
     onClose: () => void;
     verseRef: string | null;
     passageText: string | null;
-    verseBookId?: string; // Optional bookId for better context fetching
-    chapter?: number; // New
-    verse?: number; // New
+    passageVerses?: { verse: number, text: string }[] | null; // New structured text
+    verseBookId?: string;
+    chapter?: number;
+    verse?: number;
 }
 
-export function VerseContextModal({ isOpen, onClose, verseRef, passageText, verseBookId, chapter, verse }: VerseContextModalProps) {
+export function VerseContextModal({ isOpen, onClose, verseRef, passageText, passageVerses, verseBookId, chapter, verse }: VerseContextModalProps) {
     const navigate = useNavigate();
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -53,45 +55,84 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
         return () => window.removeEventListener('keydown', handleEsc);
     }, [onClose]);
 
+    // Internal State for "Self-Service" fetching (when props are missing)
+    const [fetchedVerses, setFetchedVerses] = React.useState<BibleVerse[] | null>(null);
+    const [fetchedParams, setFetchedParams] = React.useState<{ bookId: string, chapter: number, verse: number } | null>(null);
+    const [isLoadingText, setIsLoadingText] = React.useState(false);
+
+    // 1. Resolve Reference to Params (if not provided)
+    useEffect(() => {
+        if (isOpen && verseRef && (!verseBookId || !chapter || !verse)) {
+            const details = parseReferenceDetails(verseRef);
+            if (details && details.isValid) {
+                const bookId = bibleService.getBookIdFromRaw(details.bookRaw);
+                if (bookId) {
+                    setFetchedParams({
+                        bookId,
+                        chapter: details.chapter,
+                        verse: details.verseStart
+                    });
+
+                    // Also fetch text if missing
+                    if (!passageText && !passageVerses) {
+                        setIsLoadingText(true);
+                        bibleService.getPassageText({
+                            book: details.bookRaw, // Use raw for search or ID? getPassageText handles raw well
+                            chapter: details.chapter,
+                            verseStart: details.verseStart,
+                            verseEnd: details.verseEnd
+                        }).then(verses => {
+                            setFetchedVerses(verses);
+                        }).finally(() => setIsLoadingText(false));
+                    }
+                }
+            }
+        } else {
+            // Reset if props change or close
+            // Optional: we might want to keep data to avoid flicker, but for now reset on new ref
+        }
+    }, [isOpen, verseRef, verseBookId, chapter, verse, passageText, passageVerses]);
+
+    // Determine final params
+    const activeBookId = verseBookId || fetchedParams?.bookId;
+    const activeChapter = chapter || fetchedParams?.chapter;
+    const activeVerse = verse || fetchedParams?.verse;
+
     // Lookup Static Book Context
     const bookContext = React.useMemo(() => {
-        if (!verseBookId) {
-            // Try to extract from verseRef "1Tm 3:16" -> "1tm"
-            if (!verseRef) return null;
-            const match = verseRef.match(/^((?:[123]\s*)?[a-zA-Z]+)/);
-            if (match) {
-                const key = match[1].toLowerCase().replace(/\s/g, ''); // "1 Tm" -> "1tm"
-                return bibleBooksContext[key] || null;
-            }
-            return null;
-        }
-        // Normalize passed ID "1tm", "genesis"
-        let key = verseBookId.toLowerCase();
-        if (key === 'gênesis') key = 'gn'; // basic norm
-        // ... (can add more norm logic or rely on service if needed)
+        if (!activeBookId) return null;
+        return bibleBooksContext[activeBookId.toLowerCase()] || bibleBooksContext['gn'] || null;
+    }, [activeBookId]);
 
-        return bibleBooksContext[key] || null;
-    }, [verseBookId, verseRef]);
-
-    // Data Fetching State
+    // Data Fetching State (Commentary)
     const [data, setData] = React.useState<BibleCommentary | null>(null);
     const [isLoadingContext, setIsLoadingContext] = React.useState(false);
 
     useEffect(() => {
-        if (isOpen && verseBookId && chapter && verse) {
+        if (isOpen && activeBookId && activeChapter && activeVerse) {
             setIsLoadingContext(true);
             setData(null);
 
-            bibleService.getVerseCommentary(verseBookId, chapter, verse, passageText || undefined)
+            // Use passed text OR fetched text for AI generation/fallback context
+            const contextText = passageText || (fetchedVerses ? fetchedVerses.map(v => v.text).join(' ') : undefined);
+
+            bibleService.getVerseCommentary(activeBookId, activeChapter, activeVerse, contextText)
                 .then(res => {
                     setData(res);
                 })
                 .catch(err => console.error(err))
                 .finally(() => setIsLoadingContext(false));
         }
-    }, [verseBookId, chapter, verse, isOpen]);
+    }, [activeBookId, activeChapter, activeVerse, isOpen, passageText, fetchedVerses]);
+
 
     if (!isOpen) return null;
+
+    // Logic for truncation
+    const MAX_VERSES = 12;
+    const finalVerses = passageVerses || fetchedVerses;
+    const isTruncated = finalVerses && finalVerses.length > MAX_VERSES;
+    const displayVerses = isTruncated ? finalVerses.slice(0, MAX_VERSES) : finalVerses;
 
     return createPortal(
         <div className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-16 pb-4 sm:items-center sm:p-4 animate-fade-in isolate">
@@ -123,7 +164,8 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
 
                         <h2 className="text-2xl font-serif font-bold mb-3">{verseRef}</h2>
 
-                        {passageText && (
+                        {/* Only show simple text here if NO complex verses are provided, keeping legacy behavior */}
+                        {passageText && !finalVerses && (
                             <div className="relative max-w-sm mx-auto">
                                 <p className="text-indigo-50/90 text-sm md:text-base leading-relaxed italic font-serif">
                                     "{passageText}"
@@ -136,6 +178,59 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
                 {/* Scrollable Content */}
                 <div ref={scrollRef} className="overflow-y-auto flex-1 bg-slate-50/50 scroll-smooth">
                     <div className="p-6 md:p-8 space-y-8 pb-32">
+
+                        {/* NEW: Explicit Text Section for Passages */}
+                        {((finalVerses && finalVerses.length > 0) || isLoadingText) && (
+                            <section className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                                <SectionHeader icon={BookOpen} color="indigo" title="Texto Bíblico" />
+                                {isLoadingText ? (
+                                    <div className="space-y-4 animate-pulse">
+                                        <div className="flex gap-2">
+                                            <div className="h-4 bg-slate-100 rounded w-6 shrink-0 mt-1"></div>
+                                            <div className="h-4 bg-slate-100 rounded w-full"></div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <div className="h-4 bg-slate-100 rounded w-6 shrink-0 mt-1"></div>
+                                            <div className="h-4 bg-slate-100 rounded w-5/6"></div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <div className="h-4 bg-slate-100 rounded w-6 shrink-0 mt-1"></div>
+                                            <div className="h-4 bg-slate-100 rounded w-4/5"></div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {displayVerses?.map((v, i) => (
+                                            <p key={i} className="text-slate-700 leading-relaxed font-serif text-[15px]">
+                                                <span className="text-[10px] font-bold text-indigo-400 bg-indigo-50 px-1.5 py-0.5 rounded mr-2 align-middle">
+                                                    {v.verse}
+                                                </span>
+                                                <span className="italic">{v.text}</span>
+                                            </p>
+                                        ))}
+                                        {isTruncated && (
+                                            <div className="pt-2 flex items-center gap-2 text-slate-400 text-xs font-medium italic">
+                                                <span>(continua...)</span>
+                                                <button
+                                                    onClick={() => {
+                                                        const bId = verseBookId || fetchedParams?.bookId;
+                                                        const ch = chapter || fetchedParams?.chapter;
+                                                        if (bId && ch) {
+                                                            navigate(`/biblia/${bId}/${ch}`);
+                                                            onClose();
+                                                        }
+                                                    }}
+                                                    className="text-indigo-500 hover:text-indigo-700 underline"
+                                                >
+                                                    Ler capítulo completo
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </section>
+                        )}
+
                         {/* 0. Static Book Context */}
                         {bookContext && (
                             <section className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
