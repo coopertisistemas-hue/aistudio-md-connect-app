@@ -1,58 +1,76 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MobileContainer } from '@/components/MobileContainer';
 import { DesktopOverlay } from '@/components/DesktopOverlay';
-import { Music, Book, FileText } from 'lucide-react';
+import { Music, Book, FileText, Loader2 } from 'lucide-react';
 import { ChurchLayout } from '@/layouts/ChurchLayout';
 import { PublicLayout } from '@/layouts/PublicLayout';
 // Auth Guards
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ChurchScopedRoute } from '@/components/auth/ChurchScopedRoute';
 import { APP_ROUTES } from '@/lib/routes'; // Central Source of Truth
-import { AnalyticsTracker } from '@/components/AnalyticsTracker'; // [NEW]
+import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import { FLAGS } from '@/lib/flags';
-
-import LandingPage from '@/pages/LandingPage'; // Now App Home
-import PublicContentPage from '@/pages/public/PublicContentPage'; // Generic Content Page
-import Home from '@/pages/Home';
-import { Perfil } from '@/pages/Placeholders';
-import BibleView from '@/pages/BibleView';
-// Content Pages
-import ContentHub from '@/pages/Content/Hub';
-import DevotionalsList from '@/pages/Content/DevotionalsList';
-import DevotionalDetail from '@/pages/Content/DevotionalDetail';
-import DevotionalList from '@/pages/Content/DevotionalList';
-import SeriesList from '@/pages/Content/SeriesList';
-import SeriesDetail from '@/pages/Content/SeriesDetail';
-import MessageDetail from '@/pages/Content/MessageDetail';
-import PlansList from '@/pages/Content/PlansList';
-import PlanDetail from '@/pages/Content/PlanDetail';
-import NoticeList from '@/pages/notices/NoticeList';
-import NoticeDetail from '@/pages/notices/NoticeDetail';
-import Agenda from '@/pages/events/Agenda';
-import EventDetail from '@/pages/events/EventDetail';
-import PrayerHub from '@/pages/requests/PrayerHub';
-// import RequestsHub from '@/pages/requests/RequestsHub'; // Deprecated?
-// import NewRequest from '@/pages/requests/NewRequest'; // Deprecated
-import PartnersList from '@/pages/Monetization/PartnersList';
-import ServicesList from '@/pages/Monetization/ServicesList';
-import ServiceDetail from '@/pages/Monetization/ServiceDetail';
-
-import Login from '@/pages/Login';
-import SelectChurch from '@/pages/onboarding/SelectChurch';
-import ProfileHub from '@/pages/profile/ProfileHub';
-import ProfileEditor from '@/pages/profile/ProfileEditor';
-import PrivacyCenter from '@/pages/profile/PrivacyCenter';
-import DonatePage from '@/pages/public/DonatePage';
-import PrayerRequestPage from '@/pages/public/PrayerRequestPage';
-import SchedulePage from '@/pages/public/SchedulePage';
-import RadioPage from '@/pages/public/RadioPage';
-import StudiesPage from '@/pages/Content/StudiesPage';
-
-import PartnersPage from '@/pages/public/PartnersPage';
-import PartnerLeadPage from '@/pages/public/PartnerLeadPage';
-import VersePosterPage from '@/pages/features/VersePosterPage';
-import ComingSoon from '@/pages/member/ComingSoonPage';
 import { AuthProvider } from '@/contexts/AuthContext';
+
+// Eager Load Critical Pages (Home/Landing) for LCP
+import LandingPage from '@/pages/LandingPage';
+import Home from '@/pages/Home';
+
+// Lazy Load Internal/Heavy Pages
+const PublicContentPage = lazy(() => import('@/pages/public/PublicContentPage'));
+const Perfil = lazy(() => import('@/pages/Placeholders').then(m => ({ default: m.Perfil })));
+const BibleView = lazy(() => import('@/pages/BibleView'));
+
+// Content Pages
+const ContentHub = lazy(() => import('@/pages/Content/Hub'));
+const DevotionalsList = lazy(() => import('@/pages/Content/DevotionalsList'));
+const DevotionalDetail = lazy(() => import('@/pages/Content/DevotionalDetail'));
+const DevotionalList = lazy(() => import('@/pages/Content/DevotionalList'));
+const SeriesList = lazy(() => import('@/pages/Content/SeriesList'));
+const SeriesDetail = lazy(() => import('@/pages/Content/SeriesDetail'));
+const MessageDetail = lazy(() => import('@/pages/Content/MessageDetail'));
+const PlansList = lazy(() => import('@/pages/Content/PlansList'));
+const PlanDetail = lazy(() => import('@/pages/Content/PlanDetail'));
+const StudiesPage = lazy(() => import('@/pages/Content/StudiesPage'));
+
+// Notices & Events
+const NoticeList = lazy(() => import('@/pages/notices/NoticeList'));
+const NoticeDetail = lazy(() => import('@/pages/notices/NoticeDetail'));
+const Agenda = lazy(() => import('@/pages/events/Agenda'));
+const EventDetail = lazy(() => import('@/pages/events/EventDetail'));
+
+// Requests/Prayer
+const PrayerHub = lazy(() => import('@/pages/requests/PrayerHub'));
+const PrayerRequestPage = lazy(() => import('@/pages/public/PrayerRequestPage'));
+
+// Monetization
+const PartnersList = lazy(() => import('@/pages/Monetization/PartnersList'));
+const ServicesList = lazy(() => import('@/pages/Monetization/ServicesList'));
+const ServiceDetail = lazy(() => import('@/pages/Monetization/ServiceDetail'));
+const PartnersPage = lazy(() => import('@/pages/public/PartnersPage'));
+const PartnerLeadPage = lazy(() => import('@/pages/public/PartnerLeadPage'));
+
+// Auth & Profile
+const Login = lazy(() => import('@/pages/Login'));
+const SelectChurch = lazy(() => import('@/pages/onboarding/SelectChurch'));
+const ProfileHub = lazy(() => import('@/pages/profile/ProfileHub'));
+const ProfileEditor = lazy(() => import('@/pages/profile/ProfileEditor'));
+const PrivacyCenter = lazy(() => import('@/pages/profile/PrivacyCenter'));
+
+// Public Misc
+const DonatePage = lazy(() => import('@/pages/public/DonatePage'));
+const SchedulePage = lazy(() => import('@/pages/public/SchedulePage'));
+const RadioPage = lazy(() => import('@/pages/public/RadioPage'));
+const VersePosterPage = lazy(() => import('@/pages/features/VersePosterPage'));
+const ComingSoon = lazy(() => import('@/pages/member/ComingSoonPage'));
+
+// Fallback Loading Component
+const PageLoader = () => (
+  <div className="h-screen flex items-center justify-center bg-gray-50">
+    <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+  </div>
+);
 
 export default function App() {
   return (
@@ -62,119 +80,121 @@ export default function App() {
         <MobileContainer>
           <BrowserRouter>
             <AnalyticsTracker />
-            <Routes>
-              {/* Public Routes (App Shell) */}
-              <Route element={<PublicLayout />}>
-                <Route path={APP_ROUTES.HOME} element={<LandingPage />} />
-                <Route path={APP_ROUTES.ABOUT} element={<PublicContentPage slug="entenda" />} />
-                <Route path={APP_ROUTES.BIBLE} element={<BibleView />} />
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* Public Routes (App Shell) */}
+                <Route element={<PublicLayout />}>
+                  <Route path={APP_ROUTES.HOME} element={<LandingPage />} />
+                  <Route path={APP_ROUTES.ABOUT} element={<PublicContentPage slug="entenda" />} />
+                  <Route path={APP_ROUTES.BIBLE} element={<BibleView />} />
 
-                {FLAGS.FEATURE_PRAYER_REQUESTS_V1 ? (
-                  <Route path={APP_ROUTES.PRAYER} element={<PrayerHub />} />
-                ) : (
-                  <Route path={APP_ROUTES.PRAYER} element={<PrayerRequestPage />} />
-                )}
+                  {FLAGS.FEATURE_PRAYER_REQUESTS_V1 ? (
+                    <Route path={APP_ROUTES.PRAYER} element={<PrayerHub />} />
+                  ) : (
+                    <Route path={APP_ROUTES.PRAYER} element={<PrayerRequestPage />} />
+                  )}
 
-                <Route path={APP_ROUTES.AGENDA} element={<SchedulePage />} />
-                <Route path={APP_ROUTES.RADIO} element={<RadioPage />} />
-                <Route path={APP_ROUTES.DONATE} element={<DonatePage />} />
-                <Route path={APP_ROUTES.TRANSPARENCY} element={<PublicContentPage slug="transparencia" />} />
-                <Route path={APP_ROUTES.PRIVACY} element={<PublicContentPage slug="privacidade" />} />
-                <Route path={APP_ROUTES.TERMS} element={<PublicContentPage slug="termos" />} />
-                <Route path={APP_ROUTES.HELP} element={<PublicContentPage slug="ajuda" />} />
-                <Route path={APP_ROUTES.PARTNERS} element={<PartnersPage />} />
-                <Route path={APP_ROUTES.PARTNER_JOIN} element={<PartnerLeadPage />} />
-                <Route path={APP_ROUTES.MURAL} element={<NoticeList />} />
-                <Route path={APP_ROUTES.STUDIES} element={<StudiesPage />} />
-                <Route path={APP_ROUTES.WORSHIP} element={<ComingSoon title="Louvor" description="Playlists e recursos musicais em breve." icon={Music} />} />
-                <Route path={APP_ROUTES.HARP} element={<ComingSoon title="Harpa Cristã" description="Hinos e cifras para adoração em breve." icon={Book} />} />
-                <Route path={APP_ROUTES.LYRICS} element={<ComingSoon title="Letras" description="Acervo de letras para louvor em breve." icon={FileText} />} />
-                <Route path={APP_ROUTES.VERSE_POSTER} element={<VersePosterPage />} />
+                  <Route path={APP_ROUTES.AGENDA} element={<SchedulePage />} />
+                  <Route path={APP_ROUTES.RADIO} element={<RadioPage />} />
+                  <Route path={APP_ROUTES.DONATE} element={<DonatePage />} />
+                  <Route path={APP_ROUTES.TRANSPARENCY} element={<PublicContentPage slug="transparencia" />} />
+                  <Route path={APP_ROUTES.PRIVACY} element={<PublicContentPage slug="privacidade" />} />
+                  <Route path={APP_ROUTES.TERMS} element={<PublicContentPage slug="termos" />} />
+                  <Route path={APP_ROUTES.HELP} element={<PublicContentPage slug="ajuda" />} />
+                  <Route path={APP_ROUTES.PARTNERS} element={<PartnersPage />} />
+                  <Route path={APP_ROUTES.PARTNER_JOIN} element={<PartnerLeadPage />} />
+                  <Route path={APP_ROUTES.MURAL} element={<NoticeList />} />
+                  <Route path={APP_ROUTES.STUDIES} element={<StudiesPage />} />
+                  <Route path={APP_ROUTES.WORSHIP} element={<ComingSoon title="Louvor" description="Playlists e recursos musicais em breve." icon={Music} />} />
+                  <Route path={APP_ROUTES.HARP} element={<ComingSoon title="Harpa Cristã" description="Hinos e cifras para adoração em breve." icon={Book} />} />
+                  <Route path={APP_ROUTES.LYRICS} element={<ComingSoon title="Letras" description="Acervo de letras para louvor em breve." icon={FileText} />} />
+                  <Route path={APP_ROUTES.VERSE_POSTER} element={<VersePosterPage />} />
 
-                {FLAGS.FEATURE_DEVOTIONAL_V1 && (
-                  <>
-                    <Route path="/devocionais" element={<DevotionalList />} />
-                    <Route path="/devocionais/:id" element={<DevotionalDetail />} />
-                  </>
-                )}
+                  {FLAGS.FEATURE_DEVOTIONAL_V1 && (
+                    <>
+                      <Route path="/devocionais" element={<DevotionalList />} />
+                      <Route path="/devocionais/:id" element={<DevotionalDetail />} />
+                    </>
+                  )}
 
-                <Route path="/coming-soon" element={<ComingSoon />} />
-              </Route>
+                  <Route path="/coming-soon" element={<ComingSoon />} />
+                </Route>
 
-              {/* Redirects */}
-              {/* Redirects */}
-              <Route path="/" element={<Navigate to={APP_ROUTES.HOME} replace />} />
-              <Route path="/index.html" element={<Navigate to={APP_ROUTES.HOME} replace />} />
-              <Route path="/landing" element={<Navigate to={APP_ROUTES.HOME} replace />} />
+                {/* Redirects */}
+                {/* Redirects */}
+                <Route path="/" element={<Navigate to={APP_ROUTES.HOME} replace />} />
+                <Route path="/index.html" element={<Navigate to={APP_ROUTES.HOME} replace />} />
+                <Route path="/landing" element={<Navigate to={APP_ROUTES.HOME} replace />} />
 
-              {/* Legacy Redirects for Standard */}
-              <Route path="/requests" element={<Navigate to={APP_ROUTES.PRAYER} replace />} />
-              <Route path="/notices" element={<Navigate to={APP_ROUTES.MURAL} replace />} />
-              <Route path="/news" element={<Navigate to={APP_ROUTES.MURAL} replace />} />
+                {/* Legacy Redirects for Standard */}
+                <Route path="/requests" element={<Navigate to={APP_ROUTES.PRAYER} replace />} />
+                <Route path="/notices" element={<Navigate to={APP_ROUTES.MURAL} replace />} />
+                <Route path="/news" element={<Navigate to={APP_ROUTES.MURAL} replace />} />
 
-              {/* Auth Routes */}
-              <Route path={APP_ROUTES.LOGIN} element={<Login />} />
+                {/* Auth Routes */}
+                <Route path={APP_ROUTES.LOGIN} element={<Login />} />
 
-              {/* ... (rest of routes) ... */}
+                {/* ... (rest of routes) ... */}
 
 
-              {/* Onboarding - Protected but not Scoped */}
-              <Route path="/onboarding/select-church" element={
-                <ProtectedRoute>
-                  <SelectChurch />
-                </ProtectedRoute>
-              } />
+                {/* Onboarding - Protected but not Scoped */}
+                <Route path="/onboarding/select-church" element={
+                  <ProtectedRoute>
+                    <SelectChurch />
+                  </ProtectedRoute>
+                } />
 
-              {/* Church Context Routes (Protected & Scoped) */}
-              <Route path="/c/:slug" element={
-                <ProtectedRoute>
-                  <ChurchScopedRoute>
-                    <ChurchLayout />
-                  </ChurchScopedRoute>
-                </ProtectedRoute>
-              }>
-                <Route index element={<Home />} />
-                <Route path="agenda" element={<Agenda />} />
-                <Route path="events" element={<Agenda />} />
-                <Route path="events/:id" element={<EventDetail />} />
+                {/* Church Context Routes (Protected & Scoped) */}
+                <Route path="/c/:slug" element={
+                  <ProtectedRoute>
+                    <ChurchScopedRoute>
+                      <ChurchLayout />
+                    </ChurchScopedRoute>
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Home />} />
+                  <Route path="agenda" element={<Agenda />} />
+                  <Route path="events" element={<Agenda />} />
+                  <Route path="events/:id" element={<EventDetail />} />
 
-                {/* Requests */}
-                <Route path="pedidos" element={<PrayerHub />} />
-                <Route path="requests" element={<PrayerHub />} />
-                <Route path="requests/new" element={<PrayerHub />} />
+                  {/* Requests */}
+                  <Route path="pedidos" element={<PrayerHub />} />
+                  <Route path="requests" element={<PrayerHub />} />
+                  <Route path="requests/new" element={<PrayerHub />} />
 
-                {/* Content Module */}
-                <Route path="conteudos" element={<ContentHub />} />
-                <Route path="conteudos/devocionais" element={<DevotionalsList />} />
-                <Route path="conteudos/devocionais/:id" element={<DevotionalDetail />} />
-                <Route path="conteudos/series" element={<SeriesList />} />
-                <Route path="conteudos/series/:id" element={<SeriesDetail />} />
-                <Route path="conteudos/mensagens/:id" element={<MessageDetail />} />
-                <Route path="conteudos/planos" element={<PlansList />} />
-                <Route path="conteudos/planos/:id" element={<PlanDetail />} />
-                <Route path="biblia" element={<BibleView />} />
-                <Route path="bible" element={<Navigate to="biblia" replace />} />
+                  {/* Content Module */}
+                  <Route path="conteudos" element={<ContentHub />} />
+                  <Route path="conteudos/devocionais" element={<DevotionalsList />} />
+                  <Route path="conteudos/devocionais/:id" element={<DevotionalDetail />} />
+                  <Route path="conteudos/series" element={<SeriesList />} />
+                  <Route path="conteudos/series/:id" element={<SeriesDetail />} />
+                  <Route path="conteudos/mensagens/:id" element={<MessageDetail />} />
+                  <Route path="conteudos/planos" element={<PlansList />} />
+                  <Route path="conteudos/planos/:id" element={<PlanDetail />} />
+                  <Route path="biblia" element={<BibleView />} />
+                  <Route path="bible" element={<Navigate to="biblia" replace />} />
 
-                <Route path="perfil" element={<Perfil />} />
-                <Route path="notices" element={<NoticeList />} />
-                <Route path="notices/:id" element={<NoticeDetail />} />
+                  <Route path="perfil" element={<Perfil />} />
+                  <Route path="notices" element={<NoticeList />} />
+                  <Route path="notices/:id" element={<NoticeDetail />} />
 
-                {/* Monetization */}
-                <Route path="partners" element={<PartnersList />} />
-                <Route path="services" element={<ServicesList />} />
-                <Route path="services/:id" element={<ServiceDetail />} />
+                  {/* Monetization */}
+                  <Route path="partners" element={<PartnersList />} />
+                  <Route path="services" element={<ServicesList />} />
+                  <Route path="services/:id" element={<ServiceDetail />} />
 
-                {/* Profile */}
-                <Route path="profile" element={<ProfileHub />} />
-                <Route path="profile/edit" element={<ProfileEditor />} />
-                <Route path="profile/privacy" element={<PrivacyCenter />} />
-              </Route>
+                  {/* Profile */}
+                  <Route path="profile" element={<ProfileHub />} />
+                  <Route path="profile/edit" element={<ProfileEditor />} />
+                  <Route path="profile/privacy" element={<PrivacyCenter />} />
+                </Route>
 
-              {/* Protected Routes Fallback */}
+                {/* Protected Routes Fallback */}
 
-              {/* Fallback */}
-              <Route path="*" element={<div className="h-screen flex items-center justify-center text-slate-500">Página não encontrada (404)</div>} />
-            </Routes>
+                {/* Fallback */}
+                <Route path="*" element={<div className="h-screen flex items-center justify-center text-slate-500">Página não encontrada (404)</div>} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </MobileContainer>
       </div>

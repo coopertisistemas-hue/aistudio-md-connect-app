@@ -94,6 +94,12 @@ export function DevotionalAudioPlayer({ text, title, variant = 'sticky-bottom' }
         };
 
         utterance.onerror = (e) => {
+            // "interrupted" or "canceled" are expected when we manually stop/pause
+            if (e.error === 'interrupted' || e.error === 'canceled') {
+                setIsPlaying(false);
+                setIsPaused(false);
+                return;
+            }
             console.error("Speech Error:", e);
             setIsPlaying(false);
             setIsPaused(false);

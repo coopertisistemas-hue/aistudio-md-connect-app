@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/share/devocional/:id",
+            "destination": "/api/og-devotional?id=:id"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
+}

@@ -3,16 +3,19 @@ import { Quote, BookOpen, Sparkles } from 'lucide-react';
 import { parseBibleRefs } from '@/utils/bibleParser';
 import { VerseContextModal } from '@/components/Bible/VerseContextModal';
 import { DevotionalAudioPlayer } from './DevotionalAudioPlayer';
+import { DevotionalShareButton } from './DevotionalShareButton';
 import { bibleService } from '@/services/bible';
 
 interface DevotionalContentRendererProps {
+    id: string; // [NEW] Required for sharing
     title: string;
     subtitle?: string;
     content: string;
     author?: { name: string; avatar_url: string | null } | null;
+    coverUrl?: string | null; // [NEW] For image sharing
 }
 
-export function DevotionalContentRenderer({ title, subtitle, content, author }: DevotionalContentRendererProps) {
+export function DevotionalContentRenderer({ id, title, subtitle, content, author, coverUrl }: DevotionalContentRendererProps) {
     const [modalState, setModalState] = useState<{ isOpen: boolean; ref: string | null; text: string | null; isLoading: boolean }>({
         isOpen: false,
         ref: null,
@@ -171,8 +174,17 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
 
     return (
         <div className="space-y-8 animate-fade-in relative z-20">
-            {/* Header / Audio Player */}
-            <div className="flex justify-end -mb-4">
+            {/* Header Controls: Share & Audio */}
+            <div className="flex justify-between items-end -mb-4 gap-4">
+                <div className="mb-1">
+                    <DevotionalShareButton
+                        id={id}
+                        title={title}
+                        subtitle={subtitle}
+                        verseKey={parsedContent?.verseKey}
+                        coverUrl={coverUrl}
+                    />
+                </div>
                 <DevotionalAudioPlayer
                     title={title}
                     text={fullAudioText}
