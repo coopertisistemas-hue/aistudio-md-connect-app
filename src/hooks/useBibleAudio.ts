@@ -65,7 +65,7 @@ export function useBibleAudio({ onEnd }: UseBibleAudioProps = {}) {
 
         utteranceRef.current = utterance;
         synth.speak(utterance);
-        setCurrentText(text);
+
     }, [synth, onEnd]);
 
     const pause = useCallback(() => {
