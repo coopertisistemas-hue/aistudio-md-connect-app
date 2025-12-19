@@ -1,5 +1,5 @@
 
-import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface BibleNavigationProps {

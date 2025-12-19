@@ -9,8 +9,6 @@ interface UseBibleAudioProps {
 
 export function useBibleAudio({ onEnd }: UseBibleAudioProps = {}) {
     const [state, setState] = useState<AudioState>('idle');
-    const [currentText, setCurrentText] = useState<string>('');
-    const [progress, setProgress] = useState(0); // 0 to 1 ideally, but speech api is tricky with exact progress
 
     const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
     const synth = window.speechSynthesis;
