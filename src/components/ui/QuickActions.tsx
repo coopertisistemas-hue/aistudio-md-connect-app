@@ -32,26 +32,6 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
 
     const actions = [
         {
-            label: 'Bíblia',
-            icon: Book,
-            onClick: () => {
-                trackAction('biblia', APP_ROUTES.BIBLE);
-                navigate(APP_ROUTES.BIBLE);
-            },
-            color: 'text-indigo-600',
-            bg: 'bg-indigo-50'
-        },
-        {
-            label: 'Devocional',
-            icon: Users, // Using Users as generic "community/devotional" icon if needed, or maybe BookOpen
-            onClick: () => {
-                trackAction('devocional', '/devocionais/today');
-                navigate('/devocionais/today');
-            },
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50'
-        },
-        {
             label: 'Estudos',
             icon: FileText,
             onClick: () => {
@@ -139,39 +119,53 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                 iconColor="text-blue-500"
             />
 
+            {/* Primary Actions - Premium Highlights */}
+            <div className="flex flex-col gap-3 mb-6">
+                <div className="grid grid-cols-2 gap-3">
+                    <ProminentFeatureCard
+                        title="Bíblia"
+                        subtitle="Leitura"
+                        icon={Book}
+                        gradient="from-slate-700 to-slate-900"
+                        iconBg="bg-white/20"
+                        compact={true}
+                        onClick={() => {
+                            trackAction('biblia', APP_ROUTES.BIBLE);
+                            navigate(APP_ROUTES.BIBLE);
+                        }}
+                    />
 
-            {/* Primary CTA: Prayer Request (Maintained Large) */}
-            <button
-                onClick={() => {
-                    analytics.track({
-                        name: 'feature_usage',
-                        element: 'quickaction_prayer_cta',
-                        context: 'member',
-                        route_to: APP_ROUTES.PRAYER
-                    });
-                    navigate(APP_ROUTES.PRAYER);
-                }}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-2xl shadow-lg shadow-blue-900/10 mb-4 flex items-center justify-center gap-3 relative overflow-hidden active:scale-[0.98] transition-all group"
-            >
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="flex items-center space-x-3 z-10 w-full justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-white/20 p-2.5 rounded-full backdrop-blur-sm group-hover:bg-white/30 transition-colors">
-                            <MessageCircleHeart className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="text-left">
-                            <h3 className="font-heading font-bold text-lg leading-none mb-1">Pedir Oração</h3>
-                            <p className="text-xs text-blue-100 font-medium opacity-90">Fale com os pastores</p>
-                        </div>
-                    </div>
-                    <div className="bg-white/10 p-1.5 rounded-full z-10">
-                        <ChevronRight className="w-5 h-5 text-white/90" />
-                    </div>
+                    <ProminentFeatureCard
+                        title="Devocional"
+                        subtitle="Diário"
+                        icon={Book} // Using Book as generic placeholder or BookOpen if available
+                        gradient="from-emerald-600 to-teal-600"
+                        iconBg="bg-white/20"
+                        compact={true}
+                        onClick={() => {
+                            trackAction('devocional', '/devocionais/today');
+                            navigate('/devocionais/today');
+                        }}
+                    />
                 </div>
 
-                {/* Decoration */}
-                <div className="absolute -right-6 -bottom-10 bg-white/10 h-28 w-28 rounded-full pointer-events-none blur-2xl" />
-            </button>
+                <ProminentFeatureCard
+                    title="Pedir Oração"
+                    subtitle="Fale com os pastores"
+                    icon={MessageCircleHeart}
+                    gradient="from-blue-600 to-indigo-600"
+                    iconBg="bg-white/20"
+                    onClick={() => {
+                        analytics.track({
+                            name: 'feature_usage',
+                            element: 'quickaction_prayer_cta',
+                            context: 'member',
+                            route_to: APP_ROUTES.PRAYER
+                        });
+                        navigate(APP_ROUTES.PRAYER);
+                    }}
+                />
+            </div>
 
             {/* Secondary Actions Grid - Adaptive columns */}
             <div className="grid grid-cols-4 gap-2 sm:gap-3">
@@ -188,6 +182,36 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                 ))}
             </div>
         </div>
+    );
+}
+
+function ProminentFeatureCard({ title, subtitle, icon: Icon, gradient, iconBg, onClick, compact }: any) {
+    return (
+        <button
+            onClick={onClick}
+            className={`w-full bg-gradient-to-r ${gradient} text-white ${compact ? 'p-3' : 'p-4'} rounded-2xl shadow-lg shadow-slate-900/5 flex items-center justify-center gap-3 relative overflow-hidden active:scale-[0.98] transition-all group`}
+        >
+            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className={`flex items-center ${compact ? 'justify-start space-x-2' : 'space-x-3 justify-between'} z-10 w-full`}>
+                <div className={`flex items-center ${compact ? 'gap-2' : 'gap-3'} w-full`}>
+                    <div className={`${iconBg} ${compact ? 'p-2' : 'p-2.5'} rounded-full backdrop-blur-sm group-hover:bg-white/30 transition-colors shrink-0`}>
+                        <Icon className={`${compact ? 'w-5 h-5' : 'w-6 h-6'} text-white`} />
+                    </div>
+                    <div className="text-left min-w-0">
+                        <h3 className={`font-heading font-bold ${compact ? 'text-sm' : 'text-lg'} leading-tight mb-0.5 truncate`}>{title}</h3>
+                        <p className={`text-xs text-white/90 font-medium opacity-90 truncate ${compact ? 'max-w-[80px]' : ''}`}>{subtitle}</p>
+                    </div>
+                </div>
+                {!compact && (
+                    <div className="bg-white/10 p-1.5 rounded-full z-10 shrink-0">
+                        <ChevronRight className="w-5 h-5 text-white/90" />
+                    </div>
+                )}
+            </div>
+
+            {/* Decoration */}
+            <div className={`absolute -right-6 -bottom-10 bg-white/10 h-28 w-28 rounded-full pointer-events-none blur-2xl ${compact ? 'opacity-50' : ''}`} />
+        </button>
     );
 }
 
