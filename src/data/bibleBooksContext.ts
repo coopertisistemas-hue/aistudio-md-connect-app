@@ -108,6 +108,51 @@ export const bibleBooksContext: Record<string, BookContext> = {
         date: 'Vários períodos (aprox. 1000 anos).',
         purpose: 'Expressar louvor, lamento, gratidão e confiança em Deus.',
         themes: ['Adoração', 'Confiança', 'Messias', 'Lei de Deus']
+    },
+    '1jo': {
+        id: '1jo',
+        name: '1 João',
+        author: 'João, o apóstolo.',
+        audience: 'Igrejas na Ásia Menor.',
+        date: 'Aprox. 90-95 d.C.',
+        purpose: 'Garantir aos crentes a certeza da salvação e refutar o gnosticismo.',
+        themes: ['Comunhão', 'Amor', 'Verdade', 'Certeza']
+    },
+    '2jo': {
+        id: '2jo',
+        name: '2 João',
+        author: 'João, o apóstolo.',
+        audience: 'À "senhora eleita" e seus filhos.',
+        date: 'Aprox. 90-95 d.C.',
+        purpose: 'Alertar contra falsos mestres e encorajar o amor na verdade.',
+        themes: ['Verdade', 'Amor', 'Falsos Mestres']
+    },
+    '3jo': {
+        id: '3jo',
+        name: '3 João',
+        author: 'João, o apóstolo.',
+        audience: 'Gaio.',
+        date: 'Aprox. 90-95 d.C.',
+        purpose: 'Elogiar a hospitalidade de Gaio e advertir contra Diótrefes.',
+        themes: ['Hospitalidade', 'Verdade', 'Liderança']
+    },
+    'jd': {
+        id: 'jd',
+        name: 'Judas',
+        author: 'Judas, irmão de Tiago (e meio-irmão de Jesus).',
+        audience: 'Cristãos ameaçados por falsos mestres.',
+        date: 'Aprox. 65 d.C.',
+        purpose: 'Exortar a batalhar pela fé entregue aos santos.',
+        themes: ['Apostasia', 'Juízo', 'Perseverança']
+    },
+    'ap': {
+        id: 'ap',
+        name: 'Apocalipse',
+        author: 'João, o apóstolo.',
+        audience: 'As sete igrejas da Ásia.',
+        date: 'Aprox. 95 d.C.',
+        purpose: 'Revelar a vitória final de Cristo sobre o mal e encorajar a igreja perseguida.',
+        themes: ['Soberania', 'Fim dos Tempos', 'Vitória do Cordeiro', 'Nova Jerusalém']
     }
     // Add others as needed
 };
