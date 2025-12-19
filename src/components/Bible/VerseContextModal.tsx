@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-
+import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { X, Sparkles, Book, Compass, Lightbulb, Scroll, User, Calendar, Target, BookOpen, Link as LinkIcon, ArrowRight, ExternalLink } from 'lucide-react';
 import { bibleService, type BibleCommentary } from '@/services/bible';
@@ -37,6 +37,14 @@ interface VerseContextModalProps {
 
 export function VerseContextModal({ isOpen, onClose, verseRef, passageText, verseBookId, chapter, verse }: VerseContextModalProps) {
     const navigate = useNavigate();
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    // Reset scroll when opened
+    useEffect(() => {
+        if (isOpen && scrollRef.current) {
+            scrollRef.current.scrollTo(0, 0);
+        }
+    }, [isOpen]);
 
     // Close on escape
     useEffect(() => {
@@ -85,13 +93,13 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
+    return createPortal(
+        <div className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-16 pb-4 sm:items-center sm:p-4 animate-fade-in isolate">
             {/* Backdrop */}
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onClick={onClose} />
 
             {/* Modal Card */}
-            <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
+            <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200 ring-1 ring-white/20 z-10">
 
                 {/* Header */}
                 <div className="relative px-6 py-6 md:px-8 bg-gradient-to-br from-indigo-600 to-violet-700 text-white shrink-0 overflow-hidden">
@@ -126,9 +134,8 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
                 </div>
 
                 {/* Scrollable Content */}
-                <div className="overflow-y-auto flex-1 bg-slate-50/50">
-                    <div className="p-6 md:p-8 space-y-8 pb-32"> {/* Added padding bottom for sticky footer overlap safety if needed, though structure separates it */}
-
+                <div ref={scrollRef} className="overflow-y-auto flex-1 bg-slate-50/50 scroll-smooth">
+                    <div className="p-6 md:p-8 space-y-8 pb-32">
                         {/* 0. Static Book Context */}
                         {bookContext && (
                             <section className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
@@ -283,6 +290,7 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpen, Search, Bookmark, ChevronRight } from 'lucide-react';
 import { PageIntro } from '@/components/layout/PageIntro';
 import { BookList } from '@/components/Bible/BookList';
-import { OLD_TESTAMENT, NEW_TESTAMENT, bibleService } from '@/services/bible';
+import { bibleService } from '@/services/bible';
 import { useBibleProgress } from '@/hooks/useBibleProgress';
 import { Input } from '@/components/ui/input';
+import { BIBLE_CATEGORIES, getAllBooksFlat, type BibleCategory } from '@/data/bibleCategories';
 
 export default function BibleHome() {
     const navigate = useNavigate();
@@ -15,21 +16,15 @@ export default function BibleHome() {
     const [activeTab, setActiveTab] = useState<'OT' | 'NT'>('OT');
 
     // Filter Logic
-    const filterBooks = (list: string[]) => {
-        if (!searchTerm) return list;
-        return list.filter(b => {
-            const ptName = bibleService.expandBookName(b);
-            return b.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                ptName.toLowerCase().includes(searchTerm.toLowerCase());
-        });
-    };
+    const allBooks = getAllBooksFlat();
+    const filteredResults = searchTerm
+        ? allBooks.filter(b =>
+            b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            b.key.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        : [];
 
-    const filteredOT = filterBooks(OLD_TESTAMENT);
-    const filteredNT = filterBooks(NEW_TESTAMENT);
-
-    // Auto-switch tab if search only matches one side
-    if (searchTerm && filteredOT.length === 0 && filteredNT.length > 0 && activeTab === 'OT') setActiveTab('NT');
-    if (searchTerm && filteredNT.length === 0 && filteredOT.length > 0 && activeTab === 'NT') setActiveTab('OT');
+    const currentTestamentData = BIBLE_CATEGORIES[activeTab];
 
     return (
         <div className="min-h-screen bg-slate-50 pb-24">
@@ -76,42 +71,58 @@ export default function BibleHome() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <Input
                         placeholder="Buscar livro..."
-                        className="pl-10 h-12 bg-white border-slate-200 text-base"
+                        className="pl-10 h-12 bg-white border-slate-200 text-base rounded-xl focus:ring-indigo-500 focus:border-indigo-500"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
 
-                {/* Tabs */}
-                <div className="mt-6 flex bg-slate-200/50 p-1 rounded-xl">
-                    <button
-                        onClick={() => setActiveTab('OT')}
-                        className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${activeTab === 'OT' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                    >
-                        Antigo Testamento
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('NT')}
-                        className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${activeTab === 'NT' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                    >
-                        Novo Testamento
-                    </button>
-                </div>
-
-                {/* List */}
-                <div className="mt-6 animate-in slide-in-from-bottom-4 duration-500">
-                    {activeTab === 'OT' ? (
-                        filteredOT.length > 0 ? (
-                            <BookList books={filteredOT} onSelect={(b) => navigate(`/biblia/${b}`)} />
-                        ) : (
-                            <p className="text-center text-slate-400 py-10">Nenhum livro encontrado.</p>
-                        )
+                {/* Content Area */}
+                <div className="mt-6">
+                    {searchTerm ? (
+                        <div className="space-y-4 animate-in fade-in duration-300">
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">
+                                Resultados da Busca ({filteredResults.length})
+                            </h3>
+                            {filteredResults.length > 0 ? (
+                                <BookList books={filteredResults} onSelect={(b) => navigate(`/biblia/${b}`)} />
+                            ) : (
+                                <div className="text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-100 border-dashed">
+                                    <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                                    <p>Nenhum livro encontrado.</p>
+                                </div>
+                            )}
+                        </div>
                     ) : (
-                        filteredNT.length > 0 ? (
-                            <BookList books={filteredNT} onSelect={(b) => navigate(`/biblia/${b}`)} />
-                        ) : (
-                            <p className="text-center text-slate-400 py-10">Nenhum livro encontrado.</p>
-                        )
+                        <>
+                            {/* Tabs */}
+                            <div className="flex bg-slate-200/50 p-1 rounded-xl mb-6">
+                                <button
+                                    onClick={() => setActiveTab('OT')}
+                                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${activeTab === 'OT' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    Antigo Testamento
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('NT')}
+                                    className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${activeTab === 'NT' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    Novo Testamento
+                                </button>
+                            </div>
+
+                            {/* Categorized List */}
+                            <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+                                {currentTestamentData.categories.map((category: BibleCategory) => (
+                                    <section key={category.title} className="space-y-3">
+                                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1 border-l-2 border-indigo-500 ml-1">
+                                            {category.title}
+                                        </h3>
+                                        <BookList books={category.books} onSelect={(b) => navigate(`/biblia/${b}`)} />
+                                    </section>
+                                ))}
+                            </div>
+                        </>
                     )}
                 </div>
             </div>

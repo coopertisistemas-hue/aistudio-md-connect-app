@@ -335,18 +335,31 @@ export const bibleService = {
 
     expandBookName: (abbrev: string): string => {
         if (!abbrev) return abbrev;
+
+        // 1. Check if input is already a known English key (Case Insensitive)
+        // e.g. "Revelation" -> "Apocalipse"
+        const directMatch = Object.keys(ENGLISH_TO_PORTUGUESE).find(k => k.toLowerCase() === abbrev.toLowerCase());
+        if (directMatch) {
+            return ENGLISH_TO_PORTUGUESE[directMatch];
+        }
+
+        // 2. Fallback to existing logic (Abbreviations)
         const lower = abbrev.toLowerCase().replace(/\s+/g, '');
         let fullName = abbrev;
         const enName = PT_TO_EN_BOOKS[lower];
+
         if (enName) {
             fullName = ENGLISH_TO_PORTUGUESE[enName] || enName;
         } else {
             const found = Object.values(ENGLISH_TO_PORTUGUESE).find(v => v.toLowerCase() === lower);
             if (found) fullName = found;
         }
+
+        // 3. Number Formatting
         if (fullName.startsWith('1 ')) return fullName.replace('1 ', 'Primeiro ');
         if (fullName.startsWith('2 ')) return fullName.replace('2 ', 'Segundo ');
         if (fullName.startsWith('3 ')) return fullName.replace('3 ', 'Terceiro ');
+
         return fullName;
     },
 
