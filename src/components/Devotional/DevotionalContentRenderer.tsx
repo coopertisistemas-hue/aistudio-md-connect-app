@@ -1,10 +1,13 @@
-import { useState, useMemo } from 'react';
-import { Quote, BookOpen, Sparkles } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Quote, BookOpen, Sparkles, Share2, Calendar, Volume2, Heart, Users } from 'lucide-react';
 import { parseBibleRefs } from '@/utils/bibleParser';
 import { VerseContextModal } from '@/components/Bible/VerseContextModal';
+import { cn } from '@/lib/utils';
 import { DevotionalAudioPlayer } from './DevotionalAudioPlayer';
 import { DevotionalShareButton } from './DevotionalShareButton';
 import { bibleService } from '@/services/bible';
+import { interactionService } from '@/services/interactionService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DevotionalContentRendererProps {
     id: string; // [NEW] Required for sharing
@@ -172,28 +175,127 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
         });
     }, [title, subtitle, parsedContent]);
 
+    // Social Proof State
+    const [likes, setLikes] = useState(0);
+    const [hasLiked, setHasLiked] = useState(false);
+    const [viewsToday, setViewsToday] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false); // Added for audio player control
+    const { user } = useAuth(); // Assuming useAuth exists, if not need to fetch from supabase auth
+
+    useEffect(() => {
+        if (!id) return;
+
+        // Log View
+        interactionService.logDevotionalRead(id, user?.id);
+
+        // Fetch Data
+        const load = async () => {
+            const [reactionData, views] = await Promise.all([
+                interactionService.getDevotionalReaction(id, user?.id),
+                interactionService.getDevotionalReadsToday(id)
+            ]);
+            setLikes(reactionData.count);
+            setHasLiked(reactionData.hasReacted);
+            setViewsToday(views);
+        };
+        load();
+    }, [id, user]);
+
+    const handleLike = async () => {
+        if (!user) {
+            // Optional: prompt login
+            return;
+        }
+
+        // Optimistic UI
+        const newLikeState = !hasLiked;
+        setHasLiked(newLikeState);
+        setLikes(prev => newLikeState ? prev + 1 : prev - 1);
+
+        const res = await interactionService.toggleDevotionalReaction(id!, user.id);
+        if (res) {
+            setLikes(res.count);
+            setHasLiked(res.reacted);
+        } else {
+            // Revert on error
+            setHasLiked(!newLikeState);
+            setLikes(prev => newLikeState ? prev - 1 : prev + 1);
+        }
+    };
+
+    if (!content) return null;
+
+    const formattedDate = new Date().toLocaleDateString('pt-BR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
     return (
-        <div className="space-y-8 animate-fade-in relative z-20">
-            {/* Header Controls: Share & Audio */}
-            <div className="flex justify-between items-end -mb-4 gap-4">
-                <div className="mb-1">
-                    <DevotionalShareButton
-                        id={id}
-                        title={title}
-                        subtitle={subtitle}
-                        verseKey={parsedContent?.verseKey}
-                        coverUrl={coverUrl}
-                    />
-                </div>
+        <article className="max-w-3xl mx-auto pb-24 animate-in fade-in duration-700">
+            {/* Minimal Audio Player */}
+            <div className="mb-8">
                 <DevotionalAudioPlayer
                     text={fullAudioText}
+                    isPlaying={isPlaying}
+                    onPlayPause={() => setIsPlaying(!isPlaying)}
                     variant="minimal"
                 />
             </div>
 
+            {/* Header Content */}
+            <header className="mb-10 text-center px-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-4">
+                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                    Devocional Diário
+                </div>
+
+                <h1 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4 leading-tight">
+                    {title}
+                </h1>
+
+                <div className="flex items-center justify-center gap-2 text-slate-500 text-sm font-medium">
+                    <Calendar className="w-4 h-4" />
+                    <span className="capitalize">{formattedDate}</span>
+                </div>
+
+                {/* Social Proof Bar */}
+                <div className="flex items-center justify-center gap-6 mt-6 animate-in slide-in-from-bottom-2 fade-in duration-500 delay-150">
+                    <div className="flex items-center gap-2 text-slate-500 text-xs font-medium bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+                        <Users className="w-3.5 h-3.5 text-indigo-500" />
+                        <span>{viewsToday > 0 ? `${viewsToday} leram hoje` : 'Seja o primeiro a ler'}</span>
+                    </div>
+
+                    <button
+                        onClick={handleLike}
+                        className={cn(
+                            "flex items-center gap-1.5 px-4 py-1.5 rounded-full border transition-all active:scale-95",
+                            hasLiked
+                                ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                        )}
+                    >
+                        <Heart className={cn("w-4 h-4", hasLiked && "fill-current")} />
+                        <span className="text-sm font-bold">{hasLiked ? "Amém!" : "Amém"}</span>
+                        <span className="text-xs opacity-70 border-l border-current pl-1.5 ml-0.5">{likes}</span>
+                    </button>
+
+                    {coverUrl && (
+                        <DevotionalShareButton
+                            id={id}
+                            title={title}
+                            subtitle={subtitle}
+                            verseKey={parsedContent?.verseKey}
+                            coverUrl={coverUrl}
+                        />
+                    )}
+                </div>
+            </header>
+
             {/* 1. Key Verse */}
             {parsedContent.verseKey && (
-                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow mb-8">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                         <Quote className="w-16 h-16 text-indigo-900 rotate-12" />
                     </div>
@@ -210,7 +312,7 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
             )}
 
             {/* 2. Reflection */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 mb-8">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="h-0.5 w-8 bg-indigo-500 rounded-full" />
                     <span className="text-sm font-bold text-indigo-900 uppercase tracking-widest">Reflexão Guiada</span>
@@ -242,9 +344,9 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
                 )}
             </div>
 
-            {/* 3. Application (Practical Application) */}
+            {/* 3. Application */}
             {parsedContent.applicationLines.length > 0 && (
-                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
+                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 mb-8">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="h-0.5 w-8 bg-indigo-500 rounded-full" />
                         <span className="text-sm font-bold text-indigo-900 uppercase tracking-widest">Aplicação Prática</span>
@@ -262,8 +364,7 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
 
             {/* 4. Prayer */}
             {parsedContent.prayer && (
-                <div className="bg-slate-50/80 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
-                    {/* Decorative Background Icon */}
+                <div className="bg-slate-50/80 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden group mb-8">
                     <div className="absolute -right-2 -top-2 opacity-[0.03] transform rotate-12">
                         <Sparkles className="w-24 h-24 text-indigo-900" />
                     </div>
@@ -299,6 +400,7 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
                 passageText={modalState.text}
                 isLoading={modalState.isLoading}
             />
-        </div>
+        </article>
     );
 }
+
