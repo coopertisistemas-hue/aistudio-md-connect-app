@@ -7,7 +7,7 @@ export const interactionService = {
     // --- Devotionals ---
 
     // Toggle Reaction (Like/Amém) via RPC
-    toggleDevotionalReaction: async (devotionalId: string, userId: string): Promise<{ reacted: boolean, count: number } | null> => {
+    toggleDevotionalReaction: async (devotionalId: string, _userId: string): Promise<{ reacted: boolean, count: number } | null> => {
         try {
             // Updated to use 'toggle_devotional_amen' as per strict spec
             // Note: Function expects _devotional_id (authed user from context)
@@ -25,7 +25,7 @@ export const interactionService = {
     },
 
     // Get Devotional Details (Likes + Views) via RPC
-    getDevotionalDetails: async (devotionalId: string, userId?: string) => {
+    getDevotionalDetails: async (devotionalId: string, _userId?: string) => {
         try {
             // Updated to use 'get_devotional_social_combined' for total counts
             const { data, error } = await supabase.rpc('get_devotional_social_combined', {
@@ -76,7 +76,7 @@ export const interactionService = {
     // --- Verses ---
 
     // Toggle Verse Reaction via RPC
-    toggleVerseReaction: async (book: string, chapter: number, verse: number, userId: string): Promise<{ reacted: boolean, count: number } | null> => {
+    toggleVerseReaction: async (book: string, chapter: number, verse: number, _userId: string): Promise<{ reacted: boolean, count: number } | null> => {
         try {
             const { data, error } = await supabase.rpc('toggle_verse_amen', {
                 _book: book,
