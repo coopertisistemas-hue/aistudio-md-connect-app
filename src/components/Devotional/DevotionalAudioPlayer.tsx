@@ -3,15 +3,13 @@ import { Play, Pause, Square, Volume2 } from 'lucide-react';
 
 interface DevotionalAudioPlayerProps {
     text: string;
-    title?: string;
     variant?: 'sticky-bottom' | 'minimal';
 }
 
-export function DevotionalAudioPlayer({ text, title, variant = 'sticky-bottom' }: DevotionalAudioPlayerProps) {
+export function DevotionalAudioPlayer({ text, variant = 'sticky-bottom' }: DevotionalAudioPlayerProps) {
     const [isSupported, setIsSupported] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     // Use refs for speech synthesis to avoid closure staleness issues
     const synthRef = useRef<SpeechSynthesis | null>(null);
@@ -22,7 +20,7 @@ export function DevotionalAudioPlayer({ text, title, variant = 'sticky-bottom' }
             synthRef.current = window.speechSynthesis;
             setIsSupported(true);
         } else {
-            setError("Áudio não suportado");
+            console.warn("Áudio não suportado");
         }
 
         // Cleanup on unmount

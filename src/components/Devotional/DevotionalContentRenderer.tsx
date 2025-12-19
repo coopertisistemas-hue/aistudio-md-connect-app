@@ -11,7 +11,7 @@ interface DevotionalContentRendererProps {
     title: string;
     subtitle?: string;
     content: string;
-    author?: { name: string; avatar_url: string | null | undefined } | null;
+    author?: { name: string; avatar_url?: string | null } | null;
     coverUrl?: string | null; // [NEW] For image sharing
 }
 

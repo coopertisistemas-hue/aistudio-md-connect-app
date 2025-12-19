@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, LucideIcon } from 'lucide-react';
+import { MessageCircle, type LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageIntro } from '@/components/layout/PageIntro';
 
