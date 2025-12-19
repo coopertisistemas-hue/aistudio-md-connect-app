@@ -9,13 +9,15 @@ export const interactionService = {
     // Toggle Reaction (Like/Amém) via RPC
     toggleDevotionalReaction: async (devotionalId: string, userId: string): Promise<{ reacted: boolean, count: number } | null> => {
         try {
-            const { data, error } = await supabase.rpc('toggle_devotional_reaction', {
-                _devotional_id: devotionalId,
-                _user_id: userId
+            // Updated to use 'toggle_devotional_amen' as per strict spec
+            // Note: Function expects _devotional_id (authed user from context)
+            const { data, error } = await supabase.rpc('toggle_devotional_amen', {
+                _devotional_id: devotionalId
             });
 
             if (error) throw error;
-            return data as { reacted: boolean, count: number };
+            // Map RPC result { liked, count } to internal { reacted, count }
+            return { reacted: data.liked, count: data.count };
         } catch (error) {
             console.error('Error toggling reaction:', error);
             return null;
@@ -23,40 +25,51 @@ export const interactionService = {
     },
 
     // Get Devotional Details (Likes + Views) via RPC
-    // Replaces getDevotionalReaction and getDevotionalReadsToday
     getDevotionalDetails: async (devotionalId: string, userId?: string) => {
         try {
-            const { data, error } = await supabase.rpc('get_devotional_details', {
+            // Updated to use 'get_devotional_social_combined' for total counts
+            const { data, error } = await supabase.rpc('get_devotional_social_combined', {
                 _devotional_id: devotionalId,
-                _user_id: userId || null
+                _read_date: new Date().toISOString().split('T')[0]
             });
 
             if (error) throw error;
-            return data as { likes: number, has_liked: boolean, views_today: number };
+
+            return {
+                likes: data.amen_count,
+                has_liked: data.liked,
+                views_today: data.reads_count // This is now Auth + Public
+            };
         } catch (error) {
             console.error('Error fetching details:', error);
             return { likes: 0, has_liked: false, views_today: 0 };
         }
     },
 
-    // Log Read (View) - Direct Insert (Public Policy)
+    // Log Read (View)
     logDevotionalRead: async (devotionalId: string, userId?: string) => {
         try {
-            const sessionId = localStorage.getItem('md_session_id') || crypto.randomUUID();
-            if (!localStorage.getItem('md_session_id')) {
-                localStorage.setItem('md_session_id', sessionId);
-            }
+            if (userId) {
+                // Authenticated: Direct DB Insert
+                await supabase
+                    .from('devotional_reads')
+                    .insert({
+                        devotional_id: devotionalId,
+                        user_id: userId
+                    });
+            } else {
+                // Anonymous: Call Edge Function
+                const sessionHash = localStorage.getItem('md_session_hash') || crypto.randomUUID();
+                if (!localStorage.getItem('md_session_hash')) {
+                    localStorage.setItem('md_session_hash', sessionHash);
+                }
 
-            await supabase
-                .from('devotional_reads')
-                .insert({
-                    devotional_id: devotionalId,
-                    user_id: userId || null,
-                    session_id: sessionId
+                await supabase.functions.invoke('track-public-read', {
+                    body: { devotional_id: devotionalId, session_hash: sessionHash }
                 });
+            }
         } catch (error) {
-            // Ignore duplicate/error logs silently
-            console.error('Error logging read:', error);
+            // Ignore errors/duplicates silently
         }
     },
 
@@ -65,15 +78,14 @@ export const interactionService = {
     // Toggle Verse Reaction via RPC
     toggleVerseReaction: async (book: string, chapter: number, verse: number, userId: string): Promise<{ reacted: boolean, count: number } | null> => {
         try {
-            const { data, error } = await supabase.rpc('toggle_verse_reaction', {
+            const { data, error } = await supabase.rpc('toggle_verse_amen', {
                 _book: book,
                 _chapter: chapter,
-                _verse: verse,
-                _user_id: userId
+                _verse: verse
             });
 
             if (error) throw error;
-            return data as { reacted: boolean, count: number };
+            return { reacted: data.liked, count: data.count };
         } catch (error) {
             console.error('Verse reaction error:', error);
             return null;
