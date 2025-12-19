@@ -1,5 +1,5 @@
 import { useBibleAudio } from '@/hooks/useBibleAudio';
-import { Play, Pause, Square, Volume2, AlertCircle } from 'lucide-react';
+import { Play, Pause, Square, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils'; // Assuming cn is available or use standard className
 
 interface DevotionalAudioPlayerProps {
