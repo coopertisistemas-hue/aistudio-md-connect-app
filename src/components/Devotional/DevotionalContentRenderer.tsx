@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { Quote, BookOpen, Sparkles } from 'lucide-react';
 import { parseBibleRefs } from '@/utils/bibleParser';
 import { VerseContextModal } from '@/components/Bible/VerseContextModal';
+import { DevotionalAudioPlayer } from './DevotionalAudioPlayer';
+import { bibleService } from '@/services/bible';
 
 interface DevotionalContentRendererProps {
     title: string;
@@ -47,7 +49,6 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
         let applicationLines: string[] = [];
         let prayer = '';
         let readings: string[] = [];
-        // Signature is now handled exclusively by props/fallback, ignored from content
 
         let currentBlockIndex = 0;
         // Key Verse Heuristic: First block if not a header
@@ -77,16 +78,15 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
             if (lowerBlock.startsWith('## leituras') || lowerBlock.startsWith('## leituras')) {
                 currentSection = 'readings'; continue;
             }
-            // Application Section Detection (Case Insensitive, with or without ##)
+            // Application Section Detection
             const appMatch = block.match(/^(?:##\s*)?aplicaç[ãa]o pr[áa]tica:?(.*)/i);
             if (appMatch) {
                 currentSection = 'application';
-                // Handle inline content
                 const inline = appMatch[1].trim();
                 if (inline) applicationLines.push(inline);
                 continue;
             }
-            // Signature Detection (Ignore these lines)
+            // Signature Detection
             if (block.match(/^(?:---|___)?\s*(?:escrito|supervisionado|autor)\s*(?:por|:)?\s+.*$/i)) {
                 continue;
             }
@@ -127,7 +127,6 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
                             </span>
                         );
                     }
-                    // Handle bold markdown too
                     const parts = chunk.content.split(/(\*\*.*?\*\*)/g);
                     return parts.map((sub, sIdx) => {
                         if (sub.startsWith('**') && sub.endsWith('**')) return <strong key={`${idx}-${sIdx}`} className="font-bold text-slate-900">{sub.slice(2, -2)}</strong>;
@@ -140,8 +139,47 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
 
     if (!parsedContent) return null;
 
+    // Helper to generate full audio text with expanded abbreviations
+    const fullAudioText = useMemo(() => {
+        const parts = [
+            title,
+            subtitle,
+            parsedContent.verseKey,
+            ...parsedContent.reflectionLines,
+            parsedContent.applicationLines.length > 0 ? 'Aplicação Prática.' : '',
+            ...parsedContent.applicationLines,
+            parsedContent.prayer ? 'Oração.' : '',
+            parsedContent.prayer
+        ].filter(Boolean) as string[];
+
+        // Join and clean basic markdown
+        let text = parts.join('. ').replace(/[*#_\[\]]/g, '');
+
+        // 1. Fix "Chapter:Verse" pronunciation (e.g. 4:6 -> 4 versículo 6)
+        text = text.replace(/(\d+):(\d+)/g, '$1 versículo $2');
+
+        // 2. Fix Verse Ranges (e.g. 1-2 -> 1 a 2)
+        text = text.replace(/(\d+)-(\d+)/g, '$1 a $2');
+
+        // 3. Expand Book Abbreviations (e.g. "Hb" -> "Hebreus", "1Pe" -> "Primeiro Pedro", "1 Rs" -> "Primeiro Reis")
+        // Capture optional 1-3 prefix (+ optional space) + 2 letters (including accents)
+        // [A-Za-zÀ-ÿ] ensures words like "Amém" are matched correctly preventing partial matches.
+        return text.replace(/\b((?:[1-3]\s*)?[A-Za-zÀ-ÿ]{2,})\b/g, (match) => {
+            return bibleService.expandBookName(match);
+        });
+    }, [title, subtitle, parsedContent]);
+
     return (
         <div className="space-y-8 animate-fade-in relative z-20">
+            {/* Header / Audio Player */}
+            <div className="flex justify-end -mb-4">
+                <DevotionalAudioPlayer
+                    title={title}
+                    text={fullAudioText}
+                    variant="minimal"
+                />
+            </div>
+
             {/* 1. Key Verse */}
             {parsedContent.verseKey && (
                 <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
@@ -210,10 +248,6 @@ export function DevotionalContentRenderer({ title, subtitle, content, author }: 
                     </div>
                 </div>
             )}
-
-            {/* 4. Readings (Moved outside Reflection card or keep inside? User wants "Mesmo destaque", implying main card. Code shows Readings inside Reflection card. I'll keep Readings logic as is but note the comment numbers changed) */}
-
-
 
             {/* 4. Prayer */}
             {parsedContent.prayer && (

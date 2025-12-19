@@ -229,7 +229,7 @@ export const bibleService = {
                     if (translation === 'almeida' && ENGLISH_TO_PORTUGUESE[enBook]) {
                         const ptBook = ENGLISH_TO_PORTUGUESE[enBook];
                         // Reconstruct ref with PT book name
-                        const match = reference.match(/(\d+[:.]\d+)/);
+                        const match = reference.match(/(\d+[:.]\d+(?:-\d+)?)/);
                         if (match) {
                             const numbers = match[0];
                             searchRef = `${ptBook} ${numbers}`;
@@ -239,7 +239,7 @@ export const bibleService = {
                         }
                     } else {
                         // Use English name (standard behavior)
-                        const match = reference.match(/(\d+[:.]\d+)/);
+                        const match = reference.match(/(\d+[:.]\d+(?:-\d+)?)/);
                         if (match) {
                             const numbers = match[0];
                             searchRef = `${enBook} ${numbers}`;
@@ -262,7 +262,7 @@ export const bibleService = {
                 const ptBook = ENGLISH_TO_PORTUGUESE[enBook];
                 // Re-construct ref simple fallback
                 // Use regex match from earlier or parts
-                const match = reference.match(/(\d+[:.]\d+)/);
+                const match = reference.match(/(\d+[:.]\d+(?:-\d+)?)/);
                 const numbers = match ? match[0] : parts.slice(1).join(' ');
                 const ptSearchRef = `${ptBook} ${numbers}`;
 
@@ -336,9 +336,36 @@ export const bibleService = {
 
             return book || null;
 
+            return book || null;
         } catch (error) {
             console.error('Bible Context DB Error:', error);
             return null;
         }
+    },
+
+    expandBookName: (abbrev: string): string => {
+        if (!abbrev) return abbrev;
+        // Remove spaces to handle "1 Rs" -> "1rs" for standardized lookup
+        const lower = abbrev.toLowerCase().replace(/\s+/g, '');
+        let fullName = abbrev;
+
+        // 1. Map PT abbrev -> EN name -> PT Full Name
+        const enName = PT_TO_EN_BOOKS[lower];
+        if (enName) {
+            fullName = ENGLISH_TO_PORTUGUESE[enName] || enName;
+        } else {
+            // Check if it matches a value in ENGLISH_TO_PORTUGUESE (already full PT name or close to it)
+            const found = Object.values(ENGLISH_TO_PORTUGUESE).find(v => v.toLowerCase() === lower);
+            if (found) fullName = found;
+        }
+
+        // 2. Handle Ordinals (1 John -> Primeiro João, etc.)
+        // We look for patterns starting with 1, 2, or 3 followed by space or non-letter?
+        // Actually usually "1 Pedro", "2 Reis".
+        if (fullName.startsWith('1 ')) return fullName.replace('1 ', 'Primeiro ');
+        if (fullName.startsWith('2 ')) return fullName.replace('2 ', 'Segundo ');
+        if (fullName.startsWith('3 ')) return fullName.replace('3 ', 'Terceiro ');
+
+        return fullName;
     }
 };
