@@ -186,7 +186,6 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
                     />
                 </div>
                 <DevotionalAudioPlayer
-                    title={title}
                     text={fullAudioText}
                     variant="minimal"
                 />
