@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { contentService } from '@/services/content';
 import type { ReadingPlan, ReadingPlanDay } from '@/types/content';
-import { ArrowLeft, CheckCircle2, Circle, Loader2 } from 'lucide-react';
+import { CheckCircle2, Circle, Loader2 } from 'lucide-react';
 import { BackLink } from '@/components/ui/BackLink';
 
 export default function PlanDetail() {
     const { id } = useParams();
-    const navigate = useNavigate();
     const [plan, setPlan] = useState<ReadingPlan | null>(null);
     const [days, setDays] = useState<ReadingPlanDay[]>([]);
     const [completedDays, setCompletedDays] = useState<number[]>([]);

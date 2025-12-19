@@ -1,5 +1,5 @@
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { type LucideIcon } from 'lucide-react';
 import { BackLink } from '@/components/ui/BackLink';
 import { cn } from '@/lib/utils';

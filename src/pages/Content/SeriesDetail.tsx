@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { contentService } from '@/services/content';
 import type { ContentSeries, ContentMessage } from '@/types/content';
-import { ArrowLeft, Loader2, PlayCircle, Clock } from 'lucide-react';
+import { Loader2, PlayCircle, Clock } from 'lucide-react';
 import { BackLink } from '@/components/ui/BackLink';
 
 export default function SeriesDetail() {

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { contentService } from '@/services/content';
 import type { Post } from '@/types/content';
 import { Heart } from 'lucide-react';
-import { PageIntro } from '@/components/layout/PageIntro'; // Kept if needed, but likely replaced by InternalPageLayout usage. Ideally clean up.
 import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function DevotionalsList() {

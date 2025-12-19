@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/routes';
@@ -11,7 +11,6 @@ interface BackLinkProps {
 
 export function BackLink({ to, label = "Voltar", className }: BackLinkProps) {
     const navigate = useNavigate();
-    const location = useLocation();
 
     const handleBack = () => {
         if (to) {

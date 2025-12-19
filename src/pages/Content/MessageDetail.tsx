@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'; // Missing types, assumes generic
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { contentService } from '@/services/content'; // Need getMessageById
 import type { ContentMessage } from '@/types/content';
-import { ArrowLeft, Loader2, Youtube } from 'lucide-react';
+import { Loader2, Youtube } from 'lucide-react';
 import { BackLink } from '@/components/ui/BackLink';
 
 export default function MessageDetail() {
     const { id } = useParams();
-    const navigate = useNavigate();
     const [msg, setMsg] = useState<ContentMessage | null>(null);
     const [isLoading, setIsLoading] = useState(false); // Can fetch by ID if service supports
 

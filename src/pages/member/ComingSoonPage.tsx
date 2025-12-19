@@ -1,14 +1,13 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, MessageCircle } from 'lucide-react';
+import { MessageCircle, LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageIntro } from '@/components/layout/PageIntro';
 
 interface ComingSoonPageProps {
     title?: string;
     description?: string;
-    icon?: React.ElementType;
+    icon?: LucideIcon;
 }
 
 const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
@@ -16,7 +15,6 @@ const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
     description = "Estamos preparando algo especial para você.",
     icon: Icon
 }) => {
-    const navigate = useNavigate();
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-50/50">

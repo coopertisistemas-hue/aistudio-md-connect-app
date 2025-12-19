@@ -1,14 +1,13 @@
 
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { feedService, type FeedItem } from '@/services/feed';
-import { ArrowLeft, Calendar, Share2, AlertTriangle } from 'lucide-react';
+import { Calendar, Share2, AlertTriangle } from 'lucide-react';
 import { BackLink } from '@/components/ui/BackLink';
 
 
 export default function NoticeDetail() {
     const { id } = useParams();
-    const navigate = useNavigate();
     const [notice, setNotice] = useState<FeedItem | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { PublicHeader } from '@/components/layout/PublicHeader';
 import { AppFooter } from '@/components/layout/AppFooter';
 import { AppBackground } from '@/components/layout/AppBackground';
@@ -9,18 +8,9 @@ import { HomeReturnPill } from '@/components/navigation/HomeReturnPill';
 
 export const PublicLayout: React.FC = () => {
     const location = useLocation();
-    const navigate = useNavigate();
 
     // Determine if we should show the back button (Not on Home)
     const isHome = location.pathname === '/' || location.pathname === '/home';
-
-    const handleBack = () => {
-        if (window.history.length > 2) {
-            navigate(-1);
-        } else {
-            navigate('/');
-        }
-    };
 
     return (
         <div className="min-h-screen bg-transparent flex flex-col relative isolate">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, MapPin, Clock, Share2 } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Calendar, MapPin, Clock, Share2 } from 'lucide-react';
 import { BackLink } from '@/components/ui/BackLink';
 import { Button } from '@/components/ui/button';
 import { eventService, type ChurchEvent } from '@/services/event';
@@ -9,7 +9,6 @@ import { ptBR } from 'date-fns/locale';
 
 export default function EventDetail() {
     const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
     const [event, setEvent] = useState<ChurchEvent | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
