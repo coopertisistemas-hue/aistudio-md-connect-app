@@ -189,13 +189,10 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
 
         // Fetch Data
         const load = async () => {
-            const [reactionData, views] = await Promise.all([
-                interactionService.getDevotionalReaction(id, user?.id),
-                interactionService.getDevotionalReadsToday(id)
-            ]);
-            setLikes(reactionData.count);
-            setHasLiked(reactionData.hasReacted);
-            setViewsToday(views);
+            const details = await interactionService.getDevotionalDetails(id, user?.id);
+            setLikes(details.likes);
+            setHasLiked(details.has_liked);
+            setViewsToday(details.views_today);
         };
         load();
     }, [id, user]);
