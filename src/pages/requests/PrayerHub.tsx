@@ -1,76 +1,57 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageIntro } from '@/components/layout/PageIntro';
 import { useAuth } from '@/contexts/AuthContext';
-import { Heart, Send, Loader2, Lock, Globe, ShieldCheck } from 'lucide-react';
+import { Heart, Loader2, Filter } from 'lucide-react';
 
 import { FLAGS } from '@/lib/flags';
-import { analytics } from '@/lib/analytics';
-import { prayerApi } from '@/lib/api/prayer';
+import { prayerApi, type PrayerRequest } from '@/lib/api/prayer';
+import { PrayerRequestForm } from '@/components/Prayer/PrayerRequestForm';
+import { PrayerRequestCard } from '@/components/Prayer/PrayerRequestCard';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function PrayerHub() {
     useAuth();
     const [activeTab, setActiveTab] = useState<'new' | 'list'>('new');
+    // Filters
+    const [filterUrgent, setFilterUrgent] = useState(false);
+    const [filterGratitude, setFilterGratitude] = useState(false);
 
-    // Form State
-    const [description, setDescription] = useState('');
-    const [type, setType] = useState('oração');
-    const [contact] = useState<'whatsapp' | 'none'>('whatsapp');
-    const [isAnonymous, setIsAnonymous] = useState(false);
-    const [visibility, setVisibility] = useState<'public' | 'private'>('public');
-    const [submitting, setSubmitting] = useState(false);
+    // Data
+    const [requests, setRequests] = useState<PrayerRequest[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    if (!FLAGS.FEATURE_PRAYER_REQUESTS_V1) return null;
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!description.trim() || description.length < 10) {
-            alert('Por favor, descreva seu pedido com pelo menos 10 caracteres.');
-            return;
+    useEffect(() => {
+        if (activeTab === 'list' && FLAGS.FEATURE_PRAYER_API) {
+            fetchFeed();
         }
+    }, [activeTab, filterUrgent, filterGratitude]);
 
-        setSubmitting(true);
+    const fetchFeed = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await prayerApi.getFeed(20, 0, filterUrgent, filterGratitude);
+            if (error) throw error;
+            setRequests(data);
 
-        analytics.track({
-            name: 'cta_click',
-            element: 'submit_prayer_request',
-            context: 'member',
-            metadata: { type, visibility, anonymous: isAnonymous }
-        });
-
-        let error = null;
-
-        if (FLAGS.FEATURE_PRAYER_API) {
-            const res = await prayerApi.create({
-                request_type: type,
-                description,
-                is_anonymous: isAnonymous,
-                visibility,
-                preferred_contact: contact
-            });
-            error = res.error;
-        } else {
-            // Validate mock offline
-            await new Promise(r => setTimeout(r, 1000));
-        }
-
-        setSubmitting(false);
-
-        if (!error) {
-            setDescription('');
-            alert('Pedido enviado com sucesso! Estaremos orando por você.');
-            // Do not switch tab automatically if tab is placeholder
-            // setActiveTab('list'); 
-        } else {
-            console.error("Submission error", error);
-            alert('Erro ao enviar. Verifique sua conexão.');
+            // If offline/mock, we might get empty, so let's mock one if empty for demo
+            if (data.length === 0 && !FLAGS.FEATURE_PRAYER_API) {
+                // Mock data for dev if needed
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Não foi possível carregar os pedidos.");
+        } finally {
+            setLoading(false);
         }
     };
+
+    if (!FLAGS.FEATURE_PRAYER_REQUESTS_V1) return null;
 
     return (
         <div className="min-h-screen bg-transparent flex flex-col pb-safe">
             {/* Header (Standardized) */}
-            <div className="px-6 pt-6">
+            <div className="px-6 pt-6 mb-4">
                 <PageIntro
                     title="Pedidos de Oração"
                     icon={Heart}
@@ -80,122 +61,88 @@ export default function PrayerHub() {
             </div>
 
             {/* Tabs */}
-            <div className="flex p-2 bg-white mb-2">
-                <button
-                    onClick={() => setActiveTab('new')}
-                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'new' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500'}`}
-                >
-                    Novo Pedido
-                </button>
-                <button
-                    onClick={() => setActiveTab('list')}
-                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'list' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500'}`}
-                >
-                    Meus Pedidos
-                </button>
+            <div className="px-4 mb-6">
+                <div className="flex p-1 bg-slate-100 rounded-xl">
+                    <button
+                        onClick={() => setActiveTab('new')}
+                        className={cn("flex-1 py-2.5 text-sm font-bold rounded-lg transition-all", activeTab === 'new' ? "bg-white text-indigo-700 shadow-sm" : "text-slate-500 hover:text-slate-600")}
+                    >
+                        Novo Pedido
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('list')}
+                        className={cn("flex-1 py-2.5 text-sm font-bold rounded-lg transition-all", activeTab === 'list' ? "bg-white text-indigo-700 shadow-sm" : "text-slate-500 hover:text-slate-600")}
+                    >
+                        Mural de Oração
+                    </button>
+                </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 p-4 max-w-lg mx-auto w-full">
+            <div className="flex-1 px-4 pb-8 max-w-lg mx-auto w-full">
                 {activeTab === 'new' ? (
-                    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-
-                        {/* Type Selection */}
-                        <div className="flex gap-2 p-1 bg-slate-50 rounded-xl">
-                            {['oração', 'visita', 'conselho'].map(t => (
-                                <button
-                                    key={t}
-                                    type="button"
-                                    onClick={() => setType(t)}
-                                    className={`flex-1 py-2 text-xs font-medium capitalize rounded-lg transition-all ${type === t ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}
-                                >
-                                    {t}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Text Area */}
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Como podemos orar?</label>
-                            <textarea
-                                value={description}
-                                onChange={e => setDescription(e.target.value)}
-                                className="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[120px] text-slate-700 placeholder:text-slate-400 resize-none text-base"
-                                placeholder="Descreva seu pedido aqui..."
-                                maxLength={500}
-                            />
-                            <div className="flex justify-end mt-1">
-                                <span className={`text-xs ${description.length > 450 ? 'text-amber-500' : 'text-slate-400'}`}>
-                                    {description.length}/500
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Toggles */}
-                        <div className="space-y-3 pt-2">
-                            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-full ${isAnonymous ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
-                                        <ShieldCheck className="w-4 h-4" />
-                                    </div>
-                                    <div className="text-sm">
-                                        <p className="font-medium text-slate-700">Pedido Anônimo</p>
-                                        <p className="text-xs text-slate-400">Não identificar meu nome</p>
-                                    </div>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} className="sr-only peer" />
-                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                                </label>
-                            </div>
-
-                            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-full ${visibility === 'private' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                        {visibility === 'private' ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
-                                    </div>
-                                    <div className="text-sm">
-                                        <p className="font-medium text-slate-700">Apenas Intercessores</p>
-                                        <p className="text-xs text-slate-400">Não exibir no mural público</p>
-                                    </div>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={visibility === 'private'}
-                                        onChange={e => setVisibility(e.target.checked ? 'private' : 'public')}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={submitting || !description.trim()}
-                            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                        >
-                            {submitting ? <Loader2 className="animate-spin w-5 h-5" /> : <Send className="w-5 h-5" />}
-                            {submitting ? 'Enviando...' : 'Enviar Pedido'}
-                        </button>
-                    </form>
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <PrayerRequestForm onSuccess={() => setActiveTab('list')} />
+                    </div>
                 ) : (
-                    // OPTION A: Premium Placeholder for "My Requests"
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
-                            <Lock className="w-8 h-8 text-indigo-400" />
+                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                        {/* Filters */}
+                        <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1 flex items-center">
+                                <Filter className="w-3 h-3 mr-1" /> Filtros
+                            </span>
+                            <button
+                                onClick={() => { setFilterUrgent(false); setFilterGratitude(false); }}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors border",
+                                    !filterUrgent && !filterGratitude ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200"
+                                )}
+                            >
+                                Recentes
+                            </button>
+                            <button
+                                onClick={() => setFilterUrgent(!filterUrgent)}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors border",
+                                    filterUrgent ? "bg-rose-500 text-white border-rose-500" : "bg-white text-slate-600 border-slate-200"
+                                )}
+                            >
+                                Urgentes
+                            </button>
+                            <button
+                                onClick={() => setFilterGratitude(!filterGratitude)}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors border",
+                                    filterGratitude ? "bg-emerald-500 text-white border-emerald-500" : "bg-white text-slate-600 border-slate-200"
+                                )}
+                            >
+                                Gratidão
+                            </button>
                         </div>
-                        <h3 className="text-lg font-medium text-slate-900 mb-2">Área de Membros</h3>
-                        <p className="text-slate-500 text-sm leading-relaxed max-w-[260px] mb-8">
-                            O histórico de pedidos estará disponível em breve para membros cadastrados. Continue orando conosco!
-                        </p>
-                        <button
-                            onClick={() => setActiveTab('new')}
-                            className="text-indigo-600 font-medium text-sm border border-indigo-100 bg-indigo-50 px-6 py-2 rounded-full hover:bg-indigo-100 transition-colors"
-                        >
-                            Fazer novo pedido
-                        </button>
+
+                        {/* List */}
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center py-12 space-y-3">
+                                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                                <p className="text-sm text-slate-400">Carregando pedidos...</p>
+                            </div>
+                        ) : requests.length > 0 ? (
+                            <div className="space-y-3">
+                                {requests.map(req => (
+                                    <PrayerRequestCard key={req.id} request={req} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 bg-slate-50 rounded-3xl border border-slate-100 border-dashed">
+                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Heart className="w-8 h-8 text-slate-300" />
+                                </div>
+                                <h3 className="text-slate-900 font-medium mb-1">Nenhum pedido encontrado.</h3>
+                                <p className="text-slate-500 text-sm max-w-[200px] mx-auto">
+                                    Seja o primeiro a compartilhar um motivo de oração ou agradecimento.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
