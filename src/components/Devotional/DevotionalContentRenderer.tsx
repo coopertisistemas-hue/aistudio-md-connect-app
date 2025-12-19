@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Quote, BookOpen, Sparkles, Share2, Calendar, Volume2, Heart, Users } from 'lucide-react';
+import { Quote, BookOpen, Sparkles, Calendar, Heart, Users } from 'lucide-react';
 import { parseBibleRefs } from '@/utils/bibleParser';
 import { VerseContextModal } from '@/components/Bible/VerseContextModal';
 import { cn } from '@/lib/utils';
@@ -179,7 +179,6 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
     const [likes, setLikes] = useState(0);
     const [hasLiked, setHasLiked] = useState(false);
     const [viewsToday, setViewsToday] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(false); // Added for audio player control
     const { user } = useAuth(); // Assuming useAuth exists, if not need to fetch from supabase auth
 
     useEffect(() => {
@@ -238,8 +237,6 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
             <div className="mb-8">
                 <DevotionalAudioPlayer
                     text={fullAudioText}
-                    isPlaying={isPlaying}
-                    onPlayPause={() => setIsPlaying(!isPlaying)}
                     variant="minimal"
                 />
             </div>

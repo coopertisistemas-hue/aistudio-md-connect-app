@@ -21,7 +21,7 @@ export default function BibleReader() {
     const { user } = useAuth();
 
     // Audio Hook
-    const { state: audioState, play, pause, toggle, cancel: stopAudio, supported: audioSupported } = useBibleAudio();
+    const { state: audioState, play, toggle, cancel: stopAudio, supported: audioSupported } = useBibleAudio();
 
     const [data, setData] = useState<BibleChapter | null>(null);
     const [isLoading, setIsLoading] = useState(true);

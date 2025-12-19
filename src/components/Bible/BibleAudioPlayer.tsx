@@ -1,5 +1,5 @@
-
-import { Play, Pause, Square, X } from 'lucide-react';
+```
+import { Play, Pause, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BibleAudioPlayerProps {
