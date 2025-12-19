@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
-import { X, Sparkles, Book, Compass, Lightbulb, Link as LinkIcon, BookOpen, Scroll } from 'lucide-react';
+
+import { X, Sparkles, Book, Compass, Lightbulb, Scroll, User, Calendar, Target, BookOpen } from 'lucide-react';
 import { bibleService, type BibleCommentary } from '@/services/bible';
+import { bibleBooksContext } from '@/data/bibleBooksContext';
 
 interface VerseContextModalProps {
     isOpen: boolean;
@@ -13,12 +15,33 @@ interface VerseContextModalProps {
 }
 
 export function VerseContextModal({ isOpen, onClose, verseRef, passageText, verseBookId, chapter, verse }: VerseContextModalProps) {
+
     // Close on escape
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
         window.addEventListener('keydown', handleEsc);
         return () => window.removeEventListener('keydown', handleEsc);
     }, [onClose]);
+
+    // Lookup Static Book Context
+    const bookContext = React.useMemo(() => {
+        if (!verseBookId) {
+            // Try to extract from verseRef "1Tm 3:16" -> "1tm"
+            if (!verseRef) return null;
+            const match = verseRef.match(/^((?:[123]\s*)?[a-zA-Z]+)/);
+            if (match) {
+                const key = match[1].toLowerCase().replace(/\s/g, ''); // "1 Tm" -> "1tm"
+                return bibleBooksContext[key] || null;
+            }
+            return null;
+        }
+        // Normalize passed ID "1tm", "genesis"
+        let key = verseBookId.toLowerCase();
+        if (key === 'gênesis') key = 'gn'; // basic norm
+        // ... (can add more norm logic or rely on service if needed)
+
+        return bibleBooksContext[key] || null;
+    }, [verseBookId, verseRef]);
 
     // Data Fetching State
     const [data, setData] = React.useState<BibleCommentary | null>(null);
@@ -82,109 +105,128 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
 
                 {/* Scrollable Content */}
                 <div className="overflow-y-auto flex-1 bg-slate-50/50">
-                    {isLoadingContext ? (
-                        <div className="p-8 space-y-6 flex flex-col items-center justify-center min-h-[300px] text-center">
-                            <Sparkles className="w-12 h-12 text-indigo-300 animate-pulse mb-4" />
-                            <div className="h-4 bg-slate-100 rounded w-1/2 animate-pulse mx-auto"></div>
-                            <p className="text-sm text-slate-400 font-medium animate-pulse">
-                                Pesquisando referências teológicas...
-                            </p>
-                        </div>
-                    ) : data ? (
-                        <div className="p-6 md:p-8 space-y-6">
+                    <div className="p-6 md:p-8 space-y-8">
 
-                            {/* 1. Contexto Histórico */}
-                            {data.historical_context && (
-                                <section className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">
-                                            <Compass className="w-4 h-4" />
-                                        </div>
-                                        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Contexto Histórico</h3>
-                                    </div>
-                                    <p className="text-slate-600 text-sm leading-relaxed text-justify">
-                                        {data.historical_context}
-                                    </p>
-                                </section>
-                            )}
-
-                            {/* 2. Insights Teológicos (NEW) */}
-                            {data.theological_insights?.length > 0 && (
-                                <section className="bg-slate-50 p-5 rounded-2xl border border-slate-200/60">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <div className="p-1.5 bg-violet-100 rounded-lg text-violet-600">
-                                            <Scroll className="w-4 h-4" />
-                                        </div>
-                                        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Visão Teológica</h3>
-                                    </div>
-                                    <ul className="space-y-3">
-                                        {data.theological_insights.map((insight, idx) => (
-                                            <li key={idx} className="text-sm text-slate-700 leading-relaxed flex gap-2">
-                                                <span className="text-violet-400 mt-1">•</span>
-                                                <span>{insight}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </section>
-                            )}
-
-                            {/* 3. Aplicabilidade */}
-                            {data.practical_application?.length > 0 && (
-                                <section>
-                                    <div className="flex items-center gap-2 mb-3 px-1">
-                                        <Lightbulb className="w-4 h-4 text-amber-500" />
-                                        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Aplicação Prática</h3>
-                                    </div>
-                                    <ul className="space-y-2">
-                                        {data.practical_application.map((app, idx) => (
-                                            <li key={idx} className="flex gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm text-sm text-slate-700">
-                                                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs mt-0.5 border border-amber-100">
-                                                    {idx + 1}
-                                                </span>
-                                                <span className="leading-relaxed">{app}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </section>
-                            )}
-
-                            {/* 4. Temas (Chips) */}
-                            {data.themes?.length > 0 && (
-                                <section className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <LinkIcon className="w-4 h-4 text-emerald-600" />
-                                        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Temas Centrais</h3>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {data.themes.map((theme, i) => (
-                                            <span key={i} className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600">
-                                                {theme}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* Author Ref */}
-                            {data.author_ref && (
-                                <div className="text-center">
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Fonte / Referência</p>
-                                    <p className="text-xs text-slate-500 font-serif italic mt-1">{data.author_ref}</p>
+                        {/* 0. Static Book Context (Study Mode) */}
+                        {bookContext && (
+                            <section className="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100/50 space-y-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <BookOpen className="w-4 h-4 text-indigo-700" />
+                                    <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Contexto de {bookContext.name}</h3>
                                 </div>
-                            )}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900/60 uppercase tracking-widest">
+                                            <User className="w-3 h-3" /> Autor
+                                        </div>
+                                        <p className="text-sm text-slate-700 leading-snug">{bookContext.author}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900/60 uppercase tracking-widest">
+                                            <Calendar className="w-3 h-3" /> Data
+                                        </div>
+                                        <p className="text-sm text-slate-700 leading-snug">{bookContext.date}</p>
+                                    </div>
+                                    <div className="col-span-1 md:col-span-2 space-y-1">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900/60 uppercase tracking-widest">
+                                            <Target className="w-3 h-3" /> Propósito
+                                        </div>
+                                        <p className="text-sm text-slate-700 leading-relaxed">{bookContext.purpose}</p>
+                                    </div>
+                                </div>
+                                {/* Book Themes Chips */}
+                                <div className="flex flex-wrap gap-2 pt-2">
+                                    {bookContext.themes.map(t => (
+                                        <span key={t} className="px-2 py-1 bg-white border border-indigo-100/50 rounded text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
+                                            {t}
+                                        </span>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-4 opacity-60">
-                            <BookOpen className="w-12 h-12 text-slate-300" />
-                            <div>
-                                <h3 className="text-slate-800 font-bold mb-1">Contexto Indisponível</h3>
-                                <p className="text-slate-500 text-sm">
-                                    Ainda não temos dados de estudo para este livro específica.
+                        {/* Loading State for Verse Context */}
+                        {isLoadingContext ? (
+                            <div className="p-8 space-y-6 flex flex-col items-center justify-center text-center opacity-70">
+                                <Sparkles className="w-8 h-8 text-indigo-300 animate-pulse mb-3" />
+                                <p className="text-xs text-slate-400 font-medium animate-pulse">
+                                    Buscando insights do versículo...
                                 </p>
                             </div>
-                        </div>
-                    )}
+                        ) : data ? (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+
+                                {/* 1. Contexto Histórico (Specific Verse) */}
+                                {data.historical_context && (
+                                    <section>
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">
+                                                <Compass className="w-4 h-4" />
+                                            </div>
+                                            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Contexto do Versículo</h3>
+                                        </div>
+                                        <p className="text-slate-600 text-sm leading-relaxed text-justify bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                                            {data.historical_context}
+                                        </p>
+                                    </section>
+                                )}
+
+                                {/* 2. Insights Teológicos */}
+                                {data.theological_insights?.length > 0 && (
+                                    <section>
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className="p-1.5 bg-violet-100 rounded-lg text-violet-600">
+                                                <Scroll className="w-4 h-4" />
+                                            </div>
+                                            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Visão Teológica</h3>
+                                        </div>
+                                        <ul className="space-y-3">
+                                            {data.theological_insights.map((insight, idx) => (
+                                                <li key={idx} className="bg-white p-3 rounded-xl border-l-4 border-violet-300 shadow-sm text-sm text-slate-700 leading-relaxed">
+                                                    {insight}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </section>
+                                )}
+
+                                {/* 3. Aplicabilidade */}
+                                {data.practical_application?.length > 0 && (
+                                    <section>
+                                        <div className="flex items-center gap-2 mb-3 px-1">
+                                            <Lightbulb className="w-4 h-4 text-amber-500" />
+                                            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Aplicação Prática</h3>
+                                        </div>
+                                        <ul className="space-y-2">
+                                            {data.practical_application.map((app, idx) => (
+                                                <li key={idx} className="flex gap-3 bg-amber-50/50 p-3 rounded-xl border border-amber-100/50 text-sm text-slate-700">
+                                                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white text-amber-600 flex items-center justify-center font-bold text-xs mt-0.5 border border-amber-100 shadow-sm">
+                                                        {idx + 1}
+                                                    </span>
+                                                    <span className="leading-relaxed">{app}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </section>
+                                )}
+
+                                {/* Author Ref */}
+                                {data.author_ref && (
+                                    <div className="text-center pt-4 border-t border-slate-100">
+                                        <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Fonte / Referência</p>
+                                        <p className="text-xs text-slate-500 font-serif italic mt-1">{data.author_ref}</p>
+                                    </div>
+                                )}
+
+                            </div>
+                        ) : (
+                            !bookContext && (
+                                <div className="flex flex-col items-center justify-center py-10 opacity-50">
+                                    <p className="text-sm text-slate-400">Nenhum detalhe adicional encontrado.</p>
+                                </div>
+                            )
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

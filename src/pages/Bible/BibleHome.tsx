@@ -39,6 +39,7 @@ export default function BibleHome() {
                     subtitle="Lâmpada para os meus pés é a Tua Palavra."
                     icon={BookOpen}
                     iconClassName="text-indigo-600"
+                    backLinkPath="/"
                 />
 
                 {/* Continue Reading Card */}
