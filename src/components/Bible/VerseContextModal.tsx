@@ -1,8 +1,29 @@
 import React, { useEffect } from 'react';
 
-import { X, Sparkles, Book, Compass, Lightbulb, Scroll, User, Calendar, Target, BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, Sparkles, Book, Compass, Lightbulb, Scroll, User, Calendar, Target, BookOpen, Link as LinkIcon, ArrowRight, ExternalLink } from 'lucide-react';
 import { bibleService, type BibleCommentary } from '@/services/bible';
 import { bibleBooksContext } from '@/data/bibleBooksContext';
+
+// Helper Component for consistent section headers
+const SectionHeader = ({ icon: Icon, color, title }: { icon: React.ElementType, color: string, title: string }) => {
+    const colorMap: Record<string, string> = {
+        indigo: 'bg-indigo-50 text-indigo-600',
+        violet: 'bg-violet-50 text-violet-600',
+        amber: 'bg-amber-50 text-amber-600',
+        emerald: 'bg-emerald-50 text-emerald-600',
+    };
+    const activeColor = colorMap[color] || colorMap.indigo;
+
+    return (
+        <div className="flex items-center gap-2 mb-3">
+            <div className={`p-1.5 rounded-lg ${activeColor}`}>
+                <Icon className="w-4 h-4" />
+            </div>
+            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">{title}</h3>
+        </div>
+    );
+};
 
 interface VerseContextModalProps {
     isOpen: boolean;
@@ -15,6 +36,7 @@ interface VerseContextModalProps {
 }
 
 export function VerseContextModal({ isOpen, onClose, verseRef, passageText, verseBookId, chapter, verse }: VerseContextModalProps) {
+    const navigate = useNavigate();
 
     // Close on escape
     useEffect(() => {
@@ -105,39 +127,35 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
 
                 {/* Scrollable Content */}
                 <div className="overflow-y-auto flex-1 bg-slate-50/50">
-                    <div className="p-6 md:p-8 space-y-8">
+                    <div className="p-6 md:p-8 space-y-8 pb-32"> {/* Added padding bottom for sticky footer overlap safety if needed, though structure separates it */}
 
-                        {/* 0. Static Book Context (Study Mode) */}
+                        {/* 0. Static Book Context */}
                         {bookContext && (
-                            <section className="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100/50 space-y-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <BookOpen className="w-4 h-4 text-indigo-700" />
-                                    <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Contexto de {bookContext.name}</h3>
-                                </div>
+                            <section className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                                <SectionHeader icon={BookOpen} color="indigo" title={`Contexto de ${bookContext.name}`} />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900/60 uppercase tracking-widest">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-widest">
                                             <User className="w-3 h-3" /> Autor
                                         </div>
-                                        <p className="text-sm text-slate-700 leading-snug">{bookContext.author}</p>
+                                        <p className="text-sm text-slate-700 leading-snug font-medium">{bookContext.author}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900/60 uppercase tracking-widest">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-widest">
                                             <Calendar className="w-3 h-3" /> Data
                                         </div>
-                                        <p className="text-sm text-slate-700 leading-snug">{bookContext.date}</p>
+                                        <p className="text-sm text-slate-700 leading-snug font-medium">{bookContext.date}</p>
                                     </div>
                                     <div className="col-span-1 md:col-span-2 space-y-1">
-                                        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900/60 uppercase tracking-widest">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-widest">
                                             <Target className="w-3 h-3" /> Propósito
                                         </div>
                                         <p className="text-sm text-slate-700 leading-relaxed">{bookContext.purpose}</p>
                                     </div>
                                 </div>
-                                {/* Book Themes Chips */}
                                 <div className="flex flex-wrap gap-2 pt-2">
                                     {bookContext.themes.map(t => (
-                                        <span key={t} className="px-2 py-1 bg-white border border-indigo-100/50 rounded text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
+                                        <span key={t} className="px-2.5 py-1 bg-slate-100 rounded-md text-[10px] font-bold text-slate-600 uppercase tracking-wider">
                                             {t}
                                         </span>
                                     ))}
@@ -145,7 +163,7 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
                             </section>
                         )}
 
-                        {/* Loading State for Verse Context */}
+                        {/* Loading State */}
                         {isLoadingContext ? (
                             <div className="p-8 space-y-6 flex flex-col items-center justify-center text-center opacity-70">
                                 <Sparkles className="w-8 h-8 text-indigo-300 animate-pulse mb-3" />
@@ -156,16 +174,11 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
                         ) : data ? (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
 
-                                {/* 1. Contexto Histórico (Specific Verse) */}
+                                {/* 1. Contexto Histórico */}
                                 {data.historical_context && (
                                     <section>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">
-                                                <Compass className="w-4 h-4" />
-                                            </div>
-                                            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Contexto do Versículo</h3>
-                                        </div>
-                                        <p className="text-slate-600 text-sm leading-relaxed text-justify bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                                        <SectionHeader icon={Compass} color="indigo" title="Contexto Histórico" />
+                                        <p className="text-slate-700 text-sm leading-relaxed text-justify bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                                             {data.historical_context}
                                         </p>
                                     </section>
@@ -174,15 +187,10 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
                                 {/* 2. Insights Teológicos */}
                                 {data.theological_insights?.length > 0 && (
                                     <section>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <div className="p-1.5 bg-violet-100 rounded-lg text-violet-600">
-                                                <Scroll className="w-4 h-4" />
-                                            </div>
-                                            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Visão Teológica</h3>
-                                        </div>
+                                        <SectionHeader icon={Scroll} color="violet" title="Visão Teológica" />
                                         <ul className="space-y-3">
                                             {data.theological_insights.map((insight, idx) => (
-                                                <li key={idx} className="bg-white p-3 rounded-xl border-l-4 border-violet-300 shadow-sm text-sm text-slate-700 leading-relaxed">
+                                                <li key={idx} className="bg-white p-4 rounded-2xl border-l-4 border-violet-300 shadow-sm text-sm text-slate-700 leading-relaxed">
                                                     {insight}
                                                 </li>
                                             ))}
@@ -190,19 +198,14 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
                                     </section>
                                 )}
 
-                                {/* 3. Aplicabilidade */}
+                                {/* 3. Aplicabilidade (Bullets) */}
                                 {data.practical_application?.length > 0 && (
                                     <section>
-                                        <div className="flex items-center gap-2 mb-3 px-1">
-                                            <Lightbulb className="w-4 h-4 text-amber-500" />
-                                            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Aplicação Prática</h3>
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {data.practical_application.map((app, idx) => (
-                                                <li key={idx} className="flex gap-3 bg-amber-50/50 p-3 rounded-xl border border-amber-100/50 text-sm text-slate-700">
-                                                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white text-amber-600 flex items-center justify-center font-bold text-xs mt-0.5 border border-amber-100 shadow-sm">
-                                                        {idx + 1}
-                                                    </span>
+                                        <SectionHeader icon={Lightbulb} color="amber" title="Aplicação Prática" />
+                                        <ul className="space-y-3 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                                            {data.practical_application.slice(0, 4).map((app, idx) => (
+                                                <li key={idx} className="flex items-start gap-3 text-sm text-slate-700">
+                                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
                                                     <span className="leading-relaxed">{app}</span>
                                                 </li>
                                             ))}
@@ -210,10 +213,46 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
                                     </section>
                                 )}
 
+                                {/* 4. Referências Cruzadas (Chips) */}
+                                {data.cross_references && data.cross_references.length > 0 && (
+                                    <section>
+                                        <SectionHeader icon={LinkIcon} color="emerald" title="Referências Cruzadas" />
+                                        <div className="flex flex-wrap gap-2.5">
+                                            {data.cross_references.map((ref, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => {
+                                                        try {
+                                                            const parts = ref.trim().split(' ');
+                                                            if (parts.length < 2) { onClose(); return; }
+                                                            const refPart = parts.pop();
+                                                            const bookPart = parts.join(' ').toLowerCase().replace('.', '');
+                                                            if (refPart && bookPart) {
+                                                                const chapterNum = refPart.split(':')[0];
+                                                                navigate(`/biblia/${encodeURIComponent(bookPart)}/${chapterNum}`);
+                                                            }
+                                                        } catch (e) {
+                                                            console.warn("Nav error", e);
+                                                        }
+                                                        onClose();
+                                                    }}
+                                                    className="group inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-semibold text-indigo-700 italic hover:bg-indigo-100 hover:border-indigo-200 transition-all shadow-sm active:scale-95"
+                                                >
+                                                    <span className="not-italic opacity-70 group-hover:opacity-100 transition-opacity">
+                                                        <LinkIcon className="w-3 h-3" />
+                                                    </span>
+                                                    {ref}
+                                                    <ExternalLink className="w-3 h-3 opacity-40 ml-0.5 group-hover:translate-x-0.5 transition-transform" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
                                 {/* Author Ref */}
                                 {data.author_ref && (
-                                    <div className="text-center pt-4 border-t border-slate-100">
-                                        <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Fonte / Referência</p>
+                                    <div className="text-center pt-6 pb-2 border-t border-slate-100 mt-6">
+                                        <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Fonte</p>
                                         <p className="text-xs text-slate-500 font-serif italic mt-1">{data.author_ref}</p>
                                     </div>
                                 )}
@@ -228,6 +267,21 @@ export function VerseContextModal({ isOpen, onClose, verseRef, passageText, vers
                         )}
                     </div>
                 </div>
+
+                {/* Sticky Footer Action */}
+                {verseBookId && chapter && (
+                    <div className="p-4 bg-white/80 backdrop-blur-xl border-t border-slate-100 sticky bottom-0 z-10 w-full shrink-0 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)]">
+                        <button
+                            onClick={() => {
+                                navigate(`/biblia/${verseBookId}/${chapter}`);
+                                onClose();
+                            }}
+                            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-all shadow-lg shadow-slate-200 active:scale-[0.98]"
+                        >
+                            Abrir no Capítulo <ArrowRight className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
