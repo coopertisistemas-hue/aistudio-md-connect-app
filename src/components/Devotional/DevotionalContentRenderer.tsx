@@ -230,13 +230,7 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
 
     return (
         <article className="max-w-3xl mx-auto pb-24 animate-in fade-in duration-700">
-            {/* Minimal Audio Player */}
-            <div className="mb-8">
-                <DevotionalAudioPlayer
-                    text={fullAudioText}
-                    variant="minimal"
-                />
-            </div>
+
 
             {/* Header Content */}
             <header className="mb-10 text-center px-4">
@@ -394,6 +388,9 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
                 passageText={modalState.text}
                 isLoading={modalState.isLoading}
             />
+
+            {/* Sticky Audio Player */}
+            <DevotionalAudioPlayer text={fullAudioText} />
         </article>
     );
 }

@@ -37,14 +37,34 @@ export function useBibleAudio({ onEnd }: UseBibleAudioProps = {}) {
         // Stop previous
         synth.cancel();
 
+        // Initialize utterance
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'pt-BR';
-        utterance.rate = rate; // Slightly slower for bible reading
+        utterance.rate = rate;
+        utterance.pitch = 1.0;
 
-        // Try to find a good voice
+        // Smart Voice Selection
         const voices = synth.getVoices();
-        const ptVoice = voices.find(v => v.lang.includes('pt-BR') && (v.name.includes('Google') || v.name.includes('Luciana')));
-        if (ptVoice) utterance.voice = ptVoice;
+        const ptVoices = voices.filter(v => v.lang.startsWith('pt-BR') || v.lang === 'pt_BR');
+
+        // Priority: Google -> Microsoft (Francisca/Antonio) -> Any Microsoft -> Any PT
+        let selectedVoice = ptVoices.find(v => v.name.includes('Google') && v.name.includes('Português'));
+
+        if (!selectedVoice) {
+            selectedVoice = ptVoices.find(v => v.name.includes('Francisca') || v.name.includes('Antonio'));
+        }
+
+        if (!selectedVoice) {
+            selectedVoice = ptVoices.find(v => v.name.includes('Microsoft'));
+        }
+
+        if (!selectedVoice) {
+            selectedVoice = ptVoices[0];
+        }
+
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        }
 
         utterance.onstart = () => setState('playing');
         utterance.onpause = () => setState('paused');
@@ -54,7 +74,6 @@ export function useBibleAudio({ onEnd }: UseBibleAudioProps = {}) {
             onEnd?.();
         };
         utterance.onerror = (e) => {
-            // 'interrupted' or 'canceled' are not real errors usually
             if (e.error !== 'interrupted' && e.error !== 'canceled') {
                 console.error('Speech error', e);
                 setState('error');

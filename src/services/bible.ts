@@ -10,6 +10,18 @@ export interface BibleBookData {
     application: string[];
 }
 
+export interface BibleCommentary {
+    id: string;
+    book_id: string;
+    chapter: number;
+    verse: number;
+    historical_context: string;
+    theological_insights: string[];
+    practical_application: string[];
+    themes: string[];
+    author_ref: string;
+}
+
 export interface BibleVerse {
     book_id: string;
     book_name: string;
@@ -360,12 +372,59 @@ export const bibleService = {
         }
 
         // 2. Handle Ordinals (1 John -> Primeiro João, etc.)
-        // We look for patterns starting with 1, 2, or 3 followed by space or non-letter?
-        // Actually usually "1 Pedro", "2 Reis".
         if (fullName.startsWith('1 ')) return fullName.replace('1 ', 'Primeiro ');
         if (fullName.startsWith('2 ')) return fullName.replace('2 ', 'Segundo ');
         if (fullName.startsWith('3 ')) return fullName.replace('3 ', 'Terceiro ');
 
         return fullName;
+    },
+
+    getVerseCommentary: async (bookId: string, chapter: number, verse: number, verseText?: string): Promise<BibleCommentary | null> => {
+        try {
+            // 1. Normalize ID
+            let searchId = bookId.toLowerCase();
+            if (searchId === 'genesis' || searchId === 'gênesis') searchId = 'gn';
+            // (Add more normalizations if critical, but 'gn' is main one for now)
+
+            // 2. Try DB
+            const { data, error } = await supabase
+                .from('bible_commentaries')
+                .select('*')
+                .eq('book_id', searchId)
+                .eq('chapter', chapter)
+                .eq('verse', verse)
+                .maybeSingle();
+
+            if (error) throw error;
+            if (data) return data as BibleCommentary;
+
+            // 3. If missing and we have text, Generate!
+            if (!data && verseText) {
+                console.log('Context missing, generating via AI...', { searchId, chapter, verse });
+
+                const { data: genData, error: genError } = await supabase.functions.invoke('generate-verse-commentary', {
+                    body: {
+                        book_id: searchId,
+                        chapter,
+                        verse,
+                        text: verseText
+                    }
+                });
+
+                if (genError) {
+                    console.error('Generation Error:', genError);
+                    return null;
+                }
+
+                if (genData?.data) {
+                    return genData.data as BibleCommentary;
+                }
+            }
+
+            return null;
+        } catch (err) {
+            console.error('Error fetching commentary:', err);
+            return null;
+        }
     }
 };
