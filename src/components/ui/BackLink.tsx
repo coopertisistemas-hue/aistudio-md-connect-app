@@ -16,10 +16,8 @@ export function BackLink({ to, label = "Voltar", className }: BackLinkProps) {
         if (to) {
             navigate(to);
         } else {
-            // Check if there is a previous entry in history state (not reliable in all browsers/stacks, but good heuristic)
-            // Or simply use navigate(-1). To be safer about "fallback to Home", we can check key.
-            // If location.key is 'default', it might be a fresh load.
-            if (window.history.length > 2) {
+            // User requested logic: if history > 1, go back. Else fallback Home.
+            if (window.history.length > 1) {
                 navigate(-1);
             } else {
                 navigate(APP_ROUTES.HOME);

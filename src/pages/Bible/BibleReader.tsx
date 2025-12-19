@@ -166,14 +166,23 @@ export default function BibleReader() {
     };
 
     const handlePlayVerse = (verse: BibleVerse) => {
-        const text = `Versículo ${verse.verse}. ${verse.text}`;
-        play(text);
+        if (!data) return;
+        const startIndex = data.verses.findIndex(v => v.verse === verse.verse);
+        if (startIndex === -1) return;
+
+        const versesToRead = data.verses.slice(startIndex);
+        // Clean text for reading
+        const text = versesToRead.map(v => v.text).join('. ');
+
+        play(`A partir do versículo ${verse.verse}. ${text}`);
     };
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="bg-white/80 backdrop-blur-xl p-8 rounded-full shadow-xl border border-white/20">
+                    <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                </div>
             </div>
         );
     }
@@ -193,9 +202,9 @@ export default function BibleReader() {
     }
 
     return (
-        <div className="min-h-screen bg-white pb-24">
+        <div className="min-h-screen pb-24">
             {/* Minimal Header */}
-            <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 py-3 flex items-center justify-between z-20">
+            <div className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-white/20 px-4 py-3 flex items-center justify-between z-20 shadow-sm">
                 <div className="flex items-center gap-4">
                     <BackLink to={`/biblia/${bookId}`} />
                     <div>
@@ -206,18 +215,32 @@ export default function BibleReader() {
 
                 {audioSupported && (
                     <button
-                        onClick={handlePlayChapter}
-                        className="p-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-full transition-colors"
-                        aria-label="Ouvir Capítulo"
+                        onClick={audioState === 'playing' ? stopAudio : handlePlayChapter}
+                        className={cn(
+                            "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all text-xs font-bold uppercase tracking-wider",
+                            audioState === 'playing'
+                                ? "bg-red-50 text-red-600 hover:bg-red-100"
+                                : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                        )}
                     >
-                        <Volume2 className="w-5 h-5" />
+                        {audioState === 'playing' ? (
+                            <>
+                                <div className="w-2 h-2 bg-current rounded-sm" />
+                                <span>Parar</span>
+                            </>
+                        ) : (
+                            <>
+                                <Volume2 className="w-4 h-4" />
+                                <span>Ouvir</span>
+                            </>
+                        )}
                     </button>
                 )}
             </div>
 
             {/* Reader Content */}
-            <div className="max-w-2xl mx-auto px-6 py-8">
-                <div className="space-y-6 text-xl leading-loose text-slate-800 font-serif">
+            <div className="max-w-3xl mx-auto px-4 py-8">
+                <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 md:p-10 shadow-sm border border-white/50 space-y-6 text-xl leading-loose text-slate-800 font-serif">
                     {data.verses.map((v) => (
                         <VerseActionMenu
                             key={v.verse}
@@ -262,6 +285,8 @@ export default function BibleReader() {
                 verseRef={`${displayBookName} ${currentChapter}:${explainModal.verse?.verse}`}
                 passageText={explainModal.verse?.text || null}
                 verseBookId={bookId}
+                chapter={currentChapter}
+                verse={explainModal.verse?.verse}
             />
 
             {/* Audio Player */}
