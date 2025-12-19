@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Lock, Users, Eye, CheckCircle2 } from 'lucide-react';
+import { Lock, Users, Eye, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BackLink } from '@/components/ui/BackLink';
 import { Input } from '@/components/ui/input';

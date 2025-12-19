@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { PublicApi, type PublicPage } from '@/lib/api/public'; // Assuming this exists from previous step
 import { Loader2, AlertCircle, FileText } from 'lucide-react';
 import { BackLink } from '@/components/ui/BackLink';
@@ -17,7 +16,6 @@ export default function PublicContentPage({ slug: propSlug }: PublicContentPageP
     const [page, setPage] = useState<PublicPage | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
-    const navigate = useNavigate();
 
     const activeSlug = propSlug;
 

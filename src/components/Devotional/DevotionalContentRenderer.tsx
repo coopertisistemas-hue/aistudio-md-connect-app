@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Quote, BookOpen, Sparkles } from 'lucide-react';
 import { parseBibleRefs } from '@/utils/bibleParser';
 import { VerseContextModal } from '@/components/Bible/VerseContextModal';
@@ -11,7 +11,7 @@ interface DevotionalContentRendererProps {
     title: string;
     subtitle?: string;
     content: string;
-    author?: { name: string; avatar_url: string | null } | null;
+    author?: { name: string; avatar_url: string | null | undefined } | null;
     coverUrl?: string | null; // [NEW] For image sharing
 }
 

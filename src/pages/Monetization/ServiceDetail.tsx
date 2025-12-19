@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, MessageCircle, CheckCircle2 } from 'lucide-react';
+import { MessageCircle, CheckCircle2 } from 'lucide-react';
 import { BackLink } from '@/components/ui/BackLink';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { monetizationService } from '@/services/monetization';
 import type { Service } from '@/types/monetization';
 
 export default function ServiceDetail() {
     const { id } = useParams();
-    const navigate = useNavigate();
     const [service, setService] = useState<Service | null>(null);
     const [loading, setLoading] = useState(true);
 

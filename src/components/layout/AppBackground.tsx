@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 
 export function AppBackground() {
     const [reduceMotion, setReduceMotion] = useState(false);
     const [videoLoaded, setVideoLoaded] = useState(false);
-    const location = useLocation();
 
     // Global Video Style: All pages now share the same 'Home' glass/video style
     const isHome = true;

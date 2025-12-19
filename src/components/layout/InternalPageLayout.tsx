@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { type LucideIcon } from 'lucide-react';
 import { PageIntro } from '@/components/layout/PageIntro';
 import { AppFooter } from '@/components/layout/AppFooter';
@@ -15,7 +15,7 @@ interface InternalPageLayoutProps {
     showSponsor?: boolean; // Controls SponsorOfTheDay visibility
     showDoe?: boolean;     // Controls DonateBlock visibility
     showFooter?: boolean;  // Controls AppFooter visibility
-    
+
     backPath?: string;
     actions?: ReactNode;
     className?: string;
@@ -66,7 +66,7 @@ export function InternalPageLayout({
                         </div>
                     </div>
                 )}
-                
+
                 {/* Global App Footer */}
                 {showFooter && <AppFooter />}
             </div>

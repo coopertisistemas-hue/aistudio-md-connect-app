@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Volume2, VolumeX, Radio as RadioIcon, WifiOff, Loader2, ArrowLeft } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Radio as RadioIcon, WifiOff, Loader2 } from 'lucide-react';
 import { BackLink } from '@/components/ui/BackLink';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';

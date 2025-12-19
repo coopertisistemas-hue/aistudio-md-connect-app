@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 // import { TopBar } from '@/components/home/TopBar'; // Removed unused
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, GraduationCap, ArrowRight, BookOpen } from 'lucide-react';
+import { GraduationCap, ArrowRight, BookOpen } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/routes';
 import { PageIntro } from '@/components/layout/PageIntro';
 
