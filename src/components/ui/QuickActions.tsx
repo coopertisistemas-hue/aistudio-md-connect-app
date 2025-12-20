@@ -282,37 +282,96 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                 isOpen={showGlobalDrawer}
                 onClose={() => {
                     setShowGlobalDrawer(false);
-                    setSearchQuery(''); // Reset search on close
+                    setSearchQuery('');
                 }}
-                title="Todos os Recursos"
+                className="!bg-slate-50/90" // Slight tint for premium feel override
+                title="" // We implement custom header
+                showCloseButton={false} // We provide custom close
             >
-                <div className="pb-10 space-y-6">
-                    {/* Search */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <Input
-                            placeholder="Buscar recurso..."
-                            className="pl-10"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            autoFocus={false}
-                        />
+                {/* Custom Sticky Header */}
+                <div className="sticky top-0 z-50 -mx-6 px-6 pt-5 pb-2 bg-white/80 backdrop-blur-xl border-b border-white/40 shadow-sm transition-all">
+                    {/* Title Row */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 className="text-xl font-bold text-slate-900 tracking-tight leading-none">Todos os Recursos</h2>
+                            <p className="text-xs text-slate-500 font-medium mt-1">Encontre por nome ou categoria</p>
+                        </div>
+                        <button
+                            onClick={() => setShowGlobalDrawer(false)}
+                            className="group p-2 -mr-2 text-slate-400 hover:text-slate-600 bg-transparent hover:bg-slate-100/50 rounded-full transition-all active:scale-95"
+                        >
+                            <div className="ring-1 ring-slate-200/50 rounded-full p-1 group-hover:ring-slate-300/60 transition-colors">
+                                <Search className="hidden" /> {/* Hack to keep import unused warning away if I remove X, but I imported X in Drawer... wait, I need X here */}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                            </div>
+                        </button>
                     </div>
 
+                    {/* Search Bar */}
+                    <div className="relative group mb-3">
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                        <div className="relative">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                            <Input
+                                placeholder="Buscar recurso..."
+                                className="pl-10 h-10 bg-slate-100/50 border-slate-200/50 focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-500/5 rounded-xl transition-all placeholder:text-slate-400 text-slate-700 font-medium text-sm"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                autoFocus={false}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Category Chips (Scrollable) */}
+                    {!searchQuery && (
+                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-6 px-6 mask-fade-right">
+                            {categories.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => {
+                                        const el = document.getElementById(`category-${cat.id}`);
+                                        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-100 shadow-sm text-[11px] font-bold text-slate-600 whitespace-nowrap active:scale-95 transition-transform hover:bg-slate-50 hover:border-slate-200"
+                                >
+                                    <span>{cat.title}</span>
+                                    <span className="bg-slate-100 text-slate-400 px-1.5 rounded-md text-[9px]">{cat.items.length}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="pt-2 pb-10 space-y-6">
                     {/* Results */}
                     {filteredCategories.length === 0 ? (
-                        <div className="text-center py-10 opacity-60">
-                            <p className="text-sm text-slate-500">Nenhum recurso encontrado para "{searchQuery}"</p>
+                        <div className="text-center py-12 flex flex-col items-center justify-center gap-3 opacity-60">
+                            <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+                                <Search className="w-6 h-6 text-slate-300" />
+                            </div>
+                            <p className="text-sm font-medium text-slate-500">Nenhum recurso encontrado para "{searchQuery}"</p>
                         </div>
                     ) : (
-                        <div className="space-y-8">
+                        <div className="space-y-6">
                             {filteredCategories.map((cat) => (
-                                <div key={cat.id}>
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <cat.categoryIcon className={`w-4 h-4 ${cat.categoryIconColor}`} />
-                                        <h3 className="font-bold text-sm text-slate-800">{cat.title}</h3>
+                                <div
+                                    key={cat.id}
+                                    id={`category-${cat.id}`}
+                                    className="bg-white/40 border border-white/60 shadow-sm rounded-3xl p-4 sm:p-5 scroll-mt-44" // scroll-mt handles sticky header offset
+                                >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-1.5 bg-white shadow-sm rounded-lg border border-slate-50">
+                                                <cat.categoryIcon className={`w-4 h-4 ${cat.categoryIconColor}`} />
+                                            </div>
+                                            <h3 className="font-bold text-sm text-slate-700 tracking-tight">{cat.title}</h3>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-slate-400 bg-slate-100/80 px-2 py-0.5 rounded-full border border-slate-100">
+                                            {cat.items.length}
+                                        </span>
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-2 gap-y-4 sm:gap-4">
                                         {cat.items.map((item, idx) => (
                                             <CategoryItem
                                                 key={idx}
@@ -321,9 +380,12 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                                                 color={item.color}
                                                 bg={item.bg}
                                                 comingSoon={item.comingSoon}
+                                                variant="large" // Larger variant for global view
                                                 onClick={() => {
                                                     if (item.comingSoon) {
-                                                        toast.info("Em breve");
+                                                        toast.info("Em breve", {
+                                                            description: "Esta funcionalidade estará disponível em breve."
+                                                        });
                                                         return;
                                                     }
                                                     trackAction(item.label.toLowerCase(), item.route);
@@ -339,7 +401,6 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                     )}
                 </div>
             </Drawer>
-
         </div>
     );
 }
@@ -393,22 +454,26 @@ function ProminentFeatureCard({ title, subtitle, icon: Icon, gradient, iconBg, o
     );
 }
 
-function CategoryItem({ icon: Icon, label, onClick, color, bg, comingSoon }: any) {
+function CategoryItem({ icon: Icon, label, onClick, color, bg, comingSoon, variant = 'default' }: any) {
+    const isLarge = variant === 'large';
+    const sizeClasses = isLarge ? "w-12 h-12 sm:w-14 sm:h-14" : "w-12 h-12";
+    const iconSize = isLarge ? "w-5 h-5 sm:w-6 sm:h-6" : "w-5 h-5";
+    const textSize = isLarge ? "text-[11px] sm:text-xs" : "text-[10px]";
+
     return (
         <button
             onClick={onClick}
-            className={`flex flex-col items-center justify-start gap-2 group active:scale-95 transition-transform ${comingSoon ? 'opacity-60 grayscale-[0.5]' : ''}`}
+            className={`flex flex-col items-center justify-start gap-2 group active:scale-95 transition-transform ${comingSoon ? 'opacity-80' : ''}`}
         >
-            <div className={`w-12 h-12 shrink-0 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center transition-all ${bg} group-hover:brightness-95 relative`}>
-                <Icon className={`w-5 h-5 ${color}`} />
+            <div className={`${sizeClasses} shrink-0 rounded-[18px] sm:rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center transition-all ${bg} group-hover:brightness-95 group-hover:scale-105 relative`}>
+                <Icon className={`${iconSize} ${color} ${comingSoon ? 'opacity-50 grayscale' : ''}`} />
                 {comingSoon && (
-                    <div className="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-slate-500"></span>
+                    <div className="absolute -bottom-2 bg-slate-100 border border-slate-200 shadow-sm px-1.5 py-0.5 rounded-full z-10">
+                        <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wide leading-none block">Breve</span>
                     </div>
                 )}
             </div>
-            <span className="font-bold text-[10px] text-slate-600 text-center leading-tight max-w-[4rem] line-clamp-2 min-h-[2.5em] flex items-start justify-center">
+            <span className={`font-bold ${textSize} text-slate-600 text-center leading-tight max-w-[5rem] line-clamp-2 min-h-[2.5em] flex items-start justify-center group-hover:text-slate-900 transition-colors`}>
                 {label}
             </span>
         </button>
