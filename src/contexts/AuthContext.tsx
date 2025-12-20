@@ -18,20 +18,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) {
                 // Fetch enriched profile from Edge Function
-                supabase.functions.invoke('auth-me').then(({ data, error }) => {
-                    if (!error && data) {
-                        // We could store the full enriched profile here if we extended the Context type.
-                        // For now, ensuring we have the user and maybe setting a local storage cache or similar.
-                        // Actually, just confirming we can reach the user data.
-                        // We stick to setting the basic user for now to avoid breaking types, 
-                        // but ideally we should update the Context to hold 'profile' and 'church'.
-                        setUser(session.user);
-                    } else {
-                        // Fallback or just set user
-                        setUser(session.user);
-                    }
-                    setLoading(false);
-                });
+                supabase.functions.invoke('auth-me')
+                    .then(({ data, error }) => {
+                        if (!error && data) {
+                            setUser(session.user);
+                        } else {
+                            // Fallback to basic session user if auth-me fails (e.g. 401, 500)
+                            console.warn('Auth-me check failed, falling back to basic session:', error?.message || 'Unknown error');
+                            setUser(session.user);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Unexpected error during auth-me:', err);
+                        setUser(session.user); // Fallback
+                    })
+                    .finally(() => {
+                        setLoading(false);
+                    });
             } else {
                 setUser(null);
                 setLoading(false);
