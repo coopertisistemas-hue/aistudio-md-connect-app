@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
-import { MessageCircleHeart, Calendar, ChevronRight, Book, Users, LayoutGrid, Music, FileText, Youtube, Sparkles, BookOpen, Megaphone, Share2, Lightbulb, UserPlus, Mic2, Music4, HeartHandshake, Handshake, ShoppingBag, Database, Home, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { MessageCircleHeart, Calendar, ChevronRight, Book, Users, LayoutGrid, Music, FileText, Youtube, Sparkles, BookOpen, Megaphone, Share2, Lightbulb, UserPlus, Mic2, Music4, HeartHandshake, Handshake, ShoppingBag, Database, Home, TrendingUp, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/routes';
 import { analytics } from '@/lib/analytics';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { toast } from 'sonner';
 import { FLAGS } from '@/lib/flags';
+import { Drawer } from '@/components/ui/Drawer';
+import { Input } from '@/components/ui/input';
 
 interface QuickActionItem {
     id?: string;
@@ -20,37 +22,11 @@ interface QuickActionsProps {
 
 export function QuickActions({ actions: _externalActions }: QuickActionsProps = {}) {
     const navigate = useNavigate();
-    const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
 
-    // Save/Load Preference
-    useEffect(() => {
-        const savedView = localStorage.getItem('md_home_modules_view');
-        if (savedView === 'expanded') {
-            // Expand all by default if preference is expanded
-            setExpandedCategories(categories.map(c => c.id));
-        }
-    }, []);
-
-    const toggleCategory = (id: string) => {
-        setExpandedCategories(prev => {
-            const isExpanded = prev.includes(id);
-            const newDocs = isExpanded ? prev.filter(catId => catId !== id) : [...prev, id];
-            return newDocs;
-        });
-    };
-
-    const toggleAll = () => {
-        const allIds = categories.map(c => c.id);
-        const isAllExpanded = expandedCategories.length === categories.length; // Simplified check
-
-        if (isAllExpanded) {
-            setExpandedCategories([]);
-            localStorage.setItem('md_home_modules_view', 'compact');
-        } else {
-            setExpandedCategories(allIds);
-            localStorage.setItem('md_home_modules_view', 'expanded');
-        }
-    };
+    // State for Drawers
+    const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+    const [showGlobalDrawer, setShowGlobalDrawer] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const trackAction = (label: string, destination: string) => {
         analytics.track({
@@ -134,7 +110,19 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
         }
     ];
 
-    const allExpanded = expandedCategories.length === categories.length;
+    const activeCategory = categories.find(c => c.id === activeCategoryId);
+
+    // Filter Logic for Global Drawer
+    const filteredCategories = useMemo(() => {
+        if (!searchQuery.trim()) return categories;
+        const lowerQuery = searchQuery.toLowerCase();
+
+        return categories.map(cat => ({
+            ...cat,
+            items: cat.items.filter(item => item.label.toLowerCase().includes(lowerQuery))
+        })).filter(cat => cat.items.length > 0);
+    }, [searchQuery, categories]);
+
 
     return (
         <div className="mb-8 px-5">
@@ -197,28 +185,24 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm font-semibold text-slate-900 tracking-tight">Recursos</h3>
                 <button
-                    onClick={toggleAll}
+                    onClick={() => setShowGlobalDrawer(true)}
                     className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors uppercase tracking-wide flex items-center gap-1"
                 >
-                    {allExpanded ? 'Mostrar menos' : 'Ver todos os recursos'}
-                    {allExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    Ver todos os recursos
+                    <ChevronRight className="w-3 h-3" />
                 </button>
             </div>
 
-            {/* Categorized Menu - 2 Columns */}
+            {/* Categorized Menu - Limited Preview */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-8">
                 {categories.map((category) => {
-                    const isExpanded = expandedCategories.includes(category.id);
-                    const cols = 2; // Items per row in the grid
-                    const limit = cols; // Limit to 1 row
+                    const limit = 2; // Always show 2 items
                     const hasMore = category.items.length > limit;
-
-                    // Display items: all if expanded, otherwise limited
-                    const visibleItems = isExpanded ? category.items : category.items.slice(0, limit);
+                    const visibleItems = category.items.slice(0, limit);
 
                     return (
                         <div key={category.id} className="flex flex-col h-full">
-                            {/* Premium Header Style with Local Toggle */}
+                            {/* Premium Header Style */}
                             <div className="flex items-center justify-between mb-4 h-6">
                                 <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                                     <category.categoryIcon className={`w-4 h-4 ${category.categoryIconColor}`} />
@@ -226,11 +210,10 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                                 </h2>
                                 {hasMore && (
                                     <button
-                                        onClick={() => toggleCategory(category.id)}
+                                        onClick={() => setActiveCategoryId(category.id)}
                                         className="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-0.5"
                                     >
-                                        {isExpanded ? 'Menos' : 'Ver mais'}
-                                        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                        Ver mais
                                     </button>
                                 )}
                             </div>
@@ -262,6 +245,101 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                     );
                 })}
             </div>
+
+            {/* --- DRAWER: Single Category --- */}
+            <Drawer
+                isOpen={!!activeCategoryId}
+                onClose={() => setActiveCategoryId(null)}
+                title={activeCategory?.title}
+            >
+                {activeCategory && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-8">
+                        {activeCategory.items.map((item, idx) => (
+                            <CategoryItem
+                                key={idx}
+                                icon={item.icon}
+                                label={item.label}
+                                color={item.color}
+                                bg={item.bg}
+                                comingSoon={item.comingSoon}
+                                onClick={() => {
+                                    if (item.comingSoon) {
+                                        toast.info("Em breve");
+                                        return;
+                                    }
+                                    trackAction(item.label.toLowerCase(), item.route);
+                                    setActiveCategoryId(null); // Close drawer
+                                    navigate(item.route);
+                                }}
+                            />
+                        ))}
+                    </div>
+                )}
+            </Drawer>
+
+            {/* --- DRAWER: Global Resources --- */}
+            <Drawer
+                isOpen={showGlobalDrawer}
+                onClose={() => {
+                    setShowGlobalDrawer(false);
+                    setSearchQuery(''); // Reset search on close
+                }}
+                title="Todos os Recursos"
+            >
+                <div className="pb-10 space-y-6">
+                    {/* Search */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Input
+                            placeholder="Buscar recurso..."
+                            className="pl-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            autoFocus={false}
+                        />
+                    </div>
+
+                    {/* Results */}
+                    {filteredCategories.length === 0 ? (
+                        <div className="text-center py-10 opacity-60">
+                            <p className="text-sm text-slate-500">Nenhum recurso encontrado para "{searchQuery}"</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-8">
+                            {filteredCategories.map((cat) => (
+                                <div key={cat.id}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <cat.categoryIcon className={`w-4 h-4 ${cat.categoryIconColor}`} />
+                                        <h3 className="font-bold text-sm text-slate-800">{cat.title}</h3>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        {cat.items.map((item, idx) => (
+                                            <CategoryItem
+                                                key={idx}
+                                                icon={item.icon}
+                                                label={item.label}
+                                                color={item.color}
+                                                bg={item.bg}
+                                                comingSoon={item.comingSoon}
+                                                onClick={() => {
+                                                    if (item.comingSoon) {
+                                                        toast.info("Em breve");
+                                                        return;
+                                                    }
+                                                    trackAction(item.label.toLowerCase(), item.route);
+                                                    setShowGlobalDrawer(false);
+                                                    navigate(item.route);
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </Drawer>
+
         </div>
     );
 }
