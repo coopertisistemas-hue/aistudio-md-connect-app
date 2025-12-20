@@ -13,6 +13,7 @@ interface QuickActionItem {
     id?: string;
     label: string;
     enabled?: boolean;
+    modalOnly?: boolean; // New prop to hide from home preview
     // ... allow other props
 }
 
@@ -23,10 +24,22 @@ interface QuickActionsProps {
 export function QuickActions({ actions: _externalActions }: QuickActionsProps = {}) {
     const navigate = useNavigate();
 
-    // State for Drawers
-    const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+    // State
     const [showGlobalDrawer, setShowGlobalDrawer] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [scrollToCategoryId, setScrollToCategoryId] = useState<string | null>(null);
+
+    // Scroll to category when drawer opens
+    useMemo(() => {
+        if (showGlobalDrawer && scrollToCategoryId) {
+            // Use setTimeout to ensure DOM is rendered after drawer animation/mount
+            setTimeout(() => {
+                const el = document.getElementById(`category-${scrollToCategoryId}`);
+                el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setScrollToCategoryId(null); // Reset
+            }, 300); // 300ms matches drawer animation roughly
+        }
+    }, [showGlobalDrawer, scrollToCategoryId]);
 
     const trackAction = (label: string, destination: string) => {
         analytics.track({
@@ -47,9 +60,11 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             categoryIcon: Book,
             categoryIconColor: 'text-blue-500',
             items: [
+                { label: 'Bíblia', icon: Book, route: APP_ROUTES.BIBLE, color: 'text-indigo-600', bg: 'bg-slate-100', modalOnly: true }, // Highlight
+                { label: 'Devocional', icon: BookOpen, route: '/devocionais/today', color: 'text-emerald-600', bg: 'bg-emerald-50', modalOnly: true }, // Highlight
                 { label: 'Estudo Bíblico', icon: FileText, route: APP_ROUTES.STUDIES, color: 'text-blue-600', bg: 'bg-blue-50' },
-                { label: 'Versículo', icon: Sparkles, route: APP_ROUTES.VERSE_POSTER, color: 'text-amber-600', bg: 'bg-amber-50' }, // "Versiculo do Dia" shortened
-                { label: 'Planos', icon: Book, route: '/plans', color: 'text-indigo-600', bg: 'bg-indigo-50', comingSoon: true }, // "Plano de Leitura" shortened
+                { label: 'Versículo', icon: Sparkles, route: APP_ROUTES.VERSE_POSTER, color: 'text-amber-600', bg: 'bg-amber-50' },
+                { label: 'Planos', icon: Book, route: '/plans', color: 'text-indigo-600', bg: 'bg-indigo-50', comingSoon: true },
             ]
         },
         {
@@ -59,7 +74,7 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             categoryIconColor: 'text-emerald-500',
             items: [
                 { label: 'Discipulado', icon: Users, route: '/discipleship', color: 'text-emerald-600', bg: 'bg-emerald-50', comingSoon: true },
-                { label: 'Células', icon: Home, route: '/cells', color: 'text-orange-600', bg: 'bg-orange-50', comingSoon: true }, // "Grupo Célula" shortened
+                { label: 'Células', icon: Home, route: '/cells', color: 'text-orange-600', bg: 'bg-orange-50', comingSoon: true },
             ]
         },
         {
@@ -68,6 +83,7 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             categoryIcon: Users,
             categoryIconColor: 'text-pink-500',
             items: [
+                { label: 'Pedido De Oração', icon: MessageCircleHeart, route: APP_ROUTES.PRAYER, color: 'text-purple-600', bg: 'bg-purple-50', modalOnly: true }, // Highlight
                 { label: 'Mural', icon: Megaphone, route: APP_ROUTES.MURAL, color: 'text-pink-600', bg: 'bg-pink-50' },
                 { label: 'Testemunhos', icon: MessageCircleHeart, route: '/testimonies', color: 'text-cyan-600', bg: 'bg-cyan-50', comingSoon: true },
                 { label: 'Convidar', icon: Share2, route: '/invite', color: 'text-purple-600', bg: 'bg-purple-50', comingSoon: true },
@@ -109,8 +125,6 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             ]
         }
     ];
-
-    const activeCategory = categories.find(c => c.id === activeCategoryId);
 
     // Filter Logic for Global Drawer
     const filteredCategories = useMemo(() => {
@@ -196,9 +210,11 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             {/* Categorized Menu - Limited Preview */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-8">
                 {categories.map((category) => {
-                    const limit = 2; // Always show 2 items
-                    const hasMore = category.items.length > limit;
-                    const visibleItems = category.items.slice(0, limit);
+                    const limit = 2;
+                    // Filter out modalOnly items for preview
+                    const previewItems = category.items.filter(i => !i.modalOnly).slice(0, limit);
+                    // Always show 2 items logic applies to the filtered list
+                    // "Ver mais" always visible as requested to access specific category in modal
 
                     return (
                         <div key={category.id} className="flex flex-col h-full">
@@ -208,19 +224,20 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                                     <category.categoryIcon className={`w-4 h-4 ${category.categoryIconColor}`} />
                                     {category.title}
                                 </h2>
-                                {hasMore && (
-                                    <button
-                                        onClick={() => setActiveCategoryId(category.id)}
-                                        className="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-0.5"
-                                    >
-                                        Ver mais
-                                    </button>
-                                )}
+                                <button
+                                    onClick={() => {
+                                        setShowGlobalDrawer(true);
+                                        setScrollToCategoryId(category.id);
+                                    }}
+                                    className="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-0.5"
+                                >
+                                    Ver mais
+                                </button>
                             </div>
 
                             {/* 2-column grid for buttons */}
                             <div className="grid grid-cols-2 gap-2">
-                                {visibleItems.map((item, idx) => (
+                                {previewItems.map((item, idx) => (
                                     <CategoryItem
                                         key={idx}
                                         icon={item.icon}
@@ -245,37 +262,6 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                     );
                 })}
             </div>
-
-            {/* --- DRAWER: Single Category --- */}
-            <Drawer
-                isOpen={!!activeCategoryId}
-                onClose={() => setActiveCategoryId(null)}
-                title={activeCategory?.title}
-            >
-                {activeCategory && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-8">
-                        {activeCategory.items.map((item, idx) => (
-                            <CategoryItem
-                                key={idx}
-                                icon={item.icon}
-                                label={item.label}
-                                color={item.color}
-                                bg={item.bg}
-                                comingSoon={item.comingSoon}
-                                onClick={() => {
-                                    if (item.comingSoon) {
-                                        toast.info("Em breve");
-                                        return;
-                                    }
-                                    trackAction(item.label.toLowerCase(), item.route);
-                                    setActiveCategoryId(null); // Close drawer
-                                    navigate(item.route);
-                                }}
-                            />
-                        ))}
-                    </div>
-                )}
-            </Drawer>
 
             {/* --- DRAWER: Global Resources --- */}
             <Drawer
