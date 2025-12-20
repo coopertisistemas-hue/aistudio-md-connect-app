@@ -19,6 +19,7 @@ import Home from '@/pages/Home';
 
 // Lazy Load Internal/Heavy Pages
 const PublicContentPage = lazy(() => import('@/pages/public/PublicContentPage'));
+const MissionPage = lazy(() => import('@/pages/public/MissionPage'));
 const Perfil = lazy(() => import('@/pages/Placeholders').then(m => ({ default: m.Perfil })));
 const BibleHome = lazy(() => import('@/pages/Bible/BibleHome'));
 const BibleBook = lazy(() => import('@/pages/Bible/BibleBook'));
@@ -88,6 +89,7 @@ export default function App() {
                 <Route element={<PublicLayout />}>
                   <Route path={APP_ROUTES.HOME} element={<LandingPage />} />
                   <Route path={APP_ROUTES.ABOUT} element={<PublicContentPage slug="entenda" />} />
+                  <Route path={APP_ROUTES.MISSION} element={<MissionPage />} />
                   <Route path="biblia" element={<BibleHome />} />
                   <Route path="biblia/:bookId" element={<BibleBook />} />
                   <Route path="biblia/:bookId/:chapterId" element={<BibleReader />} />

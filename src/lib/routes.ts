@@ -24,6 +24,7 @@ export const APP_ROUTES = {
     DONATE: '/doe',
     PARTNERS: '/parceiros',
     PARTNER_JOIN: '/seja-parceiro',
+    MISSION: '/missao',
 
     // Legal
     PRIVACY: '/privacidade',
@@ -51,6 +52,7 @@ export const FOOTER_LINKS = {
     ],
     institutional: [
         { label: 'Sobre o Projeto', path: APP_ROUTES.ABOUT },
+        { label: 'Missão e Valores', path: APP_ROUTES.MISSION },
         { label: 'Apoie a Obra', path: APP_ROUTES.DONATE, icon: DollarSign },
         { label: 'Seja Parceiro', path: APP_ROUTES.PARTNERS, icon: Handshake },
     ]
