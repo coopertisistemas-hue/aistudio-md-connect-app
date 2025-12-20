@@ -1,8 +1,10 @@
-import { MessageCircleHeart, Calendar, ChevronRight, Book, Users, LayoutGrid, Music, FileText, Youtube, Sparkles, BookOpen, Megaphone, Share2, Lightbulb, UserPlus, Mic2, Music4, HeartHandshake, Handshake, ShoppingBag, Database, Home, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MessageCircleHeart, Calendar, ChevronRight, Book, Users, LayoutGrid, Music, FileText, Youtube, Sparkles, BookOpen, Megaphone, Share2, Lightbulb, UserPlus, Mic2, Music4, HeartHandshake, Handshake, ShoppingBag, Database, Home, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { APP_ROUTES, EXTERNAL_LINKS } from '@/lib/routes';
+import { APP_ROUTES } from '@/lib/routes';
 import { analytics } from '@/lib/analytics';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { toast } from 'sonner';
 import { FLAGS } from '@/lib/flags';
 
 interface QuickActionItem {
@@ -18,6 +20,37 @@ interface QuickActionsProps {
 
 export function QuickActions({ actions: _externalActions }: QuickActionsProps = {}) {
     const navigate = useNavigate();
+    const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+
+    // Save/Load Preference
+    useEffect(() => {
+        const savedView = localStorage.getItem('md_home_modules_view');
+        if (savedView === 'expanded') {
+            // Expand all by default if preference is expanded
+            setExpandedCategories(categories.map(c => c.id));
+        }
+    }, []);
+
+    const toggleCategory = (id: string) => {
+        setExpandedCategories(prev => {
+            const isExpanded = prev.includes(id);
+            const newDocs = isExpanded ? prev.filter(catId => catId !== id) : [...prev, id];
+            return newDocs;
+        });
+    };
+
+    const toggleAll = () => {
+        const allIds = categories.map(c => c.id);
+        const isAllExpanded = expandedCategories.length === categories.length; // Simplified check
+
+        if (isAllExpanded) {
+            setExpandedCategories([]);
+            localStorage.setItem('md_home_modules_view', 'compact');
+        } else {
+            setExpandedCategories(allIds);
+            localStorage.setItem('md_home_modules_view', 'expanded');
+        }
+    };
 
     const trackAction = (label: string, destination: string) => {
         analytics.track({
@@ -39,8 +72,8 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             categoryIconColor: 'text-blue-500',
             items: [
                 { label: 'Estudo Bíblico', icon: FileText, route: APP_ROUTES.STUDIES, color: 'text-blue-600', bg: 'bg-blue-50' },
-                { label: 'Versículo do Dia', icon: Sparkles, route: APP_ROUTES.VERSE_POSTER, color: 'text-amber-600', bg: 'bg-amber-50' },
-                { label: 'Plano de Leitura', icon: Book, route: '/plans', color: 'text-indigo-600', bg: 'bg-indigo-50', comingSoon: true },
+                { label: 'Versículo', icon: Sparkles, route: APP_ROUTES.VERSE_POSTER, color: 'text-amber-600', bg: 'bg-amber-50' }, // "Versiculo do Dia" shortened
+                { label: 'Planos', icon: Book, route: '/plans', color: 'text-indigo-600', bg: 'bg-indigo-50', comingSoon: true }, // "Plano de Leitura" shortened
             ]
         },
         {
@@ -50,7 +83,7 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             categoryIconColor: 'text-emerald-500',
             items: [
                 { label: 'Discipulado', icon: Users, route: '/discipleship', color: 'text-emerald-600', bg: 'bg-emerald-50', comingSoon: true },
-                { label: 'Grupo Célula', icon: Home, route: '/cells', color: 'text-orange-600', bg: 'bg-orange-50', comingSoon: true },
+                { label: 'Células', icon: Home, route: '/cells', color: 'text-orange-600', bg: 'bg-orange-50', comingSoon: true }, // "Grupo Célula" shortened
             ]
         },
         {
@@ -59,10 +92,10 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             categoryIcon: Users,
             categoryIconColor: 'text-pink-500',
             items: [
-                { label: 'Mural', icon: Megaphone, route: APP_ROUTES.MURAL, color: 'text-pink-600', bg: 'bg-pink-50' }, // Shortened from "Mural & Novidade"
+                { label: 'Mural', icon: Megaphone, route: APP_ROUTES.MURAL, color: 'text-pink-600', bg: 'bg-pink-50' },
                 { label: 'Testemunhos', icon: MessageCircleHeart, route: '/testimonies', color: 'text-cyan-600', bg: 'bg-cyan-50', comingSoon: true },
-                { label: 'Convidar', icon: Share2, route: '/invite', color: 'text-purple-600', bg: 'bg-purple-50', comingSoon: true }, // Shortened
-                { label: 'Ideias', icon: Lightbulb, route: '/feedback', color: 'text-yellow-600', bg: 'bg-yellow-50', comingSoon: true }, // Shortened
+                { label: 'Convidar', icon: Share2, route: '/invite', color: 'text-purple-600', bg: 'bg-purple-50', comingSoon: true },
+                { label: 'Ideias', icon: Lightbulb, route: '/feedback', color: 'text-yellow-600', bg: 'bg-yellow-50', comingSoon: true },
             ]
         },
         {
@@ -95,11 +128,13 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
             items: [
                 { label: 'DOE', icon: HeartHandshake, route: APP_ROUTES.DONATE, color: 'text-rose-600', bg: 'bg-rose-50' },
                 { label: 'Parceiro', icon: Handshake, route: '/parceiros', color: 'text-slate-700', bg: 'bg-slate-100', comingSoon: true },
-                { label: 'Store', icon: ShoppingBag, route: '/store', color: 'text-indigo-600', bg: 'bg-indigo-50', comingSoon: true }, // "eCommerce"
-                { label: 'ERP', icon: Database, route: '/erp', color: 'text-blue-800', bg: 'bg-blue-100', comingSoon: true }, // "MD Connect"
+                { label: 'Store', icon: ShoppingBag, route: '/store', color: 'text-indigo-600', bg: 'bg-indigo-50', comingSoon: true },
+                { label: 'ERP', icon: Database, route: '/erp', color: 'text-blue-800', bg: 'bg-blue-100', comingSoon: true },
             ]
         }
     ];
+
+    const allExpanded = expandedCategories.length === categories.length;
 
     return (
         <div className="mb-8 px-5">
@@ -117,7 +152,7 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                         title="Bíblia"
                         subtitle="Sagrada"
                         icon={Book}
-                        gradient="from-slate-800 to-slate-950" // Darker, more premium
+                        gradient="from-slate-800 to-slate-950"
                         iconBg="bg-white/10"
                         variant="vertical"
                         onClick={() => {
@@ -158,42 +193,74 @@ export function QuickActions({ actions: _externalActions }: QuickActionsProps = 
                 />
             </div>
 
+            {/* Global Visibility Control */}
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="text-sm font-semibold text-slate-900 tracking-tight">Recursos</h3>
+                <button
+                    onClick={toggleAll}
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors uppercase tracking-wide flex items-center gap-1"
+                >
+                    {allExpanded ? 'Mostrar menos' : 'Ver todos os recursos'}
+                    {allExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                </button>
+            </div>
+
             {/* Categorized Menu - 2 Columns */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-8">
-                {categories.map((category) => (
-                    <div key={category.id} className="flex flex-col h-full">
-                        {/* Premium Header Style */}
-                        <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2 mb-4">
-                            <category.categoryIcon className={`w-4 h-4 ${category.categoryIconColor}`} />
-                            {category.title}
-                        </h2>
+                {categories.map((category) => {
+                    const isExpanded = expandedCategories.includes(category.id);
+                    const cols = 2; // Items per row in the grid
+                    const limit = cols; // Limit to 1 row
+                    const hasMore = category.items.length > limit;
 
-                        {/* 2-column grid for buttons */}
-                        <div className="grid grid-cols-2 gap-2">
-                            {category.items.map((item, idx) => (
-                                <CategoryItem
-                                    key={idx}
-                                    icon={item.icon}
-                                    label={item.label}
-                                    color={item.color}
-                                    bg={item.bg}
-                                    comingSoon={item.comingSoon}
-                                    onClick={() => {
-                                        if (item.comingSoon) {
-                                            const { toast } = require('sonner'); // Lazy load toast
-                                            toast.info("Em breve", {
-                                                description: "Esta funcionalidade estará disponível em breve."
-                                            });
-                                            return;
-                                        }
-                                        trackAction(item.label.toLowerCase(), item.route);
-                                        navigate(item.route);
-                                    }}
-                                />
-                            ))}
+                    // Display items: all if expanded, otherwise limited
+                    const visibleItems = isExpanded ? category.items : category.items.slice(0, limit);
+
+                    return (
+                        <div key={category.id} className="flex flex-col h-full">
+                            {/* Premium Header Style with Local Toggle */}
+                            <div className="flex items-center justify-between mb-4 h-6">
+                                <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+                                    <category.categoryIcon className={`w-4 h-4 ${category.categoryIconColor}`} />
+                                    {category.title}
+                                </h2>
+                                {hasMore && (
+                                    <button
+                                        onClick={() => toggleCategory(category.id)}
+                                        className="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-0.5"
+                                    >
+                                        {isExpanded ? 'Menos' : 'Ver mais'}
+                                        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* 2-column grid for buttons */}
+                            <div className="grid grid-cols-2 gap-2">
+                                {visibleItems.map((item, idx) => (
+                                    <CategoryItem
+                                        key={idx}
+                                        icon={item.icon}
+                                        label={item.label}
+                                        color={item.color}
+                                        bg={item.bg}
+                                        comingSoon={item.comingSoon}
+                                        onClick={() => {
+                                            if (item.comingSoon) {
+                                                toast.info("Em breve", {
+                                                    description: "Esta funcionalidade estará disponível em breve."
+                                                });
+                                                return;
+                                            }
+                                            trackAction(item.label.toLowerCase(), item.route);
+                                            navigate(item.route);
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
@@ -269,3 +336,4 @@ function CategoryItem({ icon: Icon, label, onClick, color, bg, comingSoon }: any
         </button>
     );
 }
+
