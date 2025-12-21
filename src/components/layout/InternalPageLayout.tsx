@@ -8,6 +8,7 @@ import { DonateBlock } from '@/components/monetization/DonateBlock';
 interface InternalPageLayoutProps {
     title: string;
     subtitle?: string;
+    tagline?: string; // Optional tagline
     icon?: LucideIcon;
     iconClassName?: string;
     children: ReactNode;

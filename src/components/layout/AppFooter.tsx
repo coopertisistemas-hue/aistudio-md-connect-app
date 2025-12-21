@@ -74,19 +74,16 @@ export function AppFooter() {
                     {/* 1.5. Institutional Links (Main Navigation) */}
                     {/* 1.5. Institutional Links (Main Navigation) */}
                     <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-4 w-full px-2">
-                        {FOOTER_LINKS.institutional.map((link) => {
-                            const Icon = link.icon;
-                            return (
-                                <Link
-                                    key={link.path}
-                                    to={link.path}
-                                    onClick={() => trackFooterClick(link.label, link.path)}
-                                    className="flex items-center gap-1 text-[10px] font-semibold text-slate-600 hover:text-blue-600 transition-colors"
-                                >
-                                    {link.label}
-                                </Link>
-                            );
-                        })}
+                        {FOOTER_LINKS.institutional.map((link) => (
+                            <Link
+                                key={link.path}
+                                to={link.path}
+                                onClick={() => trackFooterClick(link.label, link.path)}
+                                className="flex items-center gap-1 text-[10px] font-semibold text-slate-600 hover:text-blue-600 transition-colors"
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
                     </div>
 
                     {/* 2. Legal & Transparency (Compact Cluster) */}
