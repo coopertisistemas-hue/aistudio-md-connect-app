@@ -13,8 +13,10 @@ export interface SEOConfig {
     };
 }
 
-// Base URL - Update this to your production domain
-export const BASE_URL = 'https://mdconnect.app';
+// Base URL - Uses environment variable or fallback
+// Set VITE_PUBLIC_BASE_URL in .env for production
+export const BASE_URL = import.meta.env.VITE_PUBLIC_BASE_URL ||
+    (typeof window !== 'undefined' ? window.location.origin : 'https://mdconnect.app');
 
 // Default SEO values
 export const DEFAULT_SEO: SEOConfig = {
