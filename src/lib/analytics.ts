@@ -17,16 +17,42 @@ export interface TrackingEvent {
     metadata?: Record<string, any>;
 }
 
+// Backend analytics event types
+export type AnalyticsEventName =
+    | 'page_view'
+    | 'click_partner'
+    | 'view_partner'
+    | 'click_donate'
+    | 'play_audio'
+    | 'share_devotional';
+
+interface UTMParams {
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    utm_term?: string;
+    utm_content?: string;
+}
+
 class AnalyticsService {
     private isEnabled: boolean;
     private debugMode: boolean;
     private measurementId: string;
     private isInitialized: boolean = false;
 
+    // Backend analytics properties
+    private sessionId: string | null = null;
+    private utmParams: UTMParams = {};
+    private tenantId: string = 'md-connect';
+
     constructor() {
         this.measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID || '';
         this.isEnabled = !!this.measurementId && import.meta.env.VITE_ANALYTICS_ENABLED !== 'false';
         this.debugMode = import.meta.env.DEV;
+
+        // Initialize session and UTM tracking
+        this.initSession();
+        this.captureUTMParams();
     }
 
     public init() {
@@ -77,6 +103,102 @@ class AnalyticsService {
             console.groupCollapsed(`📊 [Member] Analytics Sent: ${name}`);
             console.log('Params:', params);
             console.groupEnd();
+        }
+    }
+
+    // Session Management
+    private initSession() {
+        const stored = sessionStorage.getItem('analytics_session_id');
+        if (stored) {
+            this.sessionId = stored;
+        } else {
+            this.sessionId = crypto.randomUUID();
+            sessionStorage.setItem('analytics_session_id', this.sessionId);
+        }
+    }
+
+    // UTM Parameters Capture
+    private captureUTMParams() {
+        const params = new URLSearchParams(window.location.search);
+        const utmKeys: (keyof UTMParams)[] = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+        utmKeys.forEach(key => {
+            const value = params.get(key);
+            if (value) {
+                this.utmParams[key] = value;
+                sessionStorage.setItem(key, value);
+            } else {
+                const stored = sessionStorage.getItem(key);
+                if (stored) this.utmParams[key] = stored;
+            }
+        });
+    }
+
+    // Public getters
+    public getSessionId(): string | null {
+        return this.sessionId;
+    }
+
+    public getUTMParams(): UTMParams {
+        return { ...this.utmParams };
+    }
+
+    // Backend Event Tracking
+    public async trackEvent(
+        eventName: AnalyticsEventName,
+        params?: {
+            partner_id?: string;
+            user_id?: string;
+            user_key?: string;
+            meta?: Record<string, any>;
+        }
+    ): Promise<void> {
+        // Disable backend tracking in development due to CORS
+        // Enable in production by setting VITE_ENABLE_BACKEND_ANALYTICS=true
+        const enableBackendTracking = import.meta.env.VITE_ENABLE_BACKEND_ANALYTICS === 'true';
+
+        if (!enableBackendTracking) {
+            if (this.debugMode) {
+                console.log(`📊 [Analytics] Backend tracking disabled (dev mode). Event: ${eventName}`);
+            }
+            return;
+        }
+
+        try {
+            const payload = {
+                event_name: eventName,
+                page_path: window.location.pathname,
+                tenant_id: this.tenantId,
+                session_id: this.sessionId,
+                ...this.utmParams,
+                ...params
+            };
+
+            if (this.debugMode) {
+                console.log(`📊 [Analytics] trackEvent: ${eventName}`, payload);
+            }
+
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+            const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+            if (!supabaseUrl || !supabaseAnonKey) {
+                if (this.debugMode) console.warn('📊 [Analytics] Supabase credentials not configured');
+                return;
+            }
+
+            await fetch(`${supabaseUrl}/functions/v1/track-event`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseAnonKey}`
+                },
+                body: JSON.stringify(payload)
+            });
+        } catch (error) {
+            // Fail silently to not disrupt user experience
+            if (this.debugMode) {
+                console.error('📊 [Analytics] Failed to track event:', error);
+            }
         }
     }
 }
