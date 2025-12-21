@@ -7,6 +7,7 @@ import { APP_ROUTES, EXTERNAL_LINKS } from '@/lib/routes';
 import { toast } from 'sonner';
 import QRCode from 'react-qr-code'; // Ensure this matches package.json
 import { PixPayload } from '@/lib/pix';
+import { analytics } from '@/lib/analytics';
 
 const SUGGESTED_VALUES = [
     { label: 'R$ 1', value: 1.00 },
@@ -62,12 +63,30 @@ const DonatePage: React.FC = () => {
     const copyPixKey = () => {
         navigator.clipboard.writeText(pixKey);
         toast.success("Chave E-mail copiada!");
+
+        // Track donation intent
+        analytics.trackEvent('click_donate', {
+            meta: {
+                method: 'pix_key',
+                amount: currentAmount,
+                has_amount: currentAmount > 0
+            }
+        });
     };
 
     const copyBrCode = () => {
         if (!brCode) return;
         navigator.clipboard.writeText(brCode);
         toast.success("Código 'Copia e Cola' copiado!");
+
+        // Track donation intent
+        analytics.trackEvent('click_donate', {
+            meta: {
+                method: 'pix_brcode',
+                amount: currentAmount,
+                has_amount: currentAmount > 0
+            }
+        });
     };
 
 
