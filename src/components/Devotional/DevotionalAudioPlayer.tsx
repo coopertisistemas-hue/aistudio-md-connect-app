@@ -1,6 +1,7 @@
 import { useBibleAudio } from '@/hooks/useBibleAudio';
 import { Play, Pause, Square, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils'; // Assuming cn is available or use standard className
+import { analytics } from '@/lib/analytics';
 
 interface DevotionalAudioPlayerProps {
     text: string;
@@ -20,6 +21,14 @@ export function DevotionalAudioPlayer({ text, variant = 'sticky-bottom' }: Devot
             resume();
         } else {
             play(text, 0.9); // 0.9 rate for devotionals
+
+            // Track audio playback
+            analytics.trackEvent('play_audio', {
+                meta: {
+                    source: 'devotional',
+                    text_length: text.length
+                }
+            });
         }
     };
 

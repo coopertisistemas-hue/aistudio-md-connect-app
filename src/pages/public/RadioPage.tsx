@@ -4,6 +4,7 @@ import { Play, Pause, Volume2, VolumeX, Radio as RadioIcon, WifiOff, Loader2 } f
 import { BackLink } from '@/components/ui/BackLink';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { analytics } from '@/lib/analytics';
 
 interface RadioConfig {
     enabled: boolean;
@@ -97,6 +98,15 @@ const RadioPage: React.FC = () => {
                 console.error('Play error:', err);
                 setError(true);
                 toast.error('Não foi possível iniciar a reprodução');
+            });
+
+            // Track radio playback
+            analytics.trackEvent('play_audio', {
+                meta: {
+                    source: 'radio',
+                    station: config?.station_name || 'Unknown',
+                    program: config?.program_name || 'Unknown'
+                }
             });
         }
     };
