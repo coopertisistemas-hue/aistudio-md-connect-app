@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import QRCode from 'react-qr-code';
 import { PixPayload } from '@/lib/pix';
 import { APP_ROUTES } from '@/lib/routes';
+import { analytics } from '@/lib/analytics';
 
 export default function PartnersPage() {
     const navigate = useNavigate();
@@ -33,17 +34,41 @@ export default function PartnersPage() {
     const copyPixKey = () => {
         navigator.clipboard.writeText(pixKey);
         toast.success("Chave E-mail copiada!");
+
+        // Track partner interaction
+        analytics.trackEvent('click_partner', {
+            meta: {
+                action: 'copy_pix_key',
+                partner_value: PARTNER_VALUE
+            }
+        });
     };
 
     const copyBrCode = () => {
         if (!brCode) return;
         navigator.clipboard.writeText(brCode);
         toast.success("Código 'Copia e Cola' copiado!");
+
+        // Track partner interaction
+        analytics.trackEvent('click_partner', {
+            meta: {
+                action: 'copy_pix_brcode',
+                partner_value: PARTNER_VALUE
+            }
+        });
     };
 
     const handleWhatsAppPartner = () => {
         const text = "Olá! Paz do Senhor 😊 Vim pela página de Parceiros do MD Connect. Quero ser Parceiro Oficial (R$ 99,00) e gostaria de orientações para apoiar a obra.";
         window.open(`https://wa.me/5551986859236?text=${encodeURIComponent(text)}`, '_blank');
+
+        // Track partner interaction
+        analytics.trackEvent('click_partner', {
+            meta: {
+                action: 'whatsapp_cta',
+                partner_value: PARTNER_VALUE
+            }
+        });
     };
 
     return (
