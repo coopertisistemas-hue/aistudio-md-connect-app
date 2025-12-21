@@ -8,6 +8,8 @@ import { MonetizationBlock } from '@/components/home/MonetizationBlock';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FLAGS } from '@/lib/flags';
 import { ChurchPartnersBlock } from '@/components/home/ChurchPartnersBlock';
+import { SEOHead } from '@/components/SEO/SEOHead';
+import { generateOrganizationSchema, generateWebSiteSchema } from '@/lib/seo';
 
 export default function LandingPage() {
     const [data, setData] = useState<HomeData | null>(null);
@@ -112,37 +114,40 @@ export default function LandingPage() {
     }
 
     return (
-        <div className="relative min-h-[100dvh] text-slate-900 font-sans isolate">
-            {/* Global Background Layer handled by PublicLayout */}
+        <>
+            <SEOHead schemaData={[generateOrganizationSchema(), generateWebSiteSchema()]} />
+            <div className="relative min-h-[100dvh] text-slate-900 font-sans isolate">
+                {/* Global Background Layer handled by PublicLayout */}
 
-            {/* Content Layer */}
-            <div className="relative z-10 pb-safe">
-                {/* 1. Spacer for Sticky Header (PublicLayout Header is 80px approx) */}
-                <div className="h-4" />
+                {/* Content Layer */}
+                <div className="relative z-10 pb-safe">
+                    {/* 1. Spacer for Sticky Header (PublicLayout Header is 80px approx) */}
+                    <div className="h-4" />
 
-                {/* 2. Mural & Novidades (Ticker) */}
-                {data.latest_notices && data.latest_notices.length > 0 && (
-                    <MuralCompact notices={data.latest_notices} />
-                )}
+                    {/* 2. Mural & Novidades (Ticker) */}
+                    {data.latest_notices && data.latest_notices.length > 0 && (
+                        <MuralCompact notices={data.latest_notices} />
+                    )}
 
-                {/* 3. Quick Actions (Glass Grid) */}
-                {FLAGS.FEATURE_HOME_QUICK_ACTIONS && (
-                    <QuickActions actions={data.quick_actions} />
-                )}
+                    {/* 3. Quick Actions (Glass Grid) */}
+                    {FLAGS.FEATURE_HOME_QUICK_ACTIONS && (
+                        <QuickActions actions={data.quick_actions} />
+                    )}
 
-                {/* 3.1 Church & Partners Premium Section (NEW) */}
-                {FLAGS.FEATURE_HOME_PARTNERS_SECTION && (
-                    <ChurchPartnersBlock />
-                )}
+                    {/* 3.1 Church & Partners Premium Section (NEW) */}
+                    {FLAGS.FEATURE_HOME_PARTNERS_SECTION && (
+                        <ChurchPartnersBlock />
+                    )}
 
-                {/* 4. Monetization (Glass & Discrete) */}
-                {FLAGS.FEATURE_HOME_DONATE_SECTION && (
-                    <MonetizationBlock monetization={data.monetization} churchId={data.church?.id} />
-                )}
+                    {/* 4. Monetization (Glass & Discrete) */}
+                    {FLAGS.FEATURE_HOME_DONATE_SECTION && (
+                        <MonetizationBlock monetization={data.monetization} churchId={data.church?.id} />
+                    )}
 
-                {/* 5. Verse Card (Simple Card at Bottom) */}
-                <VerseCard verse={data.daily_verse} />
+                    {/* 5. Verse Card (Simple Card at Bottom) */}
+                    <VerseCard verse={data.daily_verse} />
+                </div>
             </div>
-        </div>
+        </>
     );
 }

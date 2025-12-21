@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and internal pages
+Disallow: /admin/
+Disallow: /login
+
+# Sitemap
+Sitemap: https://mdconnect.app/sitemap.xml
