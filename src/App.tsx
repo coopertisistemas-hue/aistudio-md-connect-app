@@ -69,6 +69,9 @@ const RadioPage = lazy(() => import('@/pages/public/RadioPage'));
 const VersePosterPage = lazy(() => import('@/pages/features/VersePosterPage'));
 const ComingSoon = lazy(() => import('@/pages/member/ComingSoonPage'));
 
+// DEV ONLY
+const ErrorReportingTestPage = lazy(() => import('@/pages/dev/ErrorReportingTestPage'));
+
 // Fallback Loading Component
 const PageLoader = () => (
   <div className="h-screen flex items-center justify-center bg-gray-50">
@@ -124,6 +127,9 @@ export default function App() {
                         <Route path="/devocionais/:id" element={<DevotionalDetail />} />
                       </>
                     )}
+
+                    {/* DEV ONLY: Error Reporting Test */}
+                    <Route path="/dev/error-reporting-test" element={<ErrorReportingTestPage />} />
 
                     <Route path="/coming-soon" element={<ComingSoon />} />
                   </Route>
