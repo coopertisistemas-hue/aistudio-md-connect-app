@@ -96,7 +96,9 @@ export async function reportError(error: Error, context: ErrorContext = {}): Pro
         // Clean up old entries (prevent memory leak)
         if (reportedErrors.size > 100) {
             const oldestKey = reportedErrors.keys().next().value;
-            reportedErrors.delete(oldestKey);
+            if (oldestKey !== undefined) {
+                reportedErrors.delete(oldestKey);
+            }
         }
 
         // Build payload
