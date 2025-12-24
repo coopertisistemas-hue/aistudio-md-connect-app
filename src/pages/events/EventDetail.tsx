@@ -90,7 +90,6 @@ export default function EventDetail() {
             icon={Calendar}
             iconClassName="text-orange-500"
             backPath="/agenda"
-            showFooter={false}
             actions={
                 <Button variant="ghost" size="icon" onClick={handleShare} className="hover:bg-slate-100">
                     <Share2 className="h-5 w-5" />
