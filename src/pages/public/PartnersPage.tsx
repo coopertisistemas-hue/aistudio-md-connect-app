@@ -96,12 +96,12 @@ export default function PartnersPage() {
                             loop
                             muted
                             playsInline
-                            className="w-full h-full object-cover opacity-20"
+                            className="w-full h-full object-cover opacity-30"
                         >
                             <source src="https://assets.mixkit.co/videos/preview/mixkit-people-praying-in-a-church-4255-large.mp4" type="video/mp4" />
                         </video>
-                        {/* Overlay gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-purple-50/90 via-white/95 to-white"></div>
+                        {/* Overlay gradient - ajustado para melhor visibilidade do vídeo */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-purple-50/80 via-white/90 to-white"></div>
                     </div>
 
                     {/* Conteúdo do Hero */}
