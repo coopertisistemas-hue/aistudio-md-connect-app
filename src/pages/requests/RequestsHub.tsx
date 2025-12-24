@@ -1,24 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import { Heart, Calendar, MessageCircle, AlertCircle, HeartHandshake } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
 import { Button } from '@/components/ui/button';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function RequestsHub() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24">
-            {/* Header */}
-            {/* Header */}
-            <div className="px-5 pt-8 mb-6">
-                <BackLink className="mb-4" />
-                <h1 className="text-2xl font-bold text-slate-900 mb-1 flex items-center gap-2">
-                    <HeartHandshake className="w-6 h-6 text-rose-500" />
-                    Cuidado Pastoral
-                </h1>
-                <p className="text-slate-500 text-sm">Estamos aqui por você. Como podemos ajudar?</p>
-            </div>
-
+        <InternalPageLayout
+            title="Pedidos"
+            subtitle="Acompanhe pedidos e intercessões."
+            icon={HeartHandshake}
+            iconClassName="text-rose-500"
+            backPath="/home"
+        >
             <div className="p-4 space-y-6">
 
                 {/* Main Actions */}
@@ -87,6 +82,6 @@ export default function RequestsHub() {
                     </p>
                 </div>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }

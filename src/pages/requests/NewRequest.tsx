@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Lock, Users, Eye, CheckCircle2 } from 'lucide-react';
+import { Lock, Users, Eye, CheckCircle2, Heart, Calendar, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { BackLink } from '@/components/ui/BackLink';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function NewRequest() {
     const navigate = useNavigate();
@@ -26,19 +26,19 @@ export default function NewRequest() {
         urgency: 'normal'
     });
 
-    const getTitle = () => {
-        switch (type) {
-            case 'visita': return 'Solicitar Visita';
-            case 'aconselhamento': return 'Aconselhamento';
-            default: return 'Pedido de Oração';
-        }
-    };
-
     const getDescription = () => {
         switch (type) {
             case 'visita': return 'Nos diga onde e quando você gostaria de receber a visita.';
             case 'aconselhamento': return 'Como podemos te ajudar? Descreva brevemente.';
             default: return 'Descreva seu pedido de oração.';
+        }
+    };
+
+    const getIcon = () => {
+        switch (type) {
+            case 'visita': return Calendar;
+            case 'aconselhamento': return MessageCircle;
+            default: return Heart;
         }
     };
 
@@ -97,15 +97,13 @@ export default function NewRequest() {
     }
 
     return (
-        <div className="min-h-screen bg-white pb-24">
-            {/* Header */}
-            {/* Header */}
-            <div className="px-5 pt-8 mb-6">
-                <BackLink className="mb-4" />
-                <h1 className="text-2xl font-bold text-slate-900 mb-1">{getTitle()}</h1>
-                <p className="text-slate-500 text-sm">Preencha os detalhes da sua solicitação.</p>
-            </div>
-
+        <InternalPageLayout
+            title="Novo Pedido"
+            subtitle="Envie seu pedido com confiança."
+            icon={getIcon()}
+            iconClassName="text-rose-500"
+            backPath="/requests"
+        >
             <div className="p-6 space-y-8 animate-in slide-in-from-right duration-300">
 
                 {/* Step 1: Basic Info */}
@@ -225,6 +223,6 @@ export default function NewRequest() {
                     </Button>
                 </div>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }

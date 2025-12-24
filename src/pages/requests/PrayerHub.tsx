@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { PageIntro } from '@/components/layout/PageIntro';
 import { useAuth } from '@/contexts/AuthContext';
 import { Heart, Loader2, Filter } from 'lucide-react';
 
@@ -9,6 +8,7 @@ import { PrayerRequestForm } from '@/components/Prayer/PrayerRequestForm';
 import { PrayerRequestCard } from '@/components/Prayer/PrayerRequestCard';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function PrayerHub() {
     useAuth();
@@ -49,17 +49,13 @@ export default function PrayerHub() {
     if (!FLAGS.FEATURE_PRAYER_REQUESTS_V1) return null;
 
     return (
-        <div className="min-h-screen bg-transparent flex flex-col pb-safe">
-            {/* Header (Standardized) */}
-            <div className="px-6 pt-6 mb-4">
-                <PageIntro
-                    title="Pedidos de Oração"
-                    icon={Heart}
-                    iconClassName="text-rose-500 fill-rose-500/20"
-                    backLink={true}
-                />
-            </div>
-
+        <InternalPageLayout
+            title="Oração"
+            subtitle="Ore, fortaleça e compartilhe fé."
+            icon={Heart}
+            iconClassName="text-rose-500"
+            backPath="/home"
+        >
             {/* Tabs */}
             <div className="px-4 mb-6">
                 <div className="flex p-1 bg-slate-100 rounded-xl">
@@ -146,6 +142,6 @@ export default function PrayerHub() {
                     </div>
                 )}
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
