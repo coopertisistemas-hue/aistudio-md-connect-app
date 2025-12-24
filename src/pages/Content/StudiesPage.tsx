@@ -1,25 +1,21 @@
 import { useNavigate } from 'react-router-dom';
-// import { TopBar } from '@/components/home/TopBar'; // Removed unused
 import { Button } from '@/components/ui/button';
 import { GraduationCap, ArrowRight, BookOpen } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/routes';
-import { PageIntro } from '@/components/layout/PageIntro';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function StudiesPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-slate-50/50 pb-20">
-            {/* TopBar removed to use PublicHeader */}
-
-            <main className="container max-w-lg mx-auto px-5 pt-8 animate-in fade-in duration-500">
-                <PageIntro
-                    title="Estudos Bíblicos"
-                    subtitle="Em breve, uma área exclusiva para aprofundar seu conhecimento na Palavra."
-                    icon={GraduationCap}
-                    iconClassName="text-indigo-600"
-                />
-
+        <InternalPageLayout
+            title="Estudos"
+            subtitle="Conteúdo para edificação e aprendizado."
+            icon={GraduationCap}
+            iconClassName="text-indigo-600"
+            backPath="/home"
+        >
+            <div className="container max-w-lg mx-auto px-5 pt-4 pb-8">
                 {/* Premium Card */}
                 <div className="w-full bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-10 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-50 rounded-bl-full -mr-10 -mt-10 opacity-50 group-hover:scale-110 transition-transform" />
@@ -39,7 +35,6 @@ export default function StudiesPage() {
 
                 {/* Actions */}
                 <div className="w-full space-y-3">
-
                     <Button
                         variant="ghost"
                         onClick={() => navigate(APP_ROUTES.MURAL)}
@@ -49,7 +44,7 @@ export default function StudiesPage() {
                         <ArrowRight className="w-4 h-4 ml-2 opacity-50" />
                     </Button>
                 </div>
-            </main>
-        </div>
+            </div>
+        </InternalPageLayout >
     );
 }
