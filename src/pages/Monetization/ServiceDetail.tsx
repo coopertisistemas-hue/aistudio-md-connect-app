@@ -4,6 +4,7 @@ import { BackLink } from '@/components/ui/BackLink';
 import { useParams } from 'react-router-dom';
 import { monetizationService } from '@/services/monetization';
 import type { Service } from '@/types/monetization';
+import { analytics } from '@/lib/analytics';
 
 export default function ServiceDetail() {
     const { id } = useParams();
@@ -15,6 +16,16 @@ export default function ServiceDetail() {
             monetizationService.getServiceById(id).then(data => {
                 setService(data);
                 setLoading(false);
+
+                // Track partner view
+                if (data) {
+                    analytics.trackEvent('view_partner', {
+                        partner_id: id,
+                        meta: {
+                            title: data.title
+                        }
+                    });
+                }
             });
             monetizationService.trackEvent(id, 'service', 'click', 'detail_load');
         }

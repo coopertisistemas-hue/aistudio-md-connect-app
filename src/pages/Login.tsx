@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Loader2 } from 'lucide-react';
+import { analytics } from '@/lib/analytics';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -23,6 +24,15 @@ export default function Login() {
                     password,
                 });
                 if (error) throw error;
+
+                // Track signup event
+                analytics.track({
+                    name: 'login_status',
+                    element: 'signup',
+                    context: 'public',
+                    metadata: { method: 'email' }
+                });
+
                 alert('Cadastro realizado! Verifique seu email.');
             } else {
                 const { data: { user } } = await supabase.auth.signInWithPassword({
@@ -30,6 +40,14 @@ export default function Login() {
                     password,
                 });
                 if (user) {
+                    // Track login event
+                    analytics.track({
+                        name: 'login_status',
+                        element: 'login',
+                        context: 'public',
+                        metadata: { method: 'email', user_id: user.id }
+                    });
+
                     await handleLoginSuccess(user.id);
                 }
             }
