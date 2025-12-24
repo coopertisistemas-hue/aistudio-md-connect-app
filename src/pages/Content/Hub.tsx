@@ -1,84 +1,89 @@
 import { useNavigate } from 'react-router-dom';
-import { Book, Heart, List, Video, ChevronRight } from 'lucide-react';
+import { BookOpen, Heart, List, Video, ChevronRight } from 'lucide-react';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
-export default function ContentHub() {
+export default function Hub() {
     const navigate = useNavigate();
 
-    const categories = [
+    const sections = [
         {
-            id: 'devotionals',
             title: 'Devocionais',
-            description: 'Mensagens diárias para sua edificação',
+            description: 'Reflexões diárias para sua vida espiritual',
             icon: Heart,
-            color: 'bg-rose-100 text-rose-600',
+            iconColor: 'text-rose-500',
+            bgColor: 'bg-rose-50',
             path: '/conteudos/devocionais'
         },
         {
-            id: 'bible',
-            title: 'Bíblia Online',
-            description: 'Leia as Sagradas Escrituras',
-            icon: Book,
-            color: 'bg-amber-100 text-amber-600',
-            path: '/biblia' // Using the existing route
+            title: 'Bíblia',
+            description: 'Leia e estude a Palavra de Deus',
+            icon: BookOpen,
+            iconColor: 'text-blue-500',
+            bgColor: 'bg-blue-50',
+            path: '/biblia'
         },
         {
-            id: 'series',
-            title: 'Séries e Mensagens',
-            description: 'Assista às pregações da igreja',
+            title: 'Séries',
+            description: 'Mensagens organizadas por temas',
             icon: Video,
-            color: 'bg-blue-100 text-blue-600',
+            iconColor: 'text-purple-500',
+            bgColor: 'bg-purple-50',
             path: '/conteudos/series'
         },
         {
-            id: 'plans',
             title: 'Planos de Leitura',
-            description: 'Acompanhe seu progresso bíblico',
+            description: 'Guias estruturados para seu crescimento',
             icon: List,
-            color: 'bg-emerald-100 text-emerald-600',
+            iconColor: 'text-green-500',
+            bgColor: 'bg-green-50',
             path: '/conteudos/planos'
         }
     ];
 
     return (
-        <div className="p-4 space-y-6">
-            <div className="space-y-1">
-                <h1 className="text-2xl font-bold font-heading text-slate-900">Conteúdos</h1>
-                <p className="text-muted-foreground text-sm">Explore nossa biblioteca de edificação.</p>
-            </div>
+        <InternalPageLayout
+            title="Conteúdos"
+            subtitle="Devocionais, mensagens e planos para edificação."
+            icon={BookOpen}
+            iconClassName="text-indigo-500"
+            backPath="/home"
+        >
+            <div className="px-5 pb-8">
+                <div className="grid gap-4">
+                    {sections.map((section) => {
+                        const Icon = section.icon;
+                        return (
+                            <div
+                                key={section.path}
+                                onClick={() => navigate(section.path)}
+                                className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-[0.99] flex items-center gap-4"
+                            >
+                                <div className={`${section.bgColor} p-3 rounded-xl`}>
+                                    <Icon className={`w-6 h-6 ${section.iconColor}`} />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-slate-900 mb-0.5">{section.title}</h3>
+                                    <p className="text-sm text-slate-500">{section.description}</p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-slate-400" />
+                            </div>
+                        );
+                    })}
+                </div>
 
-            <div className="grid gap-3">
-                {categories.map((cat) => (
-                    <button
-                        key={cat.id}
-                        onClick={() => navigate(cat.path)}
-                        className="flex items-center p-4 bg-white border border-slate-200 rounded-xl shadow-sm active:scale-98 transition-transform text-left"
-                    >
-                        <div className={`p-3 rounded-full ${cat.color} mr-4`}>
-                            <cat.icon className="h-6 w-6" />
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-slate-900">{cat.title}</h3>
-                            <p className="text-xs text-slate-500 mt-0.5">{cat.description}</p>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-slate-300" />
-                    </button>
-                ))}
-            </div>
-
-            {/* Featured Section (Placeholder for now, maybe Latest Devotional later) */}
-            <div className="pt-4 border-t border-slate-100">
-                <h2 className="text-sm font-semibold text-slate-900 mb-3">Destaque do Dia</h2>
+                {/* Featured Content Card */}
                 <div
+                    className="mt-6 aspect-video rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 relative overflow-hidden flex items-end p-4 cursor-pointer shadow-lg"
                     onClick={() => navigate('/conteudos/devocionais')}
-                    className="aspect-video rounded-xl bg-slate-100 relative overflow-hidden flex items-end p-4 cursor-pointer"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute inset-0 bg-black/20"></div>
                     <div className="relative z-10 text-white">
-                        <span className="text-xs font-medium bg-primary px-2 py-0.5 rounded-full mb-2 inline-block">Hoje</span>
-                        <h3 className="font-bold">Palavra de Esperança</h3>
+                        <p className="text-xs font-bold uppercase tracking-wider mb-1 opacity-90">Em Destaque</p>
+                        <h3 className="text-xl font-bold mb-1">Devocional de Hoje</h3>
+                        <p className="text-sm opacity-90">Comece seu dia com uma palavra de edificação</p>
                     </div>
                 </div>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
