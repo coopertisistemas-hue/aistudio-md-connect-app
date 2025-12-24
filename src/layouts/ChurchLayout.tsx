@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { MembershipProvider } from '@/contexts/MembershipContext';
 import { MembershipGate } from '@/components/auth/MembershipGate';
 import ChurchShowcase from '@/pages/ChurchShowcase';
+import { AppBackground } from '@/components/layout/AppBackground';
 
 function ChurchLayoutContent() {
     const { church, isLoading, error } = useChurch();
@@ -41,8 +42,11 @@ function ChurchLayoutContent() {
 
 export function ChurchLayout() {
     return (
-        <ChurchProvider>
-            <ChurchLayoutContent />
-        </ChurchProvider>
+        <>
+            <AppBackground />
+            <ChurchProvider>
+                <ChurchLayoutContent />
+            </ChurchProvider>
+        </>
     );
 }
