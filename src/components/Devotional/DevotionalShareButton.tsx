@@ -1,5 +1,6 @@
 import { Share2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { analytics } from '@/lib/analytics';
 
 interface DevotionalShareButtonProps {
     id: string;
@@ -57,11 +58,32 @@ export function DevotionalShareButton({ id, title, subtitle, verseKey, coverUrl 
                 }
 
                 await navigator.share(shareData);
+
+                // Track successful share
+                analytics.trackEvent('share_devotional', {
+                    meta: {
+                        devotional_id: id,
+                        title: title,
+                        method: 'native_share',
+                        has_image: !!coverUrl
+                    }
+                });
+
                 // toast.success('Compartilhado com sucesso!');
             } else {
                 // Fallback: Open WhatsApp Web/App directly via URL scheme
                 const encodedText = encodeURIComponent(shareText);
                 window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+
+                // Track fallback share
+                analytics.trackEvent('share_devotional', {
+                    meta: {
+                        devotional_id: id,
+                        title: title,
+                        method: 'whatsapp_fallback',
+                        has_image: false
+                    }
+                });
             }
         } catch (error) {
             // User aborted or share failed
@@ -72,6 +94,16 @@ export function DevotionalShareButton({ id, title, subtitle, verseKey, coverUrl 
                 // Last resort fallback
                 const encodedText = encodeURIComponent(shareText);
                 window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+
+                // Track error fallback
+                analytics.trackEvent('share_devotional', {
+                    meta: {
+                        devotional_id: id,
+                        title: title,
+                        method: 'error_fallback',
+                        has_image: false
+                    }
+                });
             }
         }
     };
