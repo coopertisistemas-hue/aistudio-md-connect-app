@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Building2 } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
 import { monetizationService } from '@/services/monetization';
 import type { Service } from '@/types/monetization';
 import ServiceCard from '@/components/monetization/ServiceCard';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function ServicesList() {
     const [services, setServices] = useState<Service[]>([]);
@@ -17,16 +17,13 @@ export default function ServicesList() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
-            <div className="px-5 pt-8 mb-4">
-                <BackLink className="mb-4" />
-                <h1 className="text-2xl font-bold text-slate-900 mb-1 flex items-center gap-2">
-                    <Building2 className="w-6 h-6 text-blue-600" />
-                    Serviços para Igrejas
-                </h1>
-                <p className="text-slate-500 text-sm">Soluções e serviços para o seu ministério.</p>
-            </div>
-
+        <InternalPageLayout
+            title="Serviços"
+            subtitle="Apoio e soluções para servir melhor."
+            icon={Building2}
+            iconClassName="text-blue-600"
+            backPath="/home"
+        >
             <div className="p-4 space-y-4">
                 {loading ? (
                     <div className="grid gap-4">
@@ -54,6 +51,6 @@ export default function ServicesList() {
                     </div>
                 )}
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
