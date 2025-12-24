@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Share2 } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
 import { Button } from '@/components/ui/button';
 import { eventService, type ChurchEvent } from '@/services/event';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function EventDetail() {
     const { id } = useParams<{ id: string }>();
@@ -18,7 +18,6 @@ export default function EventDetail() {
                 setEvent(data);
             }).catch(err => {
                 console.error(err);
-                // Handle 404
             }).finally(() => {
                 setIsLoading(false);
             });
@@ -41,27 +40,63 @@ export default function EventDetail() {
 
     const addToCalendar = () => {
         if (!event) return;
-        // Simple Google Calendar Link
-        const start = maxDate(event.starts_at);
-        const end = event.ends_at ? maxDate(event.ends_at) : maxDate(event.starts_at, 2); // Default 2h duration
+        const start = formatDate(event.starts_at);
+        const end = event.ends_at ? formatDate(event.ends_at) : formatDate(event.starts_at, 2);
 
         const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${start}/${end}&details=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(event.location || '')}`;
         window.open(url, '_blank');
     };
 
-    const maxDate = (dateStr: string, addHours = 0) => {
+    const formatDate = (dateStr: string, addHours = 0) => {
         const d = new Date(dateStr);
         d.setHours(d.getHours() + addHours);
         return d.toISOString().replace(/-|:|\.\d\d\d/g, "");
     };
 
-    if (isLoading) return <div className="p-8 text-center">Carregando...</div>;
-    if (!event) return <div className="p-8 text-center">Evento não encontrado.</div>;
+    if (isLoading) {
+        return (
+            <InternalPageLayout
+                title="Evento"
+                subtitle="Detalhes e programação."
+                icon={Calendar}
+                iconClassName="text-orange-500"
+                backPath="/agenda"
+            >
+                <div className="p-8 text-center">Carregando...</div>
+            </InternalPageLayout>
+        );
+    }
+
+    if (!event) {
+        return (
+            <InternalPageLayout
+                title="Evento"
+                subtitle="Detalhes e programação."
+                icon={Calendar}
+                iconClassName="text-orange-500"
+                backPath="/agenda"
+            >
+                <div className="p-8 text-center">Evento não encontrado.</div>
+            </InternalPageLayout>
+        );
+    }
 
     const date = parseISO(event.starts_at);
 
     return (
-        <div className="min-h-screen bg-white pb-24 relative">
+        <InternalPageLayout
+            title={event.title}
+            subtitle="Detalhes e programação."
+            icon={Calendar}
+            iconClassName="text-orange-500"
+            backPath="/agenda"
+            showFooter={false}
+            actions={
+                <Button variant="ghost" size="icon" onClick={handleShare} className="hover:bg-slate-100">
+                    <Share2 className="h-5 w-5" />
+                </Button>
+            }
+        >
             {/* Header Image */}
             <div className="relative h-64 w-full bg-slate-200">
                 {event.cover_image_url ? (
@@ -73,29 +108,19 @@ export default function EventDetail() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
-                {/* Navbar over image */}
-                <div className="absolute top-0 left-0 right-0 p-4 pt-12 flex justify-between items-center text-white">
-                    <BackLink className="hover:bg-white/20 text-white rounded-full hover:text-white/80" />
-                    <Button variant="ghost" size="icon" onClick={handleShare} className="hover:bg-white/20 text-white rounded-full">
-                        <Share2 className="h-6 w-6" />
-                    </Button>
-                </div>
-
                 <div className="absolute bottom-0 left-0 p-6 w-full">
                     {event.featured && (
                         <span className="inline-block px-2 py-0.5 mb-2 rounded bg-yellow-400 text-yellow-900 text-[10px] font-bold uppercase tracking-wide">
                             Destaque
                         </span>
                     )}
-                    <h1 className="text-2xl font-bold text-white shadow-sm leading-tight">{event.title}</h1>
                     {event.event_type && (
-                        <p className="text-white/80 text-sm font-medium mt-1 capitalize">{event.event_type}</p>
+                        <p className="text-white/80 text-sm font-medium capitalize">{event.event_type}</p>
                     )}
                 </div>
             </div>
 
             <div className="p-6 space-y-8 -mt-4 bg-white rounded-t-3xl relative z-10">
-
                 {/* Key Info */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center text-center">
@@ -145,6 +170,6 @@ export default function EventDetail() {
                     </Button>
                 )}
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
