@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
     Heart, Copy, CheckCircle2, MessageCircle,
-    Zap, Globe, Smartphone, Info, ArrowRight
+    Zap, Globe, Smartphone, Info, ArrowRight, ArrowLeft
 } from 'lucide-react';
 import { toast } from 'sonner';
 import QRCode from 'react-qr-code';
@@ -78,17 +78,44 @@ export default function PartnersPage() {
             <SEOHead />
             <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-white pt-20 pb-24 px-4 animate-in fade-in duration-500 max-w-2xl mx-auto">
 
-                {/* A) HERO */}
-                <div className="text-center space-y-4 mb-8">
-                    <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto shadow-sm border border-amber-100 mb-4">
-                        <Heart className="w-8 h-8 text-amber-500 fill-amber-500" />
+                {/* Botão Voltar Fixo */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="fixed top-4 left-4 z-50 p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white shadow-sm transition-all active:scale-95"
+                    aria-label="Voltar"
+                >
+                    <ArrowLeft className="w-5 h-5 text-slate-700" />
+                </button>
+
+                {/* A) HERO com Vídeo Background */}
+                <div className="relative text-center space-y-4 mb-8 overflow-hidden rounded-3xl">
+                    {/* Vídeo Background */}
+                    <div className="absolute inset-0 -z-10">
+                        <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-full object-cover opacity-20"
+                        >
+                            <source src="https://assets.mixkit.co/videos/preview/mixkit-people-praying-in-a-church-4255-large.mp4" type="video/mp4" />
+                        </video>
+                        {/* Overlay gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-purple-50/90 via-white/95 to-white"></div>
                     </div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight leading-tight">
-                        Seja Parceiro Oficial
-                    </h1>
-                    <p className="text-slate-600 font-medium text-lg leading-relaxed max-w-lg mx-auto">
-                        Tecnologia a serviço do Reino: missões, ação social e modernização da Igreja local.
-                    </p>
+
+                    {/* Conteúdo do Hero */}
+                    <div className="relative z-10 py-12">
+                        <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto shadow-sm border border-amber-100 mb-4">
+                            <Heart className="w-8 h-8 text-amber-500 fill-amber-500" />
+                        </div>
+                        <h1 className="text-3xl font-bold text-slate-900 tracking-tight leading-tight">
+                            Seja Parceiro Oficial
+                        </h1>
+                        <p className="text-slate-600 font-medium text-lg leading-relaxed max-w-lg mx-auto">
+                            Tecnologia a serviço do Reino: missões, ação social e modernização da Igreja local.
+                        </p>
+                    </div>
                 </div>
 
                 {/* B) CARD R$ 99,00 */}
