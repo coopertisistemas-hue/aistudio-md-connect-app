@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, CheckCircle2 } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
+import { MessageCircle, CheckCircle2, Building2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { monetizationService } from '@/services/monetization';
 import type { Service } from '@/types/monetization';
 import { analytics } from '@/lib/analytics';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function ServiceDetail() {
     const { id } = useParams();
@@ -41,16 +41,14 @@ export default function ServiceDetail() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24">
-            {/* Header Image/Gradient Placeholder - Could use an image field if added later */}
-            <div className="h-40 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
-                <BackLink className="absolute top-4 left-4 text-white hover:text-white/80 hover:bg-white/20" />
-                <div className="absolute -bottom-6 left-4 bg-white p-4 rounded-xl shadow-lg border border-slate-100">
-                    <h1 className="font-bold text-xl text-slate-900">{service.title}</h1>
-                </div>
-            </div>
-
-            <div className="mt-10 px-4 space-y-6">
+        <InternalPageLayout
+            title={service.title}
+            subtitle="Detalhes e como solicitar."
+            icon={Building2}
+            iconClassName="text-blue-600"
+            backPath="/services"
+        >
+            <div className="px-4 space-y-6">
 
                 <div className="bg-white p-4 rounded-xl border border-slate-100">
                     <h2 className="font-semibold text-slate-900 mb-2">Sobre o Serviço</h2>
@@ -85,6 +83,6 @@ export default function ServiceDetail() {
                     Falar no WhatsApp
                 </button>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }

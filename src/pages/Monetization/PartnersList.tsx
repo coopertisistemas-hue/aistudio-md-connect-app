@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Handshake } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
 import { monetizationService } from '@/services/monetization';
 import type { Partner } from '@/types/monetization';
 import AffiliateCard from '@/components/monetization/AffiliateCard';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function PartnersList() {
     const [partners, setPartners] = useState<Partner[]>([]);
@@ -17,16 +17,13 @@ export default function PartnersList() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
-            <div className="px-5 pt-8 mb-4">
-                <BackLink className="mb-4" />
-                <h1 className="text-2xl font-bold text-slate-900 mb-1 flex items-center gap-2">
-                    <Handshake className="w-6 h-6 text-emerald-600" />
-                    Parceiros & Ofertas
-                </h1>
-                <p className="text-slate-500 text-sm">Empresas que apoiam a obra de Deus.</p>
-            </div>
-
+        <InternalPageLayout
+            title="Parceiros"
+            subtitle="Quem caminha junto na missão."
+            icon={Handshake}
+            iconClassName="text-emerald-600"
+            backPath="/home"
+        >
             <div className="p-4">
                 <p className="text-xs text-slate-500 mb-4 px-2 bg-yellow-50 text-yellow-800 py-2 rounded">
                     ⚠️ Indicações de parceiros verificados. Compras podem gerar comissão para sustentabilidade do projeto.
@@ -51,6 +48,6 @@ export default function PartnersList() {
                     </div>
                 )}
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
