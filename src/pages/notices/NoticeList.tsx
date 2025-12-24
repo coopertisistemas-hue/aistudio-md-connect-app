@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Pin, Calendar, Loader2 } from 'lucide-react';
+import { Bell, Pin, Calendar, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function NoticeList() {
-    // const navigate = useNavigate(); // Removed unused
     const { slug } = useParams();
     const [notices, setNotices] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -28,17 +28,19 @@ export default function NoticeList() {
     }, [slug]);
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
-            {/* Content Header (Non-sticky, just title) */}
-            <div className="px-4 pt-4 pb-2">
-                <h1 className="text-xl font-bold text-slate-800">Mural de Avisos</h1>
-            </div>
-
-            <div className="p-4 space-y-4">
+        <InternalPageLayout
+            title="Mural de Avisos"
+            subtitle="Fique por dentro dos comunicados da igreja."
+            icon={Bell}
+            iconClassName="text-blue-500"
+            backPath="/home"
+        >
+            <div className="px-4 pb-8 space-y-4">
                 {loading ? (
                     <div className="flex justify-center py-8"><Loader2 className="animate-spin text-slate-400" /></div>
                 ) : notices.length === 0 ? (
                     <div className="text-center py-12 text-slate-400">
+                        <Bell className="w-12 h-12 mx-auto mb-3 opacity-20" />
                         <p>Nenhum aviso publicado.</p>
                     </div>
                 ) : (
@@ -67,6 +69,6 @@ export default function NoticeList() {
                     ))
                 )}
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
