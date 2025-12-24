@@ -34,7 +34,7 @@ export default function NoticeDetail() {
                 subtitle="Informações e comunicados com clareza."
                 icon={Bell}
                 iconClassName="text-blue-500"
-                backPath="/mural"
+                backPath="/home"
             >
                 <div className="p-8 text-center text-slate-400">Carregando...</div>
             </InternalPageLayout>
@@ -116,11 +116,6 @@ export default function NoticeDetail() {
                         </a>
                     </div>
                 )}
-
-                {/* Footer */}
-                <div className="pt-8 text-center text-xs text-slate-400">
-                    MD Connect • Comunicação Oficial
-                </div>
             </div>
         </InternalPageLayout>
     );
