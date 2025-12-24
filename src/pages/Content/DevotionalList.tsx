@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Calendar, Loader2 } from 'lucide-react';
+import { BookOpen, Calendar, Loader2 } from 'lucide-react';
 import { devotionalsApi } from '@/lib/api/devotionals';
 import type { Post } from '@/types/content';
 import { FLAGS } from '@/lib/flags';
