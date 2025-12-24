@@ -1,10 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { feedService, type FeedItem } from '@/services/feed';
-import { Calendar, Share2, AlertTriangle } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
-
+import { Calendar, Share2, AlertTriangle, Bell } from 'lucide-react';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function NoticeDetail() {
     const { id } = useParams();
@@ -19,11 +17,8 @@ export default function NoticeDetail() {
             .finally(() => setIsLoading(false));
     }, [id]);
 
-    if (isLoading) return <div className="p-8 text-center text-slate-400">Carregando...</div>;
-    if (!notice) return <div className="p-8 text-center text-slate-500">Aviso não encontrado.</div>;
-
     const handleShare = () => {
-        if (navigator.share) {
+        if (navigator.share && notice) {
             navigator.share({
                 title: notice.title,
                 text: notice.content || notice.body,
@@ -32,18 +27,47 @@ export default function NoticeDetail() {
         }
     };
 
-    return (
-        <div className="min-h-screen bg-white pb-safe">
-            {/* Header */}
-            <div className="sticky top-0 bg-white/90 backdrop-blur-md z-20 border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-                <BackLink className="-ml-2" />
-                <div className="flex gap-2">
-                    <button onClick={handleShare} className="p-2 rounded-full hover:bg-slate-50 text-slate-700">
-                        <Share2 className="h-5 w-5" />
-                    </button>
-                </div>
-            </div>
+    if (isLoading) {
+        return (
+            <InternalPageLayout
+                title="Aviso"
+                subtitle="Informações e comunicados com clareza."
+                icon={Bell}
+                iconClassName="text-blue-500"
+                backPath="/mural"
+            >
+                <div className="p-8 text-center text-slate-400">Carregando...</div>
+            </InternalPageLayout>
+        );
+    }
 
+    if (!notice) {
+        return (
+            <InternalPageLayout
+                title="Aviso"
+                subtitle="Informações e comunicados com clareza."
+                icon={Bell}
+                iconClassName="text-blue-500"
+                backPath="/mural"
+            >
+                <div className="p-8 text-center text-slate-500">Aviso não encontrado.</div>
+            </InternalPageLayout>
+        );
+    }
+
+    return (
+        <InternalPageLayout
+            title={notice.title}
+            subtitle="Informações e comunicados com clareza."
+            icon={Bell}
+            iconClassName="text-blue-500"
+            backPath="/mural"
+            actions={
+                <button onClick={handleShare} className="p-2 rounded-full hover:bg-slate-100 text-slate-700">
+                    <Share2 className="h-5 w-5" />
+                </button>
+            }
+        >
             <div className="px-5 py-6 space-y-6">
                 {/* Meta */}
                 <div className="space-y-3">
@@ -58,9 +82,6 @@ export default function NoticeDetail() {
                         </span>
                     </div>
 
-                    <h1 className="text-2xl font-bold text-slate-900 leading-tight">
-                        {notice.title}
-                    </h1>
                     {notice.subtitle && <p className="text-lg text-slate-600 font-medium leading-normal">{notice.subtitle}</p>}
 
                     <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -96,11 +117,11 @@ export default function NoticeDetail() {
                     </div>
                 )}
 
-                {/* Footer / CTA Area (Optional) */}
+                {/* Footer */}
                 <div className="pt-8 text-center text-xs text-slate-400">
                     MD Connect • Comunicação Oficial
                 </div>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }

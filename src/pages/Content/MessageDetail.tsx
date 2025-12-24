@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react'; // Missing types, assumes generic
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { contentService } from '@/services/content'; // Need getMessageById
+import { contentService } from '@/services/content';
 import type { ContentMessage } from '@/types/content';
 import { Loader2, Youtube } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function MessageDetail() {
     const { id } = useParams();
     const [msg, setMsg] = useState<ContentMessage | null>(null);
-    const [isLoading, setIsLoading] = useState(false); // Can fetch by ID if service supports
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (id) loadData(id);
@@ -26,18 +26,33 @@ export default function MessageDetail() {
         }
     };
 
-    if (isLoading) return <div className="flex justify-center items-center min-h-screen bg-slate-900"><Loader2 className="animate-spin text-white" /></div>;
-
+    if (isLoading) {
+        return (
+            <InternalPageLayout
+                title="Mensagem"
+                subtitle="Ouça, medite e compartilhe."
+                icon={Youtube}
+                iconClassName="text-red-600"
+                backPath="/conteudos/series"
+            >
+                <div className="flex justify-center items-center min-h-[50vh]">
+                    <Loader2 className="animate-spin text-slate-400" />
+                </div>
+            </InternalPageLayout>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white flex flex-col">
-            <div className="bg-transparent absolute top-0 w-full z-10 px-4 py-3 flex items-center justify-between pointer-events-none">
-                {/* Back button with pointer-events-auto */}
-                <BackLink className="pointer-events-auto bg-black/20 rounded-full backdrop-blur-sm text-white hover:bg-black/40 hover:text-white/90" />
-            </div>
-
-            <div className="flex-1 flex flex-col">
-                <div className="aspect-video bg-black flex items-center justify-center mt-14 sm:mt-0">
+        <InternalPageLayout
+            title={msg?.title || "Mensagem"}
+            subtitle="Ouça, medite e compartilhe."
+            icon={Youtube}
+            iconClassName="text-red-600"
+            backPath="/conteudos/series"
+            showFooter={false}
+        >
+            <div className="flex flex-col">
+                <div className="aspect-video bg-black flex items-center justify-center">
                     {/* Video Player Placeholder */}
                     <div className="text-center text-slate-400">
                         <Youtube className="h-16 w-16 mx-auto mb-2 opacity-50" />
@@ -46,11 +61,8 @@ export default function MessageDetail() {
                     </div>
                 </div>
 
-                <div className="p-5 flex-1 bg-white text-slate-900 rounded-t-2xl -mt-4 z-20">
-                    <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6" />
-
-                    <h1 className="text-2xl font-bold leading-tight mb-2">{msg?.title || 'Carregando...'}</h1>
-                    <div className="flex gap-2 text-sm text-slate-500 mb-6">
+                <div className="p-5 bg-white">
+                    <div className="flex gap-2 text-sm text-slate-500 mb-4">
                         <span>{msg?.published_at ? new Date(msg.published_at).toLocaleDateString('pt-BR') : ''}</span>
                         {msg?.duration_seconds && (
                             <>
@@ -65,6 +77,6 @@ export default function MessageDetail() {
                     </p>
                 </div>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }

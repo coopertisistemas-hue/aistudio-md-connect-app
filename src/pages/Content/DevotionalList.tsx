@@ -4,6 +4,7 @@ import { ArrowLeft, BookOpen, Calendar, Loader2 } from 'lucide-react';
 import { devotionalsApi } from '@/lib/api/devotionals';
 import type { Post } from '@/types/content';
 import { FLAGS } from '@/lib/flags';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function DevotionalList() {
     const navigate = useNavigate();
@@ -18,20 +19,9 @@ export default function DevotionalList() {
         setIsLoading(true);
         try {
             if (FLAGS.FEATURE_DEVOTIONAL_API) {
-                // Fetch using API wrapper (default limit 10)
-                // Note: The wrapper currently wraps functions.invoke('devotionals-get')
-                // We need to ensure wrapper has a getList method or similar. 
-                // Currently devotionalsApi has getById and getLatest. We should add getList.
-                // Assuming we will add getList to api/devotionals.ts next.
-                // For now, let's assume it returns a list if we call without ID/Latest params.
-                // Or we can invoke directly if wrapper update is pending.
-                // Let's implement robustly.
                 const data = await devotionalsApi.getList();
                 if (data) setItems(data);
             } else {
-                // Mock Empty State for V1 if API off
-                // Or simulate one item for demo? 
-                // Let's simulate empty to verify "Premium Empty State" as per plan
                 await new Promise(r => setTimeout(r, 800));
                 setItems([]);
             }
@@ -44,20 +34,14 @@ export default function DevotionalList() {
     };
 
     return (
-        <div className="min-h-screen bg-transparent flex flex-col">
-            {/* Header */}
-            <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-4 py-3 flex items-center gap-3 shadow-sm">
-                <button
-                    onClick={() => navigate('/')}
-                    className="p-2 -ml-2 text-slate-600 hover:bg-slate-50 rounded-full transition-colors"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                </button>
-                <h1 className="font-serif text-lg text-slate-900 font-medium">Devocionais</h1>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 p-4 max-w-lg mx-auto w-full">
+        <InternalPageLayout
+            title="Devocionais"
+            subtitle="Leituras diárias para fortalecer a caminhada."
+            icon={BookOpen}
+            iconClassName="text-indigo-600"
+            backPath="/home"
+        >
+            <div className="p-4 max-w-lg mx-auto w-full">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
                         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
@@ -88,7 +72,6 @@ export default function DevotionalList() {
                         ))}
                     </div>
                 ) : (
-                    // Premium Empty State
                     <div className="flex flex-col items-center justify-center py-16 text-center px-6">
                         <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6 ring-4 ring-indigo-50/50">
                             <BookOpen className="w-8 h-8 text-indigo-500" />
@@ -106,6 +89,6 @@ export default function DevotionalList() {
                     </div>
                 )}
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
