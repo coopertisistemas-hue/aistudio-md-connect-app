@@ -88,33 +88,38 @@ export default function PartnersPage() {
                 </button>
 
                 {/* A) HERO com Vídeo Background */}
-                <div className="relative text-center space-y-4 mb-8 overflow-hidden rounded-3xl">
-                    {/* Vídeo Background */}
-                    <div className="absolute inset-0 -z-10">
-                        <video
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            className="w-full h-full object-cover opacity-30"
-                        >
-                            <source src="https://assets.mixkit.co/videos/preview/mixkit-people-praying-in-a-church-4255-large.mp4" type="video/mp4" />
-                        </video>
-                        {/* Overlay gradient - ajustado para melhor visibilidade do vídeo */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-purple-50/80 via-white/90 to-white"></div>
-                    </div>
-
-                    {/* Conteúdo do Hero */}
-                    <div className="relative z-10 py-12">
-                        <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto shadow-sm border border-amber-100 mb-4">
-                            <Heart className="w-8 h-8 text-amber-500 fill-amber-500" />
+                <div className="relative text-center mb-8">
+                    {/* Container do Hero com fundo e vídeo */}
+                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-purple-50 via-white to-white">
+                        {/* Vídeo Background - Camada 1 */}
+                        <div className="absolute inset-0 z-0">
+                            <video
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="w-full h-full object-cover"
+                                style={{ opacity: 0.25 }}
+                            >
+                                <source src="https://assets.mixkit.co/videos/preview/mixkit-people-praying-in-a-church-4255-large.mp4" type="video/mp4" />
+                            </video>
                         </div>
-                        <h1 className="text-3xl font-bold text-slate-900 tracking-tight leading-tight">
-                            Seja Parceiro Oficial
-                        </h1>
-                        <p className="text-slate-600 font-medium text-lg leading-relaxed max-w-lg mx-auto">
-                            Tecnologia a serviço do Reino: missões, ação social e modernização da Igreja local.
-                        </p>
+
+                        {/* Overlay Gradient - Camada 2 */}
+                        <div className="absolute inset-0 z-10 bg-gradient-to-b from-purple-50/70 via-white/85 to-white/95"></div>
+
+                        {/* Conteúdo do Hero - Camada 3 */}
+                        <div className="relative z-20 py-12 px-4 space-y-4">
+                            <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto shadow-sm border border-amber-100 mb-4">
+                                <Heart className="w-8 h-8 text-amber-500 fill-amber-500" />
+                            </div>
+                            <h1 className="text-3xl font-bold text-slate-900 tracking-tight leading-tight">
+                                Seja Parceiro Oficial
+                            </h1>
+                            <p className="text-slate-600 font-medium text-lg leading-relaxed max-w-lg mx-auto">
+                                Tecnologia a serviço do Reino: missões, ação social e modernização da Igreja local.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
