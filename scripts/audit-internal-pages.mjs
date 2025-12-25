@@ -8,6 +8,16 @@ const __dirname = dirname(__filename);
 const projectRoot = join(__dirname, '..');
 const pagesDir = join(projectRoot, 'src', 'pages');
 
+// Páginas especiais que não precisam de InternalPageLayout
+const SPECIAL_PAGES = [
+    'src/pages/Home.tsx',
+    'src/pages/PublicHome.tsx',
+    'src/pages/LandingPage.tsx',
+    'src/pages/Login.tsx',
+    'src/pages/status/GateScreens.tsx',
+    'src/pages/public/RadioPage.tsx',
+];
+
 // ANSI color codes for terminal output
 const colors = {
     reset: '\x1b[0m',
@@ -37,6 +47,13 @@ async function findTsxFiles(dir, fileList = []) {
     }
 
     return fileList;
+}
+
+/**
+ * Check if a file is a special page (doesn't need InternalPageLayout)
+ */
+function isSpecialPage(relativePath) {
+    return SPECIAL_PAGES.some(sp => relativePath === sp);
 }
 
 /**
@@ -77,7 +94,7 @@ async function auditInternalPages() {
     try {
         // Find all .tsx files in src/pages
         const files = await findTsxFiles(pagesDir);
-        
+
         if (files.length === 0) {
             console.log(`${colors.yellow}⚠️  Nenhum arquivo .tsx encontrado em src/pages${colors.reset}`);
             return;
@@ -87,23 +104,35 @@ async function auditInternalPages() {
         const results = await Promise.all(files.map(analyzeFile));
 
         // Categorize results
-        const withInternalPageLayout = results.filter(r => r.hasInternalPageLayout);
-        const withoutInternalPageLayout = results.filter(r => !r.hasInternalPageLayout);
-        const withDirectImports = results.filter(r => r.directImports.length > 0);
+        const specialPages = results.filter(r => isSpecialPage(r.path));
+        const regularPages = results.filter(r => !isSpecialPage(r.path));
+        const withInternalPageLayout = regularPages.filter(r => r.hasInternalPageLayout);
+        const withoutInternalPageLayout = regularPages.filter(r => !r.hasInternalPageLayout);
+        const withDirectImports = regularPages.filter(r => r.directImports.length > 0);
 
-        // Calculate percentages
+        // Calculate percentages (only for regular pages)
         const totalFiles = results.length;
-        const conformanceRate = ((withInternalPageLayout.length / totalFiles) * 100).toFixed(1);
-        const nonConformanceRate = ((withoutInternalPageLayout.length / totalFiles) * 100).toFixed(1);
-        const directImportsRate = ((withDirectImports.length / totalFiles) * 100).toFixed(1);
+        const totalRegularPages = regularPages.length;
+        const conformanceRate = totalRegularPages > 0 ? ((withInternalPageLayout.length / totalRegularPages) * 100).toFixed(1) : '0.0';
+        const nonConformanceRate = totalRegularPages > 0 ? ((withoutInternalPageLayout.length / totalRegularPages) * 100).toFixed(1) : '0.0';
+        const directImportsRate = totalRegularPages > 0 ? ((withDirectImports.length / totalRegularPages) * 100).toFixed(1) : '0.0';
 
         // Print statistics
         console.log(`${colors.bold}📊 Estatísticas:${colors.reset}`);
-        console.log(`  Total de páginas: ${colors.bold}${totalFiles}${colors.reset}`);
+        console.log(`  Total de páginas: ${colors.bold}${totalFiles}${colors.reset} (${totalRegularPages} regulares + ${specialPages.length} especiais)`);
         console.log(`  ${colors.green}✅ Usando InternalPageLayout: ${withInternalPageLayout.length} (${conformanceRate}%)${colors.reset}`);
         console.log(`  ${colors.red}❌ Sem InternalPageLayout: ${withoutInternalPageLayout.length} (${nonConformanceRate}%)${colors.reset}`);
         console.log(`  ${colors.yellow}⚠️  Com importações diretas: ${withDirectImports.length} (${directImportsRate}%)${colors.reset}`);
         console.log();
+
+        // Print special pages (ignored from audit)
+        if (specialPages.length > 0) {
+            console.log(`${colors.bold}${colors.blue}ℹ️  Páginas Especiais (ignorar) (${specialPages.length}):${colors.reset}`);
+            specialPages.forEach(result => {
+                console.log(`  ${colors.gray}-${colors.reset} ${result.path}`);
+            });
+            console.log();
+        }
 
         // Print pages WITHOUT InternalPageLayout
         if (withoutInternalPageLayout.length > 0) {
