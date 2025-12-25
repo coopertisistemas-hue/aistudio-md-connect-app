@@ -77,6 +77,7 @@ export default function ChurchImplementationPage() {
             subtitle="Implantação assistida, segura e focada na expansão do Reino."
             tagline="Implantação & Tecnologia"
             icon={Building2}
+            backPath="/sou-igreja"
             className="pb-24"
             showDoe={false} // We will use a custom section for this to meet requiremens
             showSponsor={false}
