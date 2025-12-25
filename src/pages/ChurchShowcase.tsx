@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Church, Rocket, MessageCircle, BookOpen, Heart, Calendar, Globe, Users, Megaphone, Sparkles, FileText, Settings, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 import { APP_ROUTES, EXTERNAL_LINKS } from '@/lib/routes';
 import { SEOHead } from '@/components/SEOHead';
 
-const ChurchShowcase: React.FC = () => {
+export default function ChurchShowcase() {
     const navigate = useNavigate();
 
     return (
@@ -27,7 +26,6 @@ const ChurchShowcase: React.FC = () => {
             >
                 <div className="px-4 space-y-8 pb-8">
 
-                    {/* Hero */}
                     <div className="bg-gradient-to-br from-indigo-50 via-white to-blue-50 rounded-3xl p-8 border border-indigo-100/50 shadow-sm">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 rounded-full mb-4">
                             <Sparkles className="w-3 h-3 text-indigo-600" />
@@ -63,7 +61,6 @@ const ChurchShowcase: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Features */}
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900 mb-6">
                             O que sua igreja recebe
@@ -90,7 +87,7 @@ const ChurchShowcase: React.FC = () => {
                                             <Megaphone className="w-6 h-6 text-indigo-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-slate-900 mb-1">Mural & Comunicados</h3>
+                                            <h3 className="font-bold text-slate-900 mb-1">Mural e Comunicados</h3>
                                             <p className="text-sm text-slate-600 leading-relaxed">Avisos e comunicacao direta</p>
                                         </div>
                                     </div>
@@ -118,7 +115,7 @@ const ChurchShowcase: React.FC = () => {
                                             <Calendar className="w-6 h-6 text-indigo-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-slate-900 mb-1">Agenda & Eventos</h3>
+                                            <h3 className="font-bold text-slate-900 mb-1">Agenda e Eventos</h3>
                                             <p className="text-sm text-slate-600 leading-relaxed">Calendario de cultos e atividades</p>
                                         </div>
                                     </div>
@@ -155,7 +152,6 @@ const ChurchShowcase: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Steps */}
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900 mb-6">
                             Como funciona
@@ -168,7 +164,7 @@ const ChurchShowcase: React.FC = () => {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
                                         <FileText className="w-5 h-5 text-indigo-600" />
-                                        <h3 className="font-bold text-slate-900">Cadastro & Validacao</h3>
+                                        <h3 className="font-bold text-slate-900">Cadastro e Validacao</h3>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">Preencha o formulario. Validacao em ate 48h.</p>
                                 </div>
@@ -194,7 +190,7 @@ const ChurchShowcase: React.FC = () => {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
                                         <Rocket className="w-5 h-5 text-indigo-600" />
-                                        <h3 className="font-bold text-slate-900">Go-Live & Suporte</h3>
+                                        <h3 className="font-bold text-slate-900">Go-Live e Suporte</h3>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">Sua igreja no ar com suporte continuo.</p>
                                 </div>
@@ -202,14 +198,13 @@ const ChurchShowcase: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* LGPD */}
                     <Card className="bg-slate-50 border-slate-200">
                         <CardContent className="p-6">
                             <div className="flex items-start gap-4">
                                 <Shield className="w-6 h-6 text-slate-600 flex-shrink-0 mt-1" />
                                 <div>
                                     <h3 className="font-bold text-slate-900 mb-2">
-                                        Privacidade & Transparencia
+                                        Privacidade e Transparencia
                                     </h3>
                                     <p className="text-sm text-slate-600 mb-4 leading-relaxed">
                                         Dados tratados conforme LGPD.
@@ -235,7 +230,6 @@ const ChurchShowcase: React.FC = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Final CTA */}
                     <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-3xl p-8 text-center text-white shadow-lg">
                         <h2 className="text-2xl font-bold mb-3">
                             Pronto para comecar?
@@ -256,6 +250,4 @@ const ChurchShowcase: React.FC = () => {
             </InternalPageLayout>
         </>
     );
-};
-
-export default ChurchShowcase;
+}
