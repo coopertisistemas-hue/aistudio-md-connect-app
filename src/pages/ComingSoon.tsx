@@ -1,10 +1,9 @@
-import { useNavigate } from 'react-router-dom';
 import { Construction } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+
 import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function ComingSoon() {
-    const navigate = useNavigate();
+
 
     return (
         <InternalPageLayout

@@ -11,21 +11,17 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import { DoeSupportCard } from '@/components/monetization/DoeSupportCard';
+
 import { SEOHead } from '@/components/SEO/SEOHead';
 import { EXTERNAL_LINKS } from '@/lib/routes';
 import {
     ShieldCheck,
     MessageSquare,
     Building2,
-    CheckCircle2,
     Globe,
     MapPin,
     Sparkles,
-    User,
-    Mail,
-    Phone,
-    MapPinned
+    User
 } from 'lucide-react';
 
 export default function ChurchImplementationPage() {
