@@ -30,9 +30,9 @@ export default function ChurchShowcase() {
 
                     {/* Hero Section */}
                     <section>
-                        <Card className="bg-white/80 backdrop-blur-sm border border-slate-200/60 shadow-lg rounded-3xl">
-                            <CardContent className="p-7 md:p-10 text-center space-y-7 md:space-y-8">
-                                <div className="flex flex-wrap justify-center gap-2">
+                        <Card className="bg-white/80 backdrop-blur-sm border border-slate-200/60 shadow-lg rounded-3xl overflow-hidden">
+                            <CardContent className="p-7 md:p-10 pb-10 md:pb-12 text-center space-y-7 md:space-y-8">
+                                <div className="flex flex-wrap justify-center gap-2 mb-5">
                                     <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 uppercase tracking-widest text-[10px] font-bold">
                                         Licenca de Uso Gratuita
                                     </Badge>
@@ -50,22 +50,20 @@ export default function ChurchShowcase() {
                                     </p>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                                <div className="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl mx-auto">
                                     <Button
-                                        size="lg"
-                                        className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-14 px-10 rounded-full shadow-md shadow-indigo-200/60 gap-2 transition-all md:hover:scale-[1.02] active:scale-95"
+                                        className="w-full h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md shadow-indigo-200/60 md:hover:scale-[1.02] transition"
                                         onClick={() => navigate(APP_ROUTES.CHURCH_IMPLEMENTATION)}
                                     >
-                                        <Rocket className="w-5 h-5" />
+                                        <Rocket className="w-5 h-5 mr-2" />
                                         Quero implantar
                                     </Button>
                                     <Button
-                                        size="lg"
                                         variant="outline"
-                                        className="w-full sm:w-auto bg-white/80 backdrop-blur-sm hover:bg-white text-slate-700 border-slate-200 font-bold h-14 px-10 rounded-full shadow-sm transition-all hover:border-indigo-300"
+                                        className="w-full h-12 rounded-full bg-white/70 backdrop-blur border-slate-200 text-slate-800 hover:bg-white transition"
                                         onClick={() => window.open(EXTERNAL_LINKS.SUPPORT_WHATSAPP, '_blank')}
                                     >
-                                        <MessageCircle className="w-5 h-5" />
+                                        <MessageCircle className="w-5 h-5 mr-2" />
                                         Falar com a equipe
                                     </Button>
                                 </div>
