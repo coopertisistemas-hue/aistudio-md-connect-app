@@ -6,23 +6,27 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-    ShieldCheck,
-    MessageSquare,
-    Building2,
-    User,
-    CheckCircle2,
-    Globe,
-    MapPin,
-    Sparkles
-} from 'lucide-react';
-import { EXTERNAL_LINKS } from '@/lib/routes';
-import { DoeSupportCard } from '@/components/monetization/DoeSupportCard';
-import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "@/components/ui/accordion";
+} from '@/components/ui/accordion';
+import { DoeSupportCard } from '@/components/monetization/DoeSupportCard';
+import { SEOHead } from '@/components/SEO/SEOHead';
+import { EXTERNAL_LINKS } from '@/lib/routes';
+import {
+    ShieldCheck,
+    MessageSquare,
+    Building2,
+    CheckCircle2,
+    Globe,
+    MapPin,
+    Sparkles,
+    User,
+    Mail,
+    Phone,
+    MapPinned
+} from 'lucide-react';
 
 export default function ChurchImplementationPage() {
     const [loading, setLoading] = useState(false);
@@ -58,8 +62,8 @@ export default function ChurchImplementationPage() {
         setLoading(true);
 
         // Construct Mailto as fallback
-        const subject = `Solicitação de Implantação MD Connect - ${formData.churchName}`;
-        const body = `Nome: ${formData.name}%0D%0ACargo: ${formData.role}%0D%0AIgreja: ${formData.churchName}%0D%0ACidade: ${formData.city}%0D%0AWhatsApp: ${formData.whatsapp}%0D%0AEmail: ${formData.email}%0D%0ATipo: ${formData.type === 'remote' ? 'Remota' : 'Presencial'}%0D%0AHorário: ${formData.schedule}%0D%0AMensagem: ${formData.message}`;
+        const subject = `Solicitacao de Implantacao MD Connect - ${formData.churchName}`;
+        const body = `Nome: ${formData.name}%0D%0ACargo: ${formData.role}%0D%0AIgreja: ${formData.churchName}%0D%0ACidade: ${formData.city}%0D%0AWhatsApp: ${formData.whatsapp}%0D%0AEmail: ${formData.email}%0D%0ATipo: ${formData.type === 'remote' ? 'Remota' : 'Presencial'}%0D%0AHorario: ${formData.schedule}%0D%0AMensagem: ${formData.message}`;
 
         setTimeout(() => {
             setLoading(false);
@@ -72,394 +76,428 @@ export default function ChurchImplementationPage() {
     };
 
     return (
-        <InternalPageLayout
-            title="Sua Igreja no Digital"
-            subtitle="Implantação assistida, segura e focada na expansão do Reino."
-            tagline="Implantação & Tecnologia"
-            icon={Building2}
-            backPath="/sou-igreja"
-            className="pb-24"
-            showDoe={false} // We will use a custom section for this to meet requiremens
-            showSponsor={false}
-        >
-            <div className="max-w-4xl mx-auto px-4 py-8 space-y-24">
+        <>
+            <SEOHead
+                config={{
+                    title: "Implantacao de Igreja - MD Connect",
+                    description: "Implante o MD Connect na sua igreja com suporte completo e gratuito"
+                }}
+            />
 
-                {/* 1. HERO SECTION (Already partially in InternalPageLayout, but adding extra visual weight) */}
-                <section className="text-center space-y-8 py-4">
-                    <div className="flex flex-wrap justify-center gap-2">
-                        <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 uppercase tracking-widest text-[10px] font-bold">
-                            Licença de Uso Gratuita
-                        </Badge>
-                        <Badge variant="outline" className="bg-indigo-50/50 border-indigo-100 text-indigo-600 uppercase tracking-widest text-[10px] font-bold">
-                            Assessoria Especializada
-                        </Badge>
-                    </div>
 
-                    <div className="space-y-4 max-w-3xl mx-auto">
-                        <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
-                            Organize seu ministério com <span className="text-indigo-600">tecnologia servil.</span>
-                        </h2>
-                        <p className="text-slate-600 leading-relaxed md:text-xl max-w-2xl mx-auto">
-                            Levamos a estrutura digital completa para sua igreja, focando na facilitação do discipulado e na gestão transparente do rebanho.
-                        </p>
-                    </div>
+            <InternalPageLayout
+                title="Sua Igreja no Digital"
+                subtitle="Implantacao assistida, segura e focada na expansao do Reino."
+                tagline="Implantacao & Tecnologia"
+                icon={Building2}
+                backPath="/sou-igreja"
+                className="pb-24"
+                showDoe={false}
+                showSponsor={false}
+            >
+                <div className="max-w-4xl mx-auto px-4 py-8 space-y-24">
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                        <Button
-                            size="lg"
-                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold h-14 px-10 rounded-full shadow-xl shadow-green-200 gap-2 transition-all hover:scale-105 active:scale-95"
-                            onClick={() => window.open(EXTERNAL_LINKS.SUPPORT_WHATSAPP, '_blank')}
-                        >
-                            <MessageSquare className="w-5 h-5" />
-                            Conversar no WhatsApp
-                        </Button>
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="w-full sm:w-auto bg-white/80 backdrop-blur-sm hover:bg-white text-slate-700 border-slate-200 font-bold h-14 px-10 rounded-full transition-all hover:border-indigo-300"
-                            onClick={scrollToForm}
-                        >
-                            Preencher Formulário
-                        </Button>
-                    </div>
-                </section>
+                    {/* CONTEUDO SERA ADICIONADO AQUI INCREMENTALMENTE */}
 
-                {/* 2. COMO FUNCIONA */}
-                <section className="space-y-12">
-                    <div className="text-center space-y-2">
-                        <h3 className="text-2xl font-bold text-slate-900">Como funciona?</h3>
-                        <p className="text-slate-500 text-sm">O processo é ágil e acompanhado por nossa equipe.</p>
-                    </div>
 
-                    <div className="grid gap-6 md:grid-cols-3">
-                        {[
-                            { step: "01", title: "Solicitação", desc: "Você preenche o formulário com os dados da igreja e liderança." },
-                            { step: "02", title: "Configuração", desc: "Nossa equipe valida as informações e prepara seu ambiente exclusivo." },
-                            { step: "03", title: "Liberação", desc: "Você recebe os acessos, materiais de treinamento e suporte inicial." }
-                        ].map((s, i) => (
-                            <div key={i} className="relative">
-                                <Card className="border-slate-100 bg-white/60 backdrop-blur-sm shadow-sm h-full hover:shadow-md transition-shadow">
-                                    <CardContent className="p-8 flex flex-col items-center text-center gap-4">
-                                        <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xl mb-2">
-                                            {s.step}
-                                        </div>
-                                        <h4 className="font-bold text-slate-900 text-lg">{s.title}</h4>
-                                        <p className="text-sm text-slate-600 leading-relaxed">{s.desc}</p>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                {/* 3. O QUE SUA IGREJA RECEBE */}
-                <section className="bg-slate-900 rounded-[2.5rem] p-8 md:p-16 text-white shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-
-                    <div className="relative z-10 grid md:grid-cols-2 gap-16 items-center">
-                        <div className="space-y-8">
-                            <div className="space-y-4">
-                                <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-500/30">
-                                    Sem custo de licença mensal
-                                </Badge>
-                                <h3 className="text-3xl md:text-4xl font-bold">Ecossistema completo</h3>
-                                <p className="text-slate-400 text-lg leading-relaxed">
-                                    Toda a tecnologia necessária para a jornada do membro e a gestão da instituição, disponível sem barreiras financeiras.
-                                </p>
-                            </div>
-
-                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
-                                {[
-                                    "App Exclusivo p/ Membros",
-                                    "Gestão de Células/Grupos",
-                                    "Secretaria Digital",
-                                    "Tesouraria Transparente",
-                                    "Agenda & Eventos",
-                                    "Área de Conteúdo Bíblico",
-                                    "Devocionais Integradas",
-                                    "Suporte via Comunidade"
-                                ].map((item, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
-                                        <div className="p-1 rounded-full bg-green-500/20 text-green-400 shrink-0">
-                                            <CheckCircle2 className="w-3.5 h-3.5" />
-                                        </div>
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
+                    {/* 1. HERO SECTION */}
+                    <section className="text-center space-y-8 py-4">
+                        <div className="flex flex-wrap justify-center gap-2">
+                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 uppercase tracking-widest text-[10px] font-bold">
+                                Licenca de Uso Gratuita
+                            </Badge>
+                            <Badge variant="outline" className="bg-indigo-50/50 border-indigo-100 text-indigo-600 uppercase tracking-widest text-[10px] font-bold">
+                                Assessoria Especializada
+                            </Badge>
                         </div>
 
-                        <div className="bg-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/10 space-y-6">
-                            <div className="flex items-center gap-3 text-indigo-400">
-                                <Sparkles className="w-6 h-6" />
-                                <h4 className="font-bold text-xl text-white">Pronto para o uso</h4>
-                            </div>
-                            <p className="text-sm text-slate-400 leading-relaxed">
-                                Diferente de outros sistemas, o MD Connect já nasce configurado com as melhores práticas de gestão eclesiástica.
+                        <div className="space-y-4 max-w-3xl mx-auto">
+                            <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
+                                Organize seu ministerio com <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">tecnologia servil.</span>
+                            </h2>
+                            <p className="text-slate-600 leading-relaxed md:text-xl max-w-2xl mx-auto">
+                                Levamos a estrutura digital completa para sua igreja, focando na facilitacao do discipulado e na gestao transparente do rebanho.
                             </p>
-                            <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                                <p className="text-xs text-indigo-100 font-medium italic">
-                                    "O sistema é gratuito para a igreja focar no Reino. Nossa manutenção vem de parcerias e ofertas voluntárias."
-                                </p>
-                            </div>
                         </div>
-                    </div>
-                </section>
 
-                {/* 4. MODELOS DE IMPLANTAÇÃO */}
-                <section className="space-y-10">
-                    <div className="text-center space-y-2">
-                        <h3 className="text-2xl font-bold text-slate-900">Modelos de Implantação</h3>
-                        <p className="text-slate-500 text-sm">Escolha como prefere que nossa equipe auxilie sua igreja.</p>
-                    </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 max-w-2xl mx-auto">
+                            <Button
+                                size="lg"
+                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold h-14 px-8 rounded-full shadow-xl shadow-green-200 gap-2 transition-all hover:scale-105 active:scale-95"
+                                onClick={() => window.open(EXTERNAL_LINKS.SUPPORT_WHATSAPP, '_blank')}
+                            >
+                                <MessageSquare className="w-5 h-5" />
+                                Conversar no WhatsApp
+                            </Button>
+                            <Button
+                                size="lg"
+                                variant="outline"
+                                className="w-full bg-white/80 backdrop-blur-sm hover:bg-white text-slate-700 border-slate-200 font-bold h-14 px-8 rounded-full transition-all hover:border-indigo-300"
+                                onClick={scrollToForm}
+                            >
+                                Preencher Formulario
+                            </Button>
+                        </div>
+                    </section>
 
-                    <div className="grid md:grid-cols-2 gap-8">
-                        {/* Remote */}
-                        <Card className="border-2 border-slate-100/60 bg-white/50 backdrop-blur-sm relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-4">
-                                <Badge className="bg-green-100 text-green-700 border-none uppercase text-[10px] font-black">Gratuita</Badge>
-                            </div>
-                            <CardContent className="p-8 space-y-6">
-                                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                    <Globe className="w-7 h-7" />
+                    {/* 2. COMO FUNCIONA */}
+                    <section className="space-y-12">
+                        <div className="text-center space-y-3">
+                            <h3 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Como funciona?</h3>
+                            <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto">O processo e agil, simples e acompanhado por nossa equipe ministerial.</p>
+                        </div>
+
+                        <div className="space-y-6">
+                            {[
+                                {
+                                    step: "01",
+                                    title: "Solicitacao",
+                                    desc: "Voce preenche o formulario com os dados da igreja e lideranca.",
+                                    gradient: "from-blue-500 to-indigo-600",
+                                    icon: "📝"
+                                },
+                                {
+                                    step: "02",
+                                    title: "Configuracao",
+                                    desc: "Nossa equipe valida as informacoes e prepara seu ambiente exclusivo.",
+                                    gradient: "from-indigo-500 to-purple-600",
+                                    icon: "⚙️"
+                                },
+                                {
+                                    step: "03",
+                                    title: "Liberacao",
+                                    desc: "Voce recebe os acessos, materiais de treinamento e suporte inicial.",
+                                    gradient: "from-purple-500 to-pink-600",
+                                    icon: "🚀"
+                                }
+                            ].map((s, i) => (
+                                <div key={i} className="relative group">
+                                    <Card className="border-slate-200/60 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
+                                        <CardContent className="p-6 md:p-8">
+                                            <div className="flex items-start gap-6">
+                                                {/* Icon Badge */}
+                                                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-gradient-to-br ${s.gradient} flex items-center justify-center text-3xl md:text-4xl shadow-lg shrink-0 group-hover:scale-110 transition-transform`}>
+                                                    {s.icon}
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="flex-1 space-y-2 pt-1">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs">
+                                                            {s.step}
+                                                        </div>
+                                                        <h4 className="font-black text-slate-900 text-lg md:text-xl tracking-tight">{s.title}</h4>
+                                                    </div>
+                                                    <p className="text-sm md:text-base text-slate-600 leading-relaxed">{s.desc}</p>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
                                 </div>
-                                <div>
-                                    <h4 className="font-black text-xl text-slate-900 tracking-tight">Implantação Remota</h4>
-                                    <p className="text-sm text-slate-500 mt-2 leading-relaxed">Foco em agilidade. Todo o suporte e treinamento via ferramentas digitais.</p>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* 3. FORMULARIO DE IMPLANTACAO */}
+                    <section id="implementation-form" className="scroll-mt-20">
+                        <Card className="border-indigo-100 bg-gradient-to-br from-indigo-50/50 to-white backdrop-blur-sm shadow-xl">
+                            <CardContent className="p-8 md:p-12">
+                                <div className="text-center space-y-3 mb-10">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600 text-white mb-4">
+                                        <ShieldCheck className="w-8 h-8" />
+                                    </div>
+                                    <h3 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Inicie a implantacao</h3>
+                                    <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto">O ministerio entrara em contato em breve.</p>
                                 </div>
-                                <ul className="space-y-3 pt-2">
-                                    {["Configuração via Videochamada", "Webinars de Treinamento", "Suporte Contínuo via WhatsApp"].map((l, i) => (
-                                        <li key={i} className="text-xs text-slate-600 flex gap-2 font-medium">
-                                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" /> {l}
-                                        </li>
-                                    ))}
-                                </ul>
-                                <Button className="w-full bg-slate-900 h-12 rounded-xl group-hover:bg-indigo-600 transition-colors" onClick={scrollToForm}>
-                                    Solicitar Remota
-                                </Button>
+
+                                <form onSubmit={handleSubmit} className="space-y-10">
+                                    {/* Responsavel pela Solicitacao */}
+                                    <div className="space-y-5">
+                                        <div className="flex items-center gap-2 text-slate-700">
+                                            <User className="w-5 h-5 text-indigo-600" />
+                                            <h4 className="font-bold text-sm uppercase tracking-wider">Responsavel pela Solicitacao</h4>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700">Seu Nome Completo</label>
+                                                <Input
+                                                    name="name"
+                                                    value={formData.name}
+                                                    onChange={handleChange}
+                                                    placeholder="Ex: Pr. Joao dos Santos"
+                                                    required
+                                                    className="h-12 bg-white/80 border-slate-200 focus:border-indigo-400"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700">Cargo ou Funcao</label>
+                                                <Input
+                                                    name="role"
+                                                    value={formData.role}
+                                                    onChange={handleChange}
+                                                    placeholder="Ex: Pastor Presidente"
+                                                    required
+                                                    className="h-12 bg-white/80 border-slate-200 focus:border-indigo-400"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700">WhatsApp de Contato</label>
+                                                <Input
+                                                    name="whatsapp"
+                                                    value={formData.whatsapp}
+                                                    onChange={handleChange}
+                                                    placeholder="(00) 00000-0000"
+                                                    required
+                                                    className="h-12 bg-white/80 border-slate-200 focus:border-indigo-400"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700">E-mail Institucional</label>
+                                                <Input
+                                                    name="email"
+                                                    type="email"
+                                                    value={formData.email}
+                                                    onChange={handleChange}
+                                                    placeholder="contato@igreja.com"
+                                                    required
+                                                    className="h-12 bg-white/80 border-slate-200 focus:border-indigo-400"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Dados da Instituicao */}
+                                    <div className="space-y-6 pt-6 border-t border-slate-200">
+                                        <div className="flex items-center gap-2 text-slate-700">
+                                            <Building2 className="w-5 h-5 text-indigo-600" />
+                                            <h4 className="font-bold text-sm uppercase tracking-wider">Dados da Instituicao</h4>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700">Nome da Igreja</label>
+                                                <Input
+                                                    name="churchName"
+                                                    value={formData.churchName}
+                                                    onChange={handleChange}
+                                                    placeholder="Ex: Igreja Evangelica Betel"
+                                                    required
+                                                    className="h-12 bg-white/80 border-slate-200 focus:border-indigo-400"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700">Cidade / UF</label>
+                                                <Input
+                                                    name="city"
+                                                    value={formData.city}
+                                                    onChange={handleChange}
+                                                    placeholder="Ex: Rio de Janeiro - RJ"
+                                                    required
+                                                    className="h-12 bg-white/80 border-slate-200 focus:border-indigo-400"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Modelo de Implantacao */}
+                                    <div className="space-y-5 pt-8 border-t border-slate-200">
+                                        <div className="flex items-center gap-2 text-slate-700">
+                                            <Sparkles className="w-5 h-5 text-indigo-600" />
+                                            <h4 className="font-bold text-sm uppercase tracking-wider">Modelo de Implantacao Preferencial</h4>
+                                        </div>
+
+                                        <div className="grid md:grid-cols-2 gap-4 items-start">
+                                            {/* REMOTA */}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleTypeChange('remote')}
+                                                className={`p-6 rounded-2xl border-2 transition-all text-center ${formData.type === 'remote'
+                                                    ? 'border-indigo-600 bg-indigo-50'
+                                                    : 'border-slate-200 bg-white/50 hover:border-indigo-300'
+                                                    }`}
+                                            >
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                                                        <Globe className="w-6 h-6" />
+                                                    </div>
+
+                                                    <div className="space-y-1">
+                                                        <h5 className="font-bold text-slate-900 leading-tight">Remota</h5>
+                                                        <p className="text-xs text-green-600 font-bold uppercase">Gratuita</p>
+                                                    </div>
+
+                                                    <p className="text-sm text-slate-600 leading-relaxed">
+                                                        Configuracao via videochamada e suporte continuo.
+                                                    </p>
+                                                </div>
+                                            </button>
+
+                                            {/* PRESENCIAL */}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleTypeChange('local')}
+                                                className={`p-6 rounded-2xl border-2 transition-all text-center ${formData.type === 'local'
+                                                    ? 'border-indigo-600 bg-indigo-50'
+                                                    : 'border-slate-200 bg-white/50 hover:border-indigo-300'
+                                                    }`}
+                                            >
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
+                                                        <MapPin className="w-6 h-6" />
+                                                    </div>
+
+                                                    <div className="space-y-1">
+                                                        <h5 className="font-bold text-slate-900 leading-tight">Presencial</h5>
+                                                        <p className="text-xs text-orange-600 font-bold uppercase">Consultar</p>
+                                                    </div>
+
+                                                    <p className="text-sm text-slate-600 leading-relaxed">
+                                                        Visita tecnica e treinamento in-loco.
+                                                    </p>
+                                                </div>
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-700">Melhor horario para contato</label>
+                                            <Input
+                                                name="schedule"
+                                                value={formData.schedule}
+                                                onChange={handleChange}
+                                                placeholder="Ex: Manha (9h as 12h)"
+                                                className="h-12 bg-white/80 border-slate-200 focus:border-indigo-400"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Mensagem */}
+                                    <div className="space-y-6 pt-6 border-t border-slate-200">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-700">Mensagem ou Duvida (Opcional)</label>
+                                            <Textarea
+                                                name="message"
+                                                value={formData.message}
+                                                onChange={handleChange}
+                                                placeholder="Conte-nos um pouco sobre a necessidade da sua igreja..."
+                                                rows={4}
+                                                className="bg-white/80 border-slate-200 focus:border-indigo-400 resize-none"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <div className="pt-6">
+                                        <Button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-full shadow-xl shadow-indigo-200 transition-all hover:scale-105 active:scale-95"
+                                        >
+                                            {loading ? 'Enviando...' : 'Solicitar Implantacao'}
+                                        </Button>
+                                        <p className="text-xs text-slate-500 text-center mt-4">
+                                            Ao enviar, voce concorda com nossos termos de uso e politica de privacidade.
+                                        </p>
+                                    </div>
+                                </form>
                             </CardContent>
                         </Card>
+                    </section>
 
-                        {/* Presential */}
-                        <Card className="border-2 border-slate-100/60 bg-white/50 backdrop-blur-sm relative group">
-                            <CardContent className="p-8 space-y-6">
-                                <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center">
-                                    <MapPin className="w-7 h-7" />
-                                </div>
-                                <div>
-                                    <h4 className="font-black text-xl text-slate-900 tracking-tight">Presencial / Local</h4>
-                                    <p className="text-sm text-slate-500 mt-2 leading-relaxed">Visita técnica e workshops presenciais para a liderança e voluntários.</p>
-                                </div>
-                                <ul className="space-y-3 pt-2">
-                                    {["Treinamento In-loco", "Consultoria de Processos", "Setup Assistido presencial"].map((l, i) => (
-                                        <li key={i} className="text-xs text-slate-600 flex gap-2 font-medium">
-                                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" /> {l}
-                                        </li>
-                                    ))}
-                                </ul>
-                                <div className="space-y-3">
-                                    <Button variant="outline" className="w-full border-slate-200 h-12 rounded-xl" onClick={scrollToForm}>
-                                        Consultar Disponibilidade
+                    {/* 4. FAQ - PERGUNTAS FREQUENTES */}
+                    <section className="space-y-8">
+                        <div className="text-center space-y-3">
+                            <h3 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Perguntas Frequentes</h3>
+                            <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto">Tire suas duvidas sobre a implantacao do MD Connect.</p>
+                        </div>
+
+                        <Accordion type="single" collapsible className="space-y-4">
+                            <AccordionItem value="item-1" className="border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl px-6 border-2">
+                                <AccordionTrigger className="text-left font-bold text-slate-900 hover:no-underline py-5">
+                                    A licenca de uso e realmente gratuita?
+                                </AccordionTrigger>
+                                <AccordionContent className="text-slate-600 leading-relaxed pb-5">
+                                    Sim! O MD Connect e 100% gratuito para igrejas. Nao cobramos mensalidades, taxas de implantacao ou custos ocultos.
+                                    Nossa missao e servir o Reino com tecnologia de qualidade.
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-2" className="border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl px-6 border-2">
+                                <AccordionTrigger className="text-left font-bold text-slate-900 hover:no-underline py-5">
+                                    Qual o prazo para liberacao apos a solicitacao?
+                                </AccordionTrigger>
+                                <AccordionContent className="text-slate-600 leading-relaxed pb-5">
+                                    Normalmente, o processo leva de 3 a 5 dias uteis. Nossa equipe valida as informacoes, configura seu ambiente
+                                    exclusivo e prepara os materiais de treinamento antes da liberacao.
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-3" className="border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl px-6 border-2">
+                                <AccordionTrigger className="text-left font-bold text-slate-900 hover:no-underline py-5">
+                                    Preciso ter conhecimento tecnico para usar?
+                                </AccordionTrigger>
+                                <AccordionContent className="text-slate-600 leading-relaxed pb-5">
+                                    Nao! O MD Connect foi desenvolvido para ser intuitivo e facil de usar. Alem disso, fornecemos materiais de
+                                    treinamento, tutoriais em video e suporte continuo para sua equipe.
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-4" className="border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl px-6 border-2">
+                                <AccordionTrigger className="text-left font-bold text-slate-900 hover:no-underline py-5">
+                                    Posso personalizar o sistema com a identidade da minha igreja?
+                                </AccordionTrigger>
+                                <AccordionContent className="text-slate-600 leading-relaxed pb-5">
+                                    Sim! Voce pode adicionar o logo da sua igreja, ajustar cores e personalizar diversos aspectos visuais
+                                    para refletir a identidade do seu ministerio.
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-5" className="border-slate-200 bg-white/80 backdrop-blur-sm rounded-2xl px-6 border-2">
+                                <AccordionTrigger className="text-left font-bold text-slate-900 hover:no-underline py-5">
+                                    E possivel migrar dados de outro sistema?
+                                </AccordionTrigger>
+                                <AccordionContent className="text-slate-600 leading-relaxed pb-5">
+                                    Sim! Nossa equipe pode auxiliar na migracao de dados de planilhas ou outros sistemas. Entre em contato
+                                    conosco para avaliarmos a melhor forma de realizar essa transicao.
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                    </section>
+
+                    {/* 5. CTA WHATSAPP FINAL */}
+                    <section>
+                        <Card className="border-green-100 bg-gradient-to-br from-green-50/50 to-white backdrop-blur-sm shadow-xl">
+                            <CardContent className="p-8 md:p-12 text-center">
+                                <div className="space-y-6 max-w-2xl mx-auto">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-green-600 text-white mb-2">
+                                        <MessageSquare className="w-8 h-8" />
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+                                            Ainda tem duvidas?
+                                        </h3>
+                                        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
+                                            Nossa equipe esta pronta para atender sua igreja. Entre em contato via WhatsApp e tire todas as suas duvidas!
+                                        </p>
+                                    </div>
+
+                                    <Button
+                                        size="lg"
+                                        className="bg-green-600 hover:bg-green-700 text-white font-bold h-14 px-8 rounded-full shadow-xl shadow-green-200 gap-2 transition-all hover:scale-105 active:scale-95"
+                                        onClick={() => window.open(EXTERNAL_LINKS.SUPPORT_WHATSAPP, '_blank')}
+                                    >
+                                        <MessageSquare className="w-5 h-5" />
+                                        Falar com a Equipe
                                     </Button>
-                                    <p className="text-[10px] text-slate-400 text-center uppercase tracking-widest font-bold">
-                                        Custos de deslocamento e logística combinados à parte
-                                    </p>
                                 </div>
                             </CardContent>
                         </Card>
-                    </div>
-                </section>
+                    </section>
 
-                {/* 5. FORM SECTION */}
-                <section id="implementation-form" className="scroll-mt-24 pt-8">
-                    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-slate-200/50 overflow-hidden">
-                        <div className="bg-indigo-600 p-8 md:p-12 text-white flex flex-col md:flex-row md:items-center justify-between gap-6">
-                            <div className="space-y-2">
-                                <h3 className="text-2xl md:text-3xl font-bold">Inicie a implantação</h3>
-                                <p className="text-indigo-100/80">O ministério entrará em contato em breve.</p>
-                            </div>
-                            <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/20 hidden md:block">
-                                <ShieldCheck className="w-10 h-10" />
-                            </div>
-                        </div>
 
-                        <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-10">
-                            {/* Personal Info */}
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-2 text-slate-400">
-                                    <User className="w-4 h-4" />
-                                    <span className="text-xs font-bold uppercase tracking-widest">Responsável pela Solicitação</span>
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label htmlFor="name" className="text-xs font-bold text-slate-700 ml-1">Seu Nome Completo</label>
-                                        <Input id="name" name="name" required placeholder="Ex: Pr. João dos Santos" className="h-12 border-slate-200 focus:ring-indigo-500" value={formData.name} onChange={handleChange} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label htmlFor="role" className="text-xs font-bold text-slate-700 ml-1">Cargo ou Função</label>
-                                        <Input id="role" name="role" required placeholder="Ex: Pastor Presidente, Secretário" className="h-12 border-slate-200" value={formData.role} onChange={handleChange} />
-                                    </div>
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label htmlFor="whatsapp" className="text-xs font-bold text-slate-700 ml-1">WhatsApp de Contato</label>
-                                        <Input id="whatsapp" name="whatsapp" required placeholder="(00) 00000-0000" className="h-12 border-slate-200" value={formData.whatsapp} onChange={handleChange} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label htmlFor="email" className="text-xs font-bold text-slate-700 ml-1">E-mail Institucional</label>
-                                        <Input id="email" name="email" type="email" required placeholder="contato@igreja.org" className="h-12 border-slate-200" value={formData.email} onChange={handleChange} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <hr className="border-slate-100" />
-
-                            {/* Church Info */}
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-2 text-slate-400">
-                                    <Building2 className="w-4 h-4" />
-                                    <span className="text-xs font-bold uppercase tracking-widest">Dados da Instituição</span>
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label htmlFor="churchName" className="text-xs font-bold text-slate-700 ml-1">Nome da Igreja</label>
-                                        <Input id="churchName" name="churchName" required placeholder="Ex: Igreja Evangélica MD Connect Centro" className="h-12 border-slate-200" value={formData.churchName} onChange={handleChange} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label htmlFor="city" className="text-xs font-bold text-slate-700 ml-1">Cidade / UF</label>
-                                        <Input id="city" name="city" required placeholder="Ex: Rio de Janeiro - RJ" className="h-12 border-slate-200" value={formData.city} onChange={handleChange} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <hr className="border-slate-100" />
-
-                            {/* Preferences */}
-                            <div className="space-y-8">
-                                <div className="space-y-4">
-                                    <label className="text-xs font-bold text-slate-700 ml-1">Modelo de Implantação Preferencial</label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <label className={`cursor-pointer flex items-center gap-4 p-5 rounded-2xl border-2 transition-all ${formData.type === 'remote' ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-100 hover:border-slate-200 bg-slate-50/40'}`}>
-                                            <input type="radio" name="type" value="remote" className="sr-only" checked={formData.type === 'remote'} onChange={(e) => handleTypeChange(e.target.value)} />
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${formData.type === 'remote' ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                                                <Globe className="w-5 h-5" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="font-bold text-sm">Remota</span>
-                                                <span className="text-[10px] text-slate-500 uppercase font-black uppercase tracking-widest">Gratuita</span>
-                                            </div>
-                                        </label>
-
-                                        <label className={`cursor-pointer flex items-center gap-4 p-5 rounded-2xl border-2 transition-all ${formData.type === 'local' ? 'border-orange-500 bg-orange-50/50' : 'border-slate-100 hover:border-slate-200 bg-slate-50/40'}`}>
-                                            <input type="radio" name="type" value="local" className="sr-only" checked={formData.type === 'local'} onChange={(e) => handleTypeChange(e.target.value)} />
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${formData.type === 'local' ? 'bg-orange-500 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                                                <MapPin className="w-5 h-5" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="font-bold text-sm">Presencial</span>
-                                                <span className="text-[10px] text-slate-500 uppercase font-black uppercase tracking-widest">Consultar</span>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label htmlFor="schedule" className="text-xs font-bold text-slate-700 ml-1">Melhor horário para contato</label>
-                                    <Input id="schedule" name="schedule" placeholder="Ex: Manhã (9h às 12h)" className="h-12 border-slate-200" value={formData.schedule} onChange={handleChange} />
-                                </div>
-                                <div className="space-y-2">
-                                    <label htmlFor="message" className="text-xs font-bold text-slate-700 ml-1">Mensagem ou Dúvida (Opcional)</label>
-                                    <Textarea id="message" name="message" placeholder="Conte-nos um pouco sobre a necessidade da sua igreja..." className="min-h-[120px] border-slate-200 focus:ring-indigo-500" value={formData.message} onChange={handleChange} />
-                                </div>
-                            </div>
-
-                            <div className="pt-4">
-                                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-16 rounded-2xl shadow-xl shadow-indigo-100 text-lg transition-all active:scale-[0.98]" disabled={loading}>
-                                    {loading ? "Processando..." : "Solicitar Habilitação Gratuita"}
-                                </Button>
-                                <p className="text-center text-[11px] text-slate-400 mt-4 leading-relaxed max-w-xs mx-auto">
-                                    Ao enviar, você concorda que o MD Connect entre em contato para tratar exclusivamente da implantação.
-                                </p>
-                            </div>
-                        </form>
-                    </div>
-                </section>
-
-                {/* 6. COMPROMISSO COM O REINO */}
-                <DoeSupportCard />
-
-                {/* 7. FAQ */}
-                <section className="max-w-3xl mx-auto space-y-12">
-                    <div className="text-center space-y-2">
-                        <h3 className="text-2xl font-bold text-slate-900">Perguntas Frequentes</h3>
-                        <p className="text-slate-500 text-sm">Esclareça suas principais dúvidas sobre o projeto.</p>
-                    </div>
-
-                    <Accordion type="single" collapsible className="w-full">
-                        <AccordionItem value="item-1" className="border-slate-100">
-                            <AccordionTrigger className="text-left font-bold text-slate-800 py-6">É realmente gratuito? Tem pegadinha?</AccordionTrigger>
-                            <AccordionContent className="text-slate-600 leading-relaxed pb-6 text-sm">
-                                Não há pegadinha. O MD Connect nasceu para servir ao Reino. A "licença de uso" do ERP e do App para membros é totalmente gratuita. Incentivamos que as igrejas usuárias apoiem o projeto financeiramente conforme Deus prosperar, para que possamos manter servidores e equipe técnica, mas isso nunca será um bloqueio para as funcionalidades principais.
-                            </AccordionContent>
-                        </AccordionItem>
-                        <AccordionItem value="item-2" className="border-slate-100">
-                            <AccordionTrigger className="text-left font-bold text-slate-800 py-6">Quanto tempo leva para liberar minha igreja?</AccordionTrigger>
-                            <AccordionContent className="text-slate-600 leading-relaxed pb-6 text-sm">
-                                Após o preenchimento da solicitação, nossa equipe faz uma validação manual (para garantir que é uma liderança real). Este processo costuma levar entre 24h e 72h úteis.
-                            </AccordionContent>
-                        </AccordionItem>
-                        <AccordionItem value="item-3" className="border-slate-100">
-                            <AccordionTrigger className="text-left font-bold text-slate-800 py-6">Meus dados estão seguros e seguem a LGPD?</AccordionTrigger>
-                            <AccordionContent className="text-slate-600 leading-relaxed pb-6 text-sm">
-                                Sim. Segurança é prioridade. Utilizamos infraestrutura criptografada de nível bancário. Os dados da sua igreja pertencem exclusivamente à sua igreja. Não vendemos dados nem os expomos a terceiros interessados.
-                            </AccordionContent>
-                        </AccordionItem>
-                        <AccordionItem value="item-4" className="border-slate-100">
-                            <AccordionTrigger className="text-left font-bold text-slate-800 py-6">Preciso ter muitos membros para usar?</AccordionTrigger>
-                            <AccordionContent className="text-slate-600 leading-relaxed pb-6 text-sm">
-                                Absolutamente não. Atendemos desde igrejas em implantação (células/pontos de pregação) até grandes ministérios. A tecnologia deve servir a todos.
-                            </AccordionContent>
-                        </AccordionItem>
-                    </Accordion>
-                </section>
-
-                {/* 8. FINAL CTA (WhatsApp) */}
-                <section className="text-center py-10">
-                    <div className="bg-indigo-50 border border-indigo-100 rounded-[3rem] p-12 md:p-20 space-y-8 relative overflow-hidden">
-                        {/* Background Decor */}
-                        <div className="absolute top-0 left-0 w-64 h-64 bg-indigo-200/20 rounded-full blur-3xl -ml-20 -mt-20 pointer-events-none" />
-                        <div className="absolute bottom-0 right-0 w-64 h-64 bg-indigo-200/20 rounded-full blur-3xl -mr-20 -mb-20 pointer-events-none" />
-
-                        <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
-                            <h3 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-                                Ficou com alguma dúvida antes de começar?
-                            </h3>
-                            <p className="text-slate-600 text-lg">
-                                Nosso time ministerial está pronto para conversar e entender a realidade da sua igreja.
-                            </p>
-                            <div className="pt-4">
-                                <Button
-                                    size="lg"
-                                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-16 px-12 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 gap-3"
-                                    onClick={() => window.open(EXTERNAL_LINKS.SUPPORT_WHATSAPP, '_blank')}
-                                >
-                                    <MessageSquare className="w-6 h-6 text-green-500" />
-                                    Chamar no WhatsApp agora
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* FINAL DISCLAIMER */}
-                <div className="flex flex-col items-center gap-4 text-center max-w-xl mx-auto">
-                    <ShieldCheck className="w-10 h-10 text-green-600/50" />
-                    <p className="text-[11px] text-slate-400 leading-relaxed uppercase tracking-[0.2em] font-bold">
-                        Tecnologia a serviço do Reino • LGPD Compliant • MD Connect 2024
-                    </p>
                 </div>
-
-            </div>
-        </InternalPageLayout>
+            </InternalPageLayout>
+        </>
     );
 }
