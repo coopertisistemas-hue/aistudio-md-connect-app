@@ -80,23 +80,6 @@ export default function ChurchImplementationPage() {
                 }}
             />
 
-            {/* Video Background com Glass Premium */}
-            <div className="fixed inset-0 -z-10 overflow-hidden">
-                <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover opacity-[0.18]"
-                >
-                    <source src="/videos/md-bg.mp4" type="video/mp4" />
-                </video>
-                {/* Overlay translúcido para efeito glass */}
-                <div className="absolute inset-0 bg-white/65 backdrop-blur-sm" />
-                {/* Gradiente vertical para profundidade */}
-                <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/35 to-white/70" />
-            </div>
-
 
             <InternalPageLayout
                 title="Sua Igreja no Digital"
