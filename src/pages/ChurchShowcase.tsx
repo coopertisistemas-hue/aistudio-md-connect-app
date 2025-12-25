@@ -26,47 +26,51 @@ export default function ChurchShowcase() {
                 iconClassName="text-indigo-600"
                 backPath="/home"
             >
-                <div className="max-w-4xl mx-auto px-4 py-8 space-y-24">
+                <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-14 md:space-y-16">
 
                     {/* Hero Section */}
-                    <section className="text-center space-y-8 py-8">
-                        <div className="flex flex-wrap justify-center gap-2">
-                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 uppercase tracking-widest text-[10px] font-bold">
-                                Licenca de Uso Gratuita
-                            </Badge>
-                            <Badge variant="outline" className="bg-indigo-50/50 border-indigo-100 text-indigo-600 uppercase tracking-widest text-[10px] font-bold">
-                                Tecnologia a Servico do Reino
-                            </Badge>
-                        </div>
+                    <section>
+                        <Card className="bg-white/80 backdrop-blur-sm border border-slate-200/60 shadow-lg rounded-3xl">
+                            <CardContent className="p-7 md:p-10 text-center space-y-7 md:space-y-8">
+                                <div className="flex flex-wrap justify-center gap-2">
+                                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 uppercase tracking-widest text-[10px] font-bold">
+                                        Licenca de Uso Gratuita
+                                    </Badge>
+                                    <Badge variant="outline" className="bg-indigo-50/50 border-indigo-100 text-indigo-600 uppercase tracking-widest text-[10px] font-bold">
+                                        Tecnologia a Servico do Reino
+                                    </Badge>
+                                </div>
 
-                        <div className="space-y-6 max-w-3xl mx-auto">
-                            <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-[1.05]">
-                                Fortaleca sua <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">Igreja</span>
-                            </h2>
-                            <p className="text-slate-600 leading-relaxed text-lg md:text-xl max-w-2xl mx-auto">
-                                Implante o MD Connect e fortaleca o cuidado com a igreja com organizacao, conteudo e comunicacao.
-                            </p>
-                        </div>
+                                <div className="space-y-6 max-w-3xl mx-auto">
+                                    <h2 className="text-[2.35rem] sm:text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-[1.05]">
+                                        Fortaleca sua <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">Igreja</span>
+                                    </h2>
+                                    <p className="text-base sm:text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
+                                        Implante o MD Connect e fortaleca o cuidado com a igreja com organizacao, conteudo e comunicacao.
+                                    </p>
+                                </div>
 
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                            <Button
-                                size="lg"
-                                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-14 px-10 rounded-full shadow-xl shadow-indigo-200 gap-2 transition-all hover:scale-105 active:scale-95"
-                                onClick={() => navigate(APP_ROUTES.CHURCH_IMPLEMENTATION)}
-                            >
-                                <Rocket className="w-5 h-5" />
-                                Quero implantar
-                            </Button>
-                            <Button
-                                size="lg"
-                                variant="outline"
-                                className="w-full sm:w-auto bg-white/80 backdrop-blur-sm hover:bg-white text-slate-700 border-slate-200 font-bold h-14 px-10 rounded-full transition-all hover:border-indigo-300"
-                                onClick={() => window.open(EXTERNAL_LINKS.SUPPORT_WHATSAPP, '_blank')}
-                            >
-                                <MessageCircle className="w-5 h-5" />
-                                Falar com a equipe
-                            </Button>
-                        </div>
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                                    <Button
+                                        size="lg"
+                                        className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-14 px-10 rounded-full shadow-md shadow-indigo-200/60 gap-2 transition-all md:hover:scale-[1.02] active:scale-95"
+                                        onClick={() => navigate(APP_ROUTES.CHURCH_IMPLEMENTATION)}
+                                    >
+                                        <Rocket className="w-5 h-5" />
+                                        Quero implantar
+                                    </Button>
+                                    <Button
+                                        size="lg"
+                                        variant="outline"
+                                        className="w-full sm:w-auto bg-white/80 backdrop-blur-sm hover:bg-white text-slate-700 border-slate-200 font-bold h-14 px-10 rounded-full shadow-sm transition-all hover:border-indigo-300"
+                                        onClick={() => window.open(EXTERNAL_LINKS.SUPPORT_WHATSAPP, '_blank')}
+                                    >
+                                        <MessageCircle className="w-5 h-5" />
+                                        Falar com a equipe
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </section>
 
                     {/* Features Section */}
