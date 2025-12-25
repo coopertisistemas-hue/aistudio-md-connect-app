@@ -1,13 +1,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 
-
 import { Button } from '@/components/ui/button';
-import { Download, Share2, Sparkles, RefreshCcw, Wand2 } from 'lucide-react';
+import { Download, Share2, Image, RefreshCcw, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { analytics } from '@/lib/analytics';
 import { FLAGS } from '@/lib/flags';
-import { PageIntro } from '@/components/layout/PageIntro';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 import { versePostersApi } from '@/lib/api/versePosters';
 
 // Template Definitions
@@ -331,14 +330,14 @@ export default function VersePosterPage() {
     if (!FLAGS.FEATURE_VERSE_POSTER_V1) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50/50 pb-20">
-            <main className="container max-w-lg mx-auto px-5 pt-8 animate-in fade-in duration-500">
-                <PageIntro
-                    title="Gerador de Cards"
-                    subtitle="Crie imagens inspiradoras para compartilhar."
-                    icon={Sparkles}
-                    iconClassName="text-amber-500 fill-amber-500/20"
-                />
+        <InternalPageLayout
+            title="Poster do Versículo"
+            subtitle="Crie e compartilhe uma arte com a Palavra."
+            icon={Image}
+            iconClassName="text-indigo-600"
+            backPath="/home"
+        >
+            <main className="container max-w-lg mx-auto px-5">
 
                 {/* Input Area */}
                 <div className="space-y-4 mb-8">
@@ -436,6 +435,6 @@ export default function VersePosterPage() {
                     </Button>
                 </div>
             </main>
-        </div>
+        </InternalPageLayout>
     );
 }
