@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Search, Bookmark, ChevronRight } from 'lucide-react';
-import { PageIntro } from '@/components/layout/PageIntro';
+import { Book, BookOpen, Search, Bookmark, ChevronRight } from 'lucide-react';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 import { BookList } from '@/components/Bible/BookList';
 import { bibleService } from '@/services/bible';
 import { useBibleProgress } from '@/hooks/useBibleProgress';
@@ -27,15 +27,14 @@ export default function BibleHome() {
     const currentTestamentData = BIBLE_CATEGORIES[activeTab];
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24">
-            <div className="px-5 pt-8">
-                <PageIntro
-                    title="Bíblia Sagrada"
-                    subtitle="Lâmpada para os meus pés é a Tua Palavra."
-                    icon={BookOpen}
-                    iconClassName="text-indigo-600"
-                    backLinkPath="/"
-                />
+        <InternalPageLayout
+            title="Bíblia Sagrada"
+            subtitle="Escolha um livro para começar."
+            icon={Book}
+            iconClassName="text-indigo-600"
+            backPath="/home"
+        >
+            <div className="px-5">
 
                 {/* Continue Reading Card */}
                 {progress && (
@@ -126,6 +125,6 @@ export default function BibleHome() {
                     )}
                 </div>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
