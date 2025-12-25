@@ -13,6 +13,7 @@ import { APP_ROUTES } from '@/lib/routes'; // Central Source of Truth
 import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import { FLAGS } from '@/lib/flags';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { Toaster } from 'sonner';
 
 // Eager Load Critical Pages (Home/Landing) for LCP
 import LandingPage from '@/pages/LandingPage';
@@ -87,6 +88,7 @@ export default function App() {
           <DesktopOverlay />
           <MobileContainer>
             <BrowserRouter>
+              <Toaster position="top-center" richColors />
               <AnalyticsTracker />
               <Suspense fallback={<PageLoader />}>
                 <Routes>

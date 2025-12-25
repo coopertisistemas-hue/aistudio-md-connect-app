@@ -184,23 +184,12 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
     }, [id, user]);
 
     const handleLike = async () => {
-        console.log('[DevotionalContentRenderer] handleLike called', { user, id });
-
-
-
-        console.log('[DevotionalContentRenderer] Toggling reaction...', {
-            devotionalId: id,
-            userId: user?.id,
-            isAnonymous: !user
-        });
-
         // Optimistic UI
         const newLikeState = !hasLiked;
         setHasLiked(newLikeState);
         setLikes(prev => newLikeState ? prev + 1 : prev - 1);
 
         const res = await interactionService.toggleDevotionalReaction(id!, user?.id);
-        console.log('[DevotionalContentRenderer] Toggle result:', res);
 
         if (res) {
             setLikes(res.count);
