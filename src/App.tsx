@@ -124,6 +124,7 @@ export default function App() {
                     {FLAGS.FEATURE_DEVOTIONAL_V1 && (
                       <>
                         <Route path="/devocionais" element={<DevotionalList />} />
+                        <Route path="/devocionais/today" element={<DevotionalDetail />} />
                         <Route path="/devocionais/:id" element={<DevotionalDetail />} />
                       </>
                     )}
