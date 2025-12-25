@@ -63,7 +63,7 @@ export default function VersePosterPage() {
             setBgImage(null);
             return;
         }
-        const img = new Image();
+        const img = new window.Image();
         img.crossOrigin = "anonymous";
         img.src = aiImageUrl;
         img.onload = () => setBgImage(img);
