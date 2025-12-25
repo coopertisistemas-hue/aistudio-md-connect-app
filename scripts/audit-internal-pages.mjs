@@ -164,13 +164,20 @@ async function auditInternalPages() {
 
         // Summary recommendation
         console.log(`${colors.gray}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-        if (withoutInternalPageLayout.length > 0) {
-            console.log(`${colors.bold}💡 Recomendação:${colors.reset} Migrar páginas para usar ${colors.cyan}InternalPageLayout${colors.reset}`);
-            console.log(`   Veja o relatório completo em: ${colors.gray}audit/auditoria_paginas.md${colors.reset}`);
-        } else {
+        if (withoutInternalPageLayout.length === 0 && withDirectImports.length === 0) {
             console.log(`${colors.bold}${colors.green}🎉 Parabéns! Todas as páginas estão usando InternalPageLayout!${colors.reset}`);
+        } else {
+            console.log(`${colors.bold}${colors.red}❌ FALHA: Páginas não conformes encontradas!${colors.reset}`);
+            console.log(`${colors.yellow}💡 Recomendação:${colors.reset} Migrar páginas para usar ${colors.cyan}InternalPageLayout${colors.reset}`);
+            console.log(`   Veja o relatório completo em: ${colors.gray}audit/auditoria_paginas.md${colors.reset}`);
         }
         console.log();
+
+        // Exit with appropriate code for CI/CD
+        if (withoutInternalPageLayout.length > 0 || withDirectImports.length > 0) {
+            process.exit(1); // FAILURE - non-conformant pages found
+        }
+        // SUCCESS - all pages conformant (exit 0 is implicit)
 
     } catch (error) {
         console.error(`${colors.red}❌ Erro ao executar auditoria:${colors.reset}`, error.message);
