@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, type LucideIcon } from 'lucide-react';
+import { MessageCircle, type LucideIcon, Construction } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { PageIntro } from '@/components/layout/PageIntro';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 interface ComingSoonPageProps {
     title?: string;
@@ -17,16 +17,13 @@ const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
 }) => {
 
     return (
-        <div className="min-h-screen flex flex-col bg-slate-50/50">
-            <div className="px-5 pt-8">
-                <PageIntro
-                    title={title}
-                    subtitle={description}
-                    icon={Icon}
-                    iconClassName="text-indigo-600"
-                />
-            </div>
-
+        <InternalPageLayout
+            title={title}
+            subtitle={description}
+            icon={Icon || Construction}
+            iconClassName="text-indigo-600"
+            backPath="/home"
+        >
             <div className="flex-1 flex flex-col items-center px-5 pt-8 animate-in fade-in duration-500">
                 <div className="w-full max-w-sm space-y-6">
                     <Button
@@ -46,7 +43,7 @@ const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 };
 

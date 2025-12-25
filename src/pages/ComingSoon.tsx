@@ -1,13 +1,20 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Construction } from 'lucide-react';
+import { Construction } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function ComingSoon() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-slate-50/50 pb-20">
-            <main className="container max-w-lg mx-auto px-5 pt-20 flex flex-col items-center text-center animate-in fade-in duration-500">
+        <InternalPageLayout
+            title="Em construção"
+            subtitle="Estamos preparando algo especial."
+            icon={Construction}
+            iconClassName="text-indigo-600"
+            backPath="/home"
+        >
+            <main className="container max-w-lg mx-auto px-5 flex flex-col items-center text-center">
                 {/* Hero Icon */}
                 <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 mb-8 transform hover:scale-105 transition-transform duration-300">
                     <Construction className="w-10 h-10 text-white" />
@@ -34,18 +41,7 @@ export default function ComingSoon() {
                         </div>
                     </div>
                 </div>
-
-                {/* Actions */}
-                <div className="w-full space-y-3">
-                    <Button
-                        onClick={() => navigate(-1)}
-                        className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold tracking-wide shadow-lg shadow-slate-900/10"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Voltar
-                    </Button>
-                </div>
             </main>
-        </div>
+        </InternalPageLayout>
     );
 }

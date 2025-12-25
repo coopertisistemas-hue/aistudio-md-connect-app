@@ -3,9 +3,8 @@ import { useMembership } from '@/contexts/MembershipContext';
 import { supabase } from '@/lib/supabase';
 import { PortalSection, PortalCard } from '@/components/ui/PortalComponents';
 import { Shield, Eye, Lock, Save, Loader2 } from 'lucide-react';
-// import { useNavigate } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
-import { BackHeader } from '@/components/BackHeader';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function PrivacyCenter() {
     const { member, refreshMember } = useMembership();
@@ -49,10 +48,14 @@ export default function PrivacyCenter() {
     };
 
     return (
-        <div className="pb-20">
-            <BackHeader title="Privacidade (LGPD)" />
-
-            <div className="px-4 mt-4 space-y-6">
+        <InternalPageLayout
+            title="Privacidade"
+            subtitle="Controle seus dados e permissões."
+            icon={Shield}
+            iconClassName="text-purple-600"
+            backPath="/profile"
+        >
+            <div className="px-4 space-y-6">
 
                 {/* 1. LGPD Explanation */}
                 <PortalCard className="bg-blue-50 border-blue-200">
@@ -132,6 +135,6 @@ export default function PrivacyCenter() {
                 <div className="h-16"></div> {/* Spacer for fixed button */}
 
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }

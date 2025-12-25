@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useMembership } from '@/contexts/MembershipContext';
 import { supabase } from '@/lib/supabase';
-import { BackHeader } from '@/components/BackHeader';
-import { Save, Loader2, User, Phone, Calendar } from 'lucide-react';
+import { Save, Loader2, User, Phone, Calendar, UserCog } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function ProfileEditor() {
     const { member, refreshMember } = useMembership();
@@ -50,10 +50,14 @@ export default function ProfileEditor() {
     };
 
     return (
-        <div className="pb-20 bg-slate-50 min-h-screen">
-            <BackHeader title="Editar Dados" />
-
-            <div className="p-4 space-y-6">
+        <InternalPageLayout
+            title="Editar Perfil"
+            subtitle="Atualize seus dados com segurança."
+            icon={UserCog}
+            iconClassName="text-blue-600"
+            backPath="/profile"
+        >
+            <div className="px-4 space-y-6">
 
                 <div className="space-y-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                     {/* Full Name */}
@@ -128,6 +132,6 @@ export default function ProfileEditor() {
                 </button>
 
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
