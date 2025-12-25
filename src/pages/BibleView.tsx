@@ -163,6 +163,7 @@ export default function BibleView() {
                         </div>
                     )}
                 </div>
+            </div>
         </InternalPageLayout>
     );
 }
