@@ -1,4 +1,43 @@
-# React + TypeScript + Vite
+# MD Connect - Member App
+
+## 📐 Padrão de Páginas Internas
+
+**Todas as páginas internas devem usar `InternalPageLayout`.**
+
+### Regras
+- ✅ **Use:** `InternalPageLayout` para todas as páginas internas
+- ❌ **Não use:** `PageIntro`, `BackLink`, ou `AppFooter` diretamente nas páginas
+- ✅ **Configure:** `title`, `subtitle`, `icon`, `backPath` via props do layout
+
+### Exemplo
+```tsx
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
+import { Book } from 'lucide-react';
+
+export default function MyPage() {
+    return (
+        <InternalPageLayout
+            title="Minha Página"
+            subtitle="Descrição da página."
+            icon={Book}
+            iconClassName="text-indigo-600"
+            backPath="/home"
+        >
+            {/* Conteúdo da página */}
+        </InternalPageLayout>
+    );
+}
+```
+
+### Verificação
+Execute o audit para garantir conformidade:
+```bash
+pnpm check:ui  # Deve retornar exit code 0
+```
+
+---
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
