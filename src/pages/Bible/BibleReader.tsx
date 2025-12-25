@@ -1,13 +1,13 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Loader2, Volume2 } from 'lucide-react';
+import { Loader2, Volume2, ScrollText } from 'lucide-react';
 import { bibleService, type BibleChapter, type BibleVerse } from '@/services/bible';
 import { BibleNavigation } from '@/components/Bible/BibleNavigation';
 import { VerseActionMenu } from '@/components/Bible/VerseActionMenu';
 import { VerseContextModal } from '@/components/Bible/VerseContextModal';
 import { BibleAudioPlayer } from '@/components/Bible/BibleAudioPlayer';
-import { BackLink } from '@/components/ui/BackLink';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 import { useBibleProgress } from '@/hooks/useBibleProgress';
 import { useBibleAudio } from '@/hooks/useBibleAudio';
 import { interactionService } from '@/services/interactionService';
@@ -202,22 +202,21 @@ export default function BibleReader() {
     }
 
     return (
-        <div className="min-h-screen pb-24">
-            {/* Minimal Header */}
-            <div className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-white/20 px-4 py-3 flex items-center justify-between z-20 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <BackLink to={`/biblia/${bookId}`} />
-                    <div>
-                        <h1 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{displayBookName}</h1>
-                        <p className="text-xs text-slate-500">Capítulo {currentChapter}</p>
-                    </div>
-                </div>
-
-                {audioSupported && (
+        <InternalPageLayout
+            title="Bíblia Sagrada"
+            subtitle="Leia com atenção e medite."
+            icon={ScrollText}
+            iconClassName="text-indigo-600"
+            backPath={`/biblia/${bookId}`}
+            showFooter={false}
+        >
+            {/* Audio Button (moved from header) */}
+            {audioSupported && (
+                <div className="px-4 mb-4">
                     <button
                         onClick={audioState === 'playing' ? stopAudio : handlePlayChapter}
                         className={cn(
-                            "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all text-xs font-bold uppercase tracking-wider",
+                            "flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-sm font-bold uppercase tracking-wider w-full justify-center",
                             audioState === 'playing'
                                 ? "bg-red-50 text-red-600 hover:bg-red-100"
                                 : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
@@ -226,17 +225,17 @@ export default function BibleReader() {
                         {audioState === 'playing' ? (
                             <>
                                 <div className="w-2 h-2 bg-current rounded-sm" />
-                                <span>Parar</span>
+                                <span>Parar Áudio</span>
                             </>
                         ) : (
                             <>
                                 <Volume2 className="w-4 h-4" />
-                                <span>Ouvir</span>
+                                <span>Ouvir Capítulo</span>
                             </>
                         )}
                     </button>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Reader Content */}
             <div className="max-w-3xl mx-auto px-4 py-8">
@@ -298,6 +297,6 @@ export default function BibleReader() {
                 bookName={displayBookName}
                 chapter={currentChapter}
             />
-        </div>
+        </InternalPageLayout>
     );
 }
