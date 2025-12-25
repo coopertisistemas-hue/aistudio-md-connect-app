@@ -45,6 +45,19 @@
     <priority>0.7</priority>
   </url>
   
+  <!-- Church Pages -->
+  <url>
+    <loc>https://mdconnect.app/sou-igreja</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <url>
+    <loc>https://mdconnect.app/implantacao-igreja</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
   <url>
     <loc>https://mdconnect.app/mural</loc>
     <changefreq>daily</changefreq>
