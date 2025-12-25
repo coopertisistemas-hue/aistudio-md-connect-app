@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { reportError, reportCustomError } from '@/lib/errorReporter';
 import { AlertTriangle, Bug, CheckCircle } from 'lucide-react';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function ErrorReportingTestPage() {
     const [lastAction, setLastAction] = useState<string>('');
@@ -54,15 +55,21 @@ export default function ErrorReportingTestPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white p-8">
-            <div className="max-w-2xl mx-auto space-y-6">
+        <InternalPageLayout
+            title="Diagnóstico"
+            subtitle="Teste de monitoramento e erros."
+            icon={Bug}
+            iconClassName="text-purple-600"
+            backPath="/home"
+        >
+            <div className="max-w-2xl mx-auto px-4 space-y-6">
                 {/* Header */}
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <div className="flex items-center gap-2">
                         <Bug className="w-5 h-5 text-yellow-600" />
-                        <h1 className="text-lg font-bold text-yellow-900">
+                        <h2 className="text-lg font-bold text-yellow-900">
                             Error Reporting Test Page (DEV ONLY)
-                        </h1>
+                        </h2>
                     </div>
                     <p className="text-sm text-yellow-700 mt-2">
                         This page is only accessible in development mode.
@@ -82,11 +89,11 @@ export default function ErrorReportingTestPage() {
 
                 {/* Test Buttons */}
                 <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
-                    <h2 className="text-xl font-bold text-slate-900 mb-4">Test Cases</h2>
+                    <h3 className="text-xl font-bold text-slate-900 mb-4">Test Cases</h3>
 
                     {/* Test 1: Throw Error (ErrorBoundary) */}
                     <div className="border border-slate-200 rounded-lg p-4 space-y-2">
-                        <h3 className="font-semibold text-slate-900">1. Throw Error (ErrorBoundary)</h3>
+                        <h4 className="font-semibold text-slate-900">1. Throw Error (ErrorBoundary)</h4>
                         <p className="text-sm text-slate-600">
                             Throws an error that will be caught by ErrorBoundary.
                             You should see the premium fallback UI.
@@ -102,7 +109,7 @@ export default function ErrorReportingTestPage() {
 
                     {/* Test 2: Report Custom Error */}
                     <div className="border border-slate-200 rounded-lg p-4 space-y-2">
-                        <h3 className="font-semibold text-slate-900">2. Report Custom Error</h3>
+                        <h4 className="font-semibold text-slate-900">2. Report Custom Error</h4>
                         <p className="text-sm text-slate-600">
                             Reports a custom error without throwing.
                             App continues to work normally.
@@ -117,7 +124,7 @@ export default function ErrorReportingTestPage() {
 
                     {/* Test 3: Async Error */}
                     <div className="border border-slate-200 rounded-lg p-4 space-y-2">
-                        <h3 className="font-semibold text-slate-900">3. Unhandled Promise Rejection</h3>
+                        <h4 className="font-semibold text-slate-900">3. Unhandled Promise Rejection</h4>
                         <p className="text-sm text-slate-600">
                             Triggers an unhandled promise rejection.
                             Should be caught by global handler.
@@ -132,7 +139,7 @@ export default function ErrorReportingTestPage() {
 
                     {/* Test 4: Error with Context */}
                     <div className="border border-slate-200 rounded-lg p-4 space-y-2">
-                        <h3 className="font-semibold text-slate-900">4. Error with Extra Context</h3>
+                        <h4 className="font-semibold text-slate-900">4. Error with Extra Context</h4>
                         <p className="text-sm text-slate-600">
                             Reports an error with additional metadata.
                             Check the `meta` field in the database.
@@ -148,7 +155,7 @@ export default function ErrorReportingTestPage() {
 
                 {/* Instructions */}
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-slate-900 mb-2">How to Verify</h3>
+                    <h4 className="font-semibold text-slate-900 mb-2">How to Verify</h4>
                     <ol className="text-sm text-slate-700 space-y-1 list-decimal list-inside">
                         <li>Make sure `VITE_ERROR_REPORTING_ENABLED=true` in `.env`</li>
                         <li>Click a test button above</li>
@@ -158,6 +165,6 @@ export default function ErrorReportingTestPage() {
                     </ol>
                 </div>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }

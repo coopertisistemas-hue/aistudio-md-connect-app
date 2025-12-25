@@ -2,8 +2,9 @@ import React from 'react';
 import { useChurch } from '@/contexts/ChurchContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Clock, LogIn, ArrowLeft } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { MapPin, Clock, LogIn, Church } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 const ChurchShowcase: React.FC = () => {
     const { church } = useChurch();
@@ -12,17 +13,13 @@ const ChurchShowcase: React.FC = () => {
     if (!church) return null; // Should not happen if inside ChurchProvider
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col">
-            {/* Header / Brand */}
-            <div className="bg-white border-b py-4 px-6 flex items-center justify-between">
-                <Link to="/" className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-                    <ArrowLeft className="h-4 w-4" />
-                    <span className="text-sm font-medium">Voltar para Início</span>
-                </Link>
-                <div className="text-sm font-bold text-blue-600">MD Connect</div>
-            </div>
-
-            {/* Content */}
+        <InternalPageLayout
+            title="Sou Igreja"
+            subtitle="Conheça os recursos e como implantar."
+            icon={Church}
+            iconClassName="text-blue-600"
+            backPath="/landing"
+        >
             <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-8 max-w-md mx-auto w-full">
 
                 {/* Church Logo & Name */}
@@ -84,7 +81,7 @@ const ChurchShowcase: React.FC = () => {
                 </div>
 
             </div>
-        </div>
+        </InternalPageLayout>
     );
 };
 

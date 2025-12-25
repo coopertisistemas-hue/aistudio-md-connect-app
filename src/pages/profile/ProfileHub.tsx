@@ -1,8 +1,9 @@
 import { useMembership } from '@/contexts/MembershipContext';
-import { Shield, Edit, LogOut, ChevronRight } from 'lucide-react';
+import { Shield, Edit, LogOut, ChevronRight, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function ProfileHub() {
     const { member } = useMembership();
@@ -14,9 +15,15 @@ export default function ProfileHub() {
     };
 
     return (
-        <div className="pb-20 bg-slate-50 min-h-screen">
+        <InternalPageLayout
+            title="Perfil"
+            subtitle="Gerencie sua conta e preferências."
+            icon={User}
+            iconClassName="text-blue-600"
+            backPath="/home"
+        >
             {/* Header Profile */}
-            <div className="bg-white p-6 pb-8 border-b border-slate-100 mb-6">
+            <div className="bg-white p-6 pb-8 border-b border-slate-100 mb-6 -mt-6">
                 <div className="flex flex-col items-center">
                     <Avatar className="w-24 h-24 mb-4 border-4 border-slate-50 shadow-sm">
                         <AvatarImage src={member?.photo_url || ''} />
@@ -70,6 +77,6 @@ export default function ProfileHub() {
                 </button>
 
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
