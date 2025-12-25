@@ -25,6 +25,7 @@ export const APP_ROUTES = {
     PARTNERS: '/parceiros',
     PARTNER_JOIN: '/seja-parceiro',
     MISSION: '/missao',
+    CHURCH_SHOWCASE: '/sou-igreja',
     CHURCH_IMPLEMENTATION: '/implantacao-igreja',
 
     // Legal

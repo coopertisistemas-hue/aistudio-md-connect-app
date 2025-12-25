@@ -68,6 +68,7 @@ const DonatePage = lazy(() => import('@/pages/public/DonatePage'));
 const SchedulePage = lazy(() => import('@/pages/public/SchedulePage'));
 const RadioPage = lazy(() => import('@/pages/public/RadioPage'));
 const VersePosterPage = lazy(() => import('@/pages/features/VersePosterPage'));
+const ChurchShowcase = lazy(() => import('@/pages/ChurchShowcase'));
 const ComingSoon = lazy(() => import('@/pages/member/ComingSoonPage'));
 
 // DEV ONLY
@@ -132,6 +133,9 @@ export default function App() {
 
                     {/* DEV ONLY: Error Reporting Test */}
                     <Route path="/dev/error-reporting-test" element={<ErrorReportingTestPage />} />
+
+                    {/* Church Showcase */}
+                    <Route path="/sou-igreja" element={<ChurchShowcase />} />
 
                     <Route path="/coming-soon" element={<ComingSoon />} />
                   </Route>
