@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Church, Rocket, MessageCircle, BookOpen, Heart, Calendar, Globe, Users, Megaphone, Sparkles } from 'lucide-react';
+import { Church, Rocket, MessageCircle, BookOpen, Heart, Calendar, Globe, Users, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,7 +29,7 @@ export default function ChurchShowcase() {
                 <div className="max-w-4xl mx-auto px-4 py-8 space-y-24">
 
                     {/* Hero Section */}
-                    <section className="text-center space-y-8 py-4">
+                    <section className="text-center space-y-8 py-8">
                         <div className="flex flex-wrap justify-center gap-2">
                             <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 uppercase tracking-widest text-[10px] font-bold">
                                 Licenca de Uso Gratuita
@@ -39,11 +39,11 @@ export default function ChurchShowcase() {
                             </Badge>
                         </div>
 
-                        <div className="space-y-4 max-w-3xl mx-auto">
-                            <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
-                                Fortaleca sua <span className="text-indigo-600">Igreja</span>
+                        <div className="space-y-6 max-w-3xl mx-auto">
+                            <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-[1.05]">
+                                Fortaleca sua <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">Igreja</span>
                             </h2>
-                            <p className="text-slate-600 leading-relaxed md:text-xl max-w-2xl mx-auto">
+                            <p className="text-slate-600 leading-relaxed text-lg md:text-xl max-w-2xl mx-auto">
                                 Implante o MD Connect e fortaleca o cuidado com a igreja com organizacao, conteudo e comunicacao.
                             </p>
                         </div>
@@ -77,10 +77,10 @@ export default function ChurchShowcase() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card className="border-slate-100 bg-white/60 backdrop-blur-sm shadow-sm h-full hover:shadow-md transition-shadow">
+                            <Card className="border-slate-200/60 bg-white/80 backdrop-blur-sm shadow-sm h-full hover:shadow-lg hover:border-indigo-200 transition-all">
                                 <CardContent className="p-8 flex flex-col items-start gap-4">
-                                    <div className="bg-indigo-50 rounded-xl p-3 flex-shrink-0">
-                                        <BookOpen className="w-6 h-6 text-indigo-600" />
+                                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-2xl p-4 flex-shrink-0">
+                                        <BookOpen className="w-7 h-7 text-indigo-600" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-900 mb-1">Devocional + Biblia</h4>
@@ -89,10 +89,10 @@ export default function ChurchShowcase() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="border-slate-100 bg-white/60 backdrop-blur-sm shadow-sm h-full hover:shadow-md transition-shadow">
+                            <Card className="border-slate-200/60 bg-white/80 backdrop-blur-sm shadow-sm h-full hover:shadow-lg hover:border-indigo-200 transition-all">
                                 <CardContent className="p-8 flex flex-col items-start gap-4">
-                                    <div className="bg-indigo-50 rounded-xl p-3 flex-shrink-0">
-                                        <Megaphone className="w-6 h-6 text-indigo-600" />
+                                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-2xl p-4 flex-shrink-0">
+                                        <Megaphone className="w-7 h-7 text-indigo-600" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-900 mb-1">Mural e Comunicados</h4>
@@ -101,10 +101,10 @@ export default function ChurchShowcase() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="border-slate-100 bg-white/60 backdrop-blur-sm shadow-sm h-full hover:shadow-md transition-shadow">
+                            <Card className="border-slate-200/60 bg-white/80 backdrop-blur-sm shadow-sm h-full hover:shadow-lg hover:border-indigo-200 transition-all">
                                 <CardContent className="p-8 flex flex-col items-start gap-4">
-                                    <div className="bg-indigo-50 rounded-xl p-3 flex-shrink-0">
-                                        <Heart className="w-6 h-6 text-indigo-600" />
+                                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-2xl p-4 flex-shrink-0">
+                                        <Heart className="w-7 h-7 text-indigo-600" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-900 mb-1">Pedidos de Oracao</h4>
@@ -113,10 +113,10 @@ export default function ChurchShowcase() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="border-slate-100 bg-white/60 backdrop-blur-sm shadow-sm h-full hover:shadow-md transition-shadow">
+                            <Card className="border-slate-200/60 bg-white/80 backdrop-blur-sm shadow-sm h-full hover:shadow-lg hover:border-indigo-200 transition-all">
                                 <CardContent className="p-8 flex flex-col items-start gap-4">
-                                    <div className="bg-indigo-50 rounded-xl p-3 flex-shrink-0">
-                                        <Calendar className="w-6 h-6 text-indigo-600" />
+                                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-2xl p-4 flex-shrink-0">
+                                        <Calendar className="w-7 h-7 text-indigo-600" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-900 mb-1">Agenda e Eventos</h4>
@@ -125,10 +125,10 @@ export default function ChurchShowcase() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="border-slate-100 bg-white/60 backdrop-blur-sm shadow-sm h-full hover:shadow-md transition-shadow">
+                            <Card className="border-slate-200/60 bg-white/80 backdrop-blur-sm shadow-sm h-full hover:shadow-lg hover:border-indigo-200 transition-all">
                                 <CardContent className="p-8 flex flex-col items-start gap-4">
-                                    <div className="bg-indigo-50 rounded-xl p-3 flex-shrink-0">
-                                        <Globe className="w-6 h-6 text-indigo-600" />
+                                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-2xl p-4 flex-shrink-0">
+                                        <Globe className="w-7 h-7 text-indigo-600" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-900 mb-1">Area Publica</h4>
@@ -137,10 +137,10 @@ export default function ChurchShowcase() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="border-slate-100 bg-white/60 backdrop-blur-sm shadow-sm h-full hover:shadow-md transition-shadow">
+                            <Card className="border-slate-200/60 bg-white/80 backdrop-blur-sm shadow-sm h-full hover:shadow-lg hover:border-indigo-200 transition-all">
                                 <CardContent className="p-8 flex flex-col items-start gap-4">
-                                    <div className="bg-indigo-50 rounded-xl p-3 flex-shrink-0">
-                                        <Users className="w-6 h-6 text-indigo-600" />
+                                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-2xl p-4 flex-shrink-0">
+                                        <Users className="w-7 h-7 text-indigo-600" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-900 mb-1">Gestao de Membros</h4>
@@ -160,18 +160,18 @@ export default function ChurchShowcase() {
 
                             <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
                                 <h3 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-                                    Pronto para comecar?
+                                    Pronto para <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">comecar</span>?
                                 </h3>
-                                <p className="text-slate-600 text-lg">
+                                <p className="text-slate-700 text-lg font-medium">
                                     Junte-se as igrejas que ja usam o MD Connect.
                                 </p>
                                 <div className="pt-4">
                                     <Button
                                         size="lg"
-                                        className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-16 px-12 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 gap-3"
+                                        className="bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white font-bold h-16 px-12 rounded-full shadow-2xl shadow-slate-900/20 transition-all hover:scale-105 active:scale-95 gap-3"
                                         onClick={() => navigate(APP_ROUTES.CHURCH_IMPLEMENTATION)}
                                     >
-                                        <Rocket className="w-6 h-6 text-indigo-400" />
+                                        <Rocket className="w-6 h-6 text-indigo-300" />
                                         Iniciar implantacao agora
                                     </Button>
                                 </div>
