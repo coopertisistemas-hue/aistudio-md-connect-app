@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Volume2, VolumeX, Radio as RadioIcon, WifiOff, Loader2 } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { analytics } from '@/lib/analytics';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 interface RadioConfig {
     enabled: boolean;
@@ -144,14 +144,15 @@ const RadioPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen pt-20 pb-24 px-4 bg-gradient-to-b from-purple-50 via-white to-white flex flex-col items-center animate-in fade-in duration-500">
-            {/* Header / Meta */}
-            <div className="w-full max-w-md space-y-8 text-center mt-4 relative flex-1 flex flex-col items-center justify-center">
-                {/* Back Button - Floating Top Left relative to content */}
-                <div className="absolute left-0 top-0 w-full flex justify-start -translate-y-12">
-                    <BackLink />
-                </div>
-
+        <InternalPageLayout
+            title="Rádio"
+            subtitle="Ouça nossa programação ao vivo."
+            icon={RadioIcon}
+            iconClassName="text-purple-600"
+            backPath="/home"
+            showFooter={false}
+        >
+            <div className="flex flex-col items-center space-y-8 text-center flex-1 justify-center px-4">
                 <div className="space-y-2">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-600 text-xs font-bold uppercase tracking-wider">
                         <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-red-600 animate-pulse' : 'bg-red-400/50'}`} />
@@ -230,7 +231,7 @@ const RadioPage: React.FC = () => {
                     </Button>
                 </div>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 };
 

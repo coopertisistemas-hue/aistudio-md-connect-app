@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { PublicApi, type PublicPage } from '@/lib/api/public'; // Assuming this exists from previous step
 import { Loader2, AlertCircle, FileText } from 'lucide-react';
-import { BackLink } from '@/components/ui/BackLink';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 interface PublicContentPageProps {
     slug?: string; // Optional: if used as a standalone component
@@ -69,10 +69,9 @@ export default function PublicContentPage({ slug: propSlug }: PublicContentPageP
                     <AlertCircle className="w-8 h-8" />
                 </div>
                 <h2 className="text-lg font-bold text-slate-800 mb-2">Conteúdo indisponível</h2>
-                <p className="text-slate-500 text-sm max-w-xs mx-auto mb-6">
+                <p className="text-slate-500 text-sm max-w-xs mx-auto">
                     Não conseguimos carregar esta página no momento. Pode ser que ela ainda não tenha sido publicada.
                 </p>
-                <BackLink />
             </div>
         );
     }
@@ -80,28 +79,15 @@ export default function PublicContentPage({ slug: propSlug }: PublicContentPageP
     // --- SUCCESS RENDER ---
 
     return (
-        <div className="min-h-screen bg-slate-50/50 pb-20 font-sans animate-in fade-in duration-500">
-            {/* SEO Metadata would go here via Helmet if available */}
-
-            {/* Header Section */}
-            <div className="bg-white border-b border-slate-100 pt-8 pb-8 px-5">
-                <div className="max-w-2xl mx-auto text-center">
-                    <div className="w-12 h-12 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center mx-auto mb-4 border border-slate-200">
-                        <FileText className="w-6 h-6" />
-                    </div>
-                    <h1 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">
-                        {page.title}
-                    </h1>
-                    {page.subtitle && (
-                        <p className="text-slate-500 text-sm leading-relaxed max-w-md mx-auto">
-                            {page.subtitle}
-                        </p>
-                    )}
-                </div>
-            </div>
-
+        <InternalPageLayout
+            title="Conteúdo"
+            subtitle="Acesse conteúdos públicos e compartilhe."
+            icon={FileText}
+            iconClassName="text-slate-600"
+            backPath="/home"
+        >
             {/* Content Section */}
-            <div className="container mx-auto px-4 pt-8 max-w-2xl">
+            <div className="max-w-2xl mx-auto px-4">
                 <div className="bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-slate-100">
                     <SimpleMarkdown content={page.content} />
                 </div>
@@ -111,7 +97,7 @@ export default function PublicContentPage({ slug: propSlug }: PublicContentPageP
                     MD Connect • Documento Oficial
                 </div>
             </div>
-        </div>
+        </InternalPageLayout>
     );
 }
 
