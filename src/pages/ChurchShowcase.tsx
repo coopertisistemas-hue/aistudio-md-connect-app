@@ -16,53 +16,53 @@ export default function ChurchShowcase() {
     const features = [
         {
             icon: BookOpen,
-            title: "Devocional Diário + Bíblia",
-            description: "Conteúdo espiritual renovado todo dia + Bíblia completa com recursos"
+            title: "Devocional Diario + Biblia",
+            description: "Conteudo espiritual renovado todo dia + Biblia completa com recursos"
         },
         {
             icon: Megaphone,
             title: "Mural & Comunicados",
-            description: "Avisos, notícias e comunicação direta com os membros"
+            description: "Avisos, noticias e comunicacao direta com os membros"
         },
         {
             icon: Heart,
-            title: "Pedidos de Oração",
+            title: "Pedidos de Oracao",
             description: "Sistema de pedidos e acompanhamento pastoral"
         },
         {
             icon: Calendar,
             title: "Agenda & Eventos",
-            description: "Calendário de cultos, reuniões e atividades"
+            description: "Calendario de cultos, reunioes e atividades"
         },
         {
             icon: Globe,
-            title: "Área Pública Institucional",
-            description: "Site mobile gratuito para sua igreja (quando aplicável)"
+            title: "Area Publica Institucional",
+            description: "Site mobile gratuito para sua igreja (quando aplicavel)"
         },
         {
             icon: Users,
-            title: "Gestão de Membros",
-            description: "Controle de frequência, grupos e ministérios"
+            title: "Gestao de Membros",
+            description: "Controle de frequencia, grupos e ministerios"
         }
     ];
 
     const steps = [
         {
             number: "1",
-            title: "Cadastro & Validação",
-            description: "Preencha o formulário com os dados da igreja. Nossa equipe valida em até 48h.",
+            title: "Cadastro & Validacao",
+            description: "Preencha o formulario com os dados da igreja. Nossa equipe valida em ate 48h.",
             icon: FileText
         },
         {
             number: "2",
-            title: "Implantação Guiada",
-            description: "Checklist passo a passo + suporte técnico para configuração completa.",
+            title: "Implantacao Guiada",
+            description: "Checklist passo a passo + suporte tecnico para configuracao completa.",
             icon: Settings
         },
         {
             number: "3",
             title: "Go-Live & Suporte",
-            description: "Sua igreja no ar! Suporte contínuo via WhatsApp e atualizações constantes.",
+            description: "Sua igreja no ar! Suporte continuo via WhatsApp e atualizacoes constantes.",
             icon: Rocket
         }
     ];
@@ -71,13 +71,13 @@ export default function ChurchShowcase() {
         <>
             <SEOHead
                 title="Sou Igreja - MD Connect"
-                description="Implante o MD Connect e fortaleça o cuidado com a igreja — com organização, conteúdo e comunicação."
-                keywords="igreja, gestão eclesiástica, app igreja, sistema igreja, devocional, bíblia"
+                description="Implante o MD Connect e fortaleca o cuidado com a igreja — com organizacao, conteudo e comunicacao."
+                keywords="igreja, gestao eclesiastica, app igreja, sistema igreja, devocional, biblia"
             />
 
             <InternalPageLayout
                 title="Sou Igreja"
-                subtitle="Tecnologia a serviço do Reino"
+                subtitle="Tecnologia a servico do Reino"
                 icon={Church}
                 iconClassName="text-indigo-600"
                 backPath="/home"
@@ -90,19 +90,19 @@ export default function ChurchShowcase() {
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 rounded-full mb-4">
                             <Sparkles className="w-3 h-3 text-indigo-600" />
                             <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider">
-                                Tecnologia a Serviço do Reino
+                                Tecnologia a Servico do Reino
                             </span>
                         </div>
 
                         {/* Title */}
                         <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">
-                            Fortaleça sua Igreja
+                            Fortaleca sua Igreja
                         </h1>
 
                         {/* Subtitle */}
                         <p className="text-slate-600 leading-relaxed mb-6">
-                            Implante o MD Connect e fortaleça o cuidado com a igreja —
-                            com organização, conteúdo e comunicação.
+                            Implante o MD Connect e fortaleca o cuidado com a igreja —
+                            com organizacao, conteudo e comunicacao.
                         </p>
 
                         {/* CTAs */}
@@ -179,11 +179,11 @@ export default function ChurchShowcase() {
                                 <Shield className="w-6 h-6 text-slate-600 flex-shrink-0 mt-1" />
                                 <div>
                                     <h3 className="font-bold text-slate-900 mb-2">
-                                        Privacidade & Transparência
+                                        Privacidade & Transparencia
                                     </h3>
                                     <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-                                        Todos os dados são tratados conforme LGPD.
-                                        Acesse nossa central de privacidade e relatórios de transparência.
+                                        Todos os dados sao tratados conforme LGPD.
+                                        Acesse nossa central de privacidade e relatorios de transparencia.
                                     </p>
                                     <div className="flex flex-wrap gap-2">
                                         <Button
@@ -200,7 +200,7 @@ export default function ChurchShowcase() {
                                             onClick={() => navigate(APP_ROUTES.TRANSPARENCY)}
                                             className="text-slate-700"
                                         >
-                                            Transparência
+                                            Transparencia
                                         </Button>
                                     </div>
                                 </div>
@@ -211,17 +211,17 @@ export default function ChurchShowcase() {
                     {/* Final CTA */}
                     <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-3xl p-8 text-center text-white shadow-lg">
                         <h2 className="text-2xl font-bold mb-3">
-                            Pronto para começar?
+                            Pronto para comecar?
                         </h2>
                         <p className="text-indigo-100 mb-6 leading-relaxed">
-                            Junte-se às igrejas que já usam o MD Connect para fortalecer o cuidado pastoral.
+                            Junte-se as igrejas que ja usam o MD Connect para fortalecer o cuidado pastoral.
                         </p>
                         <Button
                             onClick={() => navigate(APP_ROUTES.CHURCH_IMPLEMENTATION)}
                             className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold py-6 px-8"
                         >
                             <Rocket className="w-5 h-5 mr-2" />
-                            Iniciar implantação agora
+                            Iniciar implantacao agora
                         </Button>
                     </div>
 
