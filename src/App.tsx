@@ -69,6 +69,7 @@ const SchedulePage = lazy(() => import('@/pages/public/SchedulePage'));
 const RadioPage = lazy(() => import('@/pages/public/RadioPage'));
 const VersePosterPage = lazy(() => import('@/pages/features/VersePosterPage'));
 const ChurchShowcase = lazy(() => import('@/pages/ChurchShowcase'));
+const ChurchImplementationPage = lazy(() => import('@/pages/public/ChurchImplementationPage'));
 const ComingSoon = lazy(() => import('@/pages/member/ComingSoonPage'));
 
 // DEV ONLY
@@ -136,6 +137,7 @@ export default function App() {
 
                     {/* Church Showcase */}
                     <Route path="/sou-igreja" element={<ChurchShowcase />} />
+                    <Route path={APP_ROUTES.CHURCH_IMPLEMENTATION} element={<ChurchImplementationPage />} />
 
                     <Route path="/coming-soon" element={<ComingSoon />} />
                   </Route>
