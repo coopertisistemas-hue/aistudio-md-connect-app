@@ -27,26 +27,37 @@ export default function DevotionalDetail() {
     const [item, setItem] = useState<Post | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    if (!FLAGS.FEATURE_DEVOTIONAL_V1) {
-        return <div className="p-10 text-center text-slate-500">Feature desabilitada.</div>;
-    }
-
     useEffect(() => {
         const targetId = id === 'today' ? 'latest' : id;
-        if (targetId) loadData(targetId);
+        console.log('[DevotionalDetail] Loading:', { id, targetId });
+        if (targetId) {
+            loadData(targetId);
+        } else {
+            console.warn('[DevotionalDetail] No ID provided');
+            setIsLoading(false);
+        }
     }, [id]);
 
     const loadData = async (postId: string) => {
         setIsLoading(true);
+        console.log('[DevotionalDetail] loadData started:', postId);
         try {
             let data: Post | null = null;
             if (FLAGS.FEATURE_DEVOTIONAL_API) {
+                console.log('[DevotionalDetail] Using API');
                 if (postId === 'latest') {
-                    data = await devotionalsApi.getLatest().catch(() => null);
+                    data = await devotionalsApi.getLatest().catch((err) => {
+                        console.error('[DevotionalDetail] API getLatest failed:', err);
+                        return null;
+                    });
                 } else {
-                    data = await devotionalsApi.getById(postId).catch(() => null);
+                    data = await devotionalsApi.getById(postId).catch((err) => {
+                        console.error('[DevotionalDetail] API getById failed:', err);
+                        return null;
+                    });
                 }
             } else {
+                console.log('[DevotionalDetail] Using legacy path');
                 // Legacy path
                 if (postId === 'latest') {
                     await new Promise(r => setTimeout(r, 600));
@@ -56,19 +67,25 @@ export default function DevotionalDetail() {
                 }
             }
 
+            console.log('[DevotionalDetail] Data loaded:', data ? 'success' : 'null, using fallback');
             if (data) {
                 setItem(data);
             } else {
                 setItem(FALLBACK_DEVOTIONAL);
             }
         } catch (error) {
-            console.error("Devotional Load Failed due to error:", error);
+            console.error("[DevotionalDetail] Load Failed due to error:", error);
             setItem(FALLBACK_DEVOTIONAL);
         } finally {
+            console.log('[DevotionalDetail] Loading complete');
             setIsLoading(false);
         }
     };
 
+
+    if (!FLAGS.FEATURE_DEVOTIONAL_V1) {
+        return <div className="p-10 text-center text-slate-500">Feature desabilitada.</div>;
+    }
 
     return (
         <InternalPageLayout
