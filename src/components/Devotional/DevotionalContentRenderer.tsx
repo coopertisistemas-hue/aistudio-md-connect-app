@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Quote, BookOpen, Sparkles, Calendar, Heart, Users } from 'lucide-react';
+import { Quote, BookOpen, Sparkles, Heart, Users } from 'lucide-react';
 import { parseBibleRefs } from '@/utils/bibleParser';
 import { VerseContextModal } from '@/components/Bible/VerseContextModal';
 import { cn } from '@/lib/utils';
@@ -204,67 +204,43 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
         }
     };
 
-    if (!content) return null;
 
-    const formattedDate = new Date().toLocaleDateString('pt-BR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    if (!content) return null;
 
     return (
         <article className="max-w-3xl mx-auto pb-24 animate-in fade-in duration-700">
 
-
-            {/* Header Content */}
-            <header className="mb-10 text-center px-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-4">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                    Devocional Diário
+            {/* Social Proof Bar (moved to top, no title duplication) */}
+            <div className="flex items-center justify-center gap-6 mb-10 animate-in slide-in-from-bottom-2 fade-in duration-500 delay-150">
+                <div className="flex items-center gap-2 text-slate-500 text-xs font-medium bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+                    <Users className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>{viewsToday > 0 ? `${viewsToday} leram hoje` : 'Seja o primeiro a ler'}</span>
                 </div>
 
-                <h1 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4 leading-tight">
-                    {title}
-                </h1>
-
-                <div className="flex items-center justify-center gap-2 text-slate-500 text-sm font-medium">
-                    <Calendar className="w-4 h-4" />
-                    <span className="capitalize">{formattedDate}</span>
-                </div>
-
-                {/* Social Proof Bar */}
-                <div className="flex items-center justify-center gap-6 mt-6 animate-in slide-in-from-bottom-2 fade-in duration-500 delay-150">
-                    <div className="flex items-center gap-2 text-slate-500 text-xs font-medium bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
-                        <Users className="w-3.5 h-3.5 text-indigo-500" />
-                        <span>{viewsToday > 0 ? `${viewsToday} leram hoje` : 'Seja o primeiro a ler'}</span>
-                    </div>
-
-                    <button
-                        onClick={handleLike}
-                        className={cn(
-                            "flex items-center gap-1.5 px-4 py-1.5 rounded-full border transition-all active:scale-95",
-                            hasLiked
-                                ? "bg-indigo-50 border-indigo-200 text-indigo-700"
-                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                        )}
-                    >
-                        <Heart className={cn("w-4 h-4", hasLiked && "fill-current")} />
-                        <span className="text-sm font-bold">{hasLiked ? "Amém!" : "Amém"}</span>
-                        <span className="text-xs opacity-70 border-l border-current pl-1.5 ml-0.5">{likes}</span>
-                    </button>
-
-                    {coverUrl && (
-                        <DevotionalShareButton
-                            id={id}
-                            title={title}
-                            subtitle={subtitle}
-                            verseKey={parsedContent?.verseKey}
-                            coverUrl={coverUrl}
-                        />
+                <button
+                    onClick={handleLike}
+                    className={cn(
+                        "flex items-center gap-1.5 px-4 py-1.5 rounded-full border transition-all active:scale-95",
+                        hasLiked
+                            ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                     )}
-                </div>
-            </header>
+                >
+                    <Heart className={cn("w-4 h-4", hasLiked && "fill-current")} />
+                    <span className="text-sm font-bold">{hasLiked ? "Amém!" : "Amém"}</span>
+                    <span className="text-xs opacity-70 border-l border-current pl-1.5 ml-0.5">{likes}</span>
+                </button>
+
+                {coverUrl && (
+                    <DevotionalShareButton
+                        id={id}
+                        title={title}
+                        subtitle={subtitle}
+                        verseKey={parsedContent?.verseKey}
+                        coverUrl={coverUrl}
+                    />
+                )}
+            </div>
 
             {/* 1. Key Verse */}
             {parsedContent.verseKey && (
