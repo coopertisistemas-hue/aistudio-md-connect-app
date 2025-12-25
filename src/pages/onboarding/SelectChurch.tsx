@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Loader2, Church } from 'lucide-react';
+import { Search, MapPin, Loader2, Church, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
+import { Button } from '@/components/ui/button';
 
 interface Church {
     id: string;
@@ -22,12 +23,15 @@ export default function SelectChurch() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [joining, setJoining] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         loadChurches();
     }, []);
 
     const loadChurches = async () => {
+        setError(null);
+        setLoading(true);
         try {
             // Using Edge Function as requested
             const { data, error } = await supabase.functions.invoke('public-churches-list');
@@ -35,8 +39,7 @@ export default function SelectChurch() {
             setChurches(data || []);
         } catch (err: any) {
             console.error('Error loading churches:', err);
-            // Fallback for dev/demo if function not deployed yet
-            // alert('Erro ao carregar igrejas via Edge Function. Verifique o console.');
+            setError('Erro ao carregar igrejas. Verifique sua conexão e tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -111,6 +114,25 @@ export default function SelectChurch() {
                     <div className="flex justify-center py-12">
                         <Loader2 className="w-8 h-8 text-primary animate-spin" />
                     </div>
+                ) : error ? (
+                    <div className="flex flex-col items-center justify-center py-12 px-4">
+                        <div className="bg-red-50 border border-red-100 rounded-2xl p-8 max-w-md w-full text-center">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-red-100 rounded-full p-3">
+                                    <AlertCircle className="w-8 h-8 text-red-600" />
+                                </div>
+                            </div>
+                            <h3 className="font-bold text-lg text-slate-900 mb-2">Ops! Algo deu errado</h3>
+                            <p className="text-slate-600 mb-6">{error}</p>
+                            <Button
+                                onClick={loadChurches}
+                                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold"
+                            >
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                Tentar novamente
+                            </Button>
+                        </div>
+                    </div>
                 ) : (
                     <div className="grid gap-4">
                         {filteredChurches.map(church => (
@@ -140,9 +162,21 @@ export default function SelectChurch() {
                             </div>
                         ))}
 
-                        {filteredChurches.length === 0 && (
+                        {filteredChurches.length === 0 && churches.length === 0 && (
+                            <div className="text-center py-12">
+                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-8 max-w-md mx-auto">
+                                    <div className="flex justify-center mb-4">
+                                        <Church className="w-12 h-12 text-slate-300" />
+                                    </div>
+                                    <h3 className="font-bold text-lg text-slate-900 mb-2">Nenhuma igreja disponível</h3>
+                                    <p className="text-slate-500 text-sm">No momento não há igrejas cadastradas no sistema.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {filteredChurches.length === 0 && churches.length > 0 && (
                             <div className="text-center py-12 text-slate-400">
-                                Nenhuma igreja encontrada.
+                                Nenhuma igreja encontrada com esse filtro.
                             </div>
                         )}
                     </div>
