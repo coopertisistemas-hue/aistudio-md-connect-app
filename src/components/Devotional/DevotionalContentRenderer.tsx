@@ -8,6 +8,7 @@ import { DevotionalShareButton } from './DevotionalShareButton';
 import { bibleService } from '@/services/bible';
 import { interactionService } from '@/services/interactionService';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface DevotionalContentRendererProps {
     id: string; // [NEW] Required for sharing
@@ -183,10 +184,17 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
     }, [id, user]);
 
     const handleLike = async () => {
+        console.log('[DevotionalContentRenderer] handleLike called', { user, id });
+
         if (!user) {
-            // Optional: prompt login
+            toast.info('Faça login para registrar seu Amém', {
+                description: 'Entre na sua conta para curtir devocionais',
+                duration: 3000
+            });
             return;
         }
+
+        console.log('[DevotionalContentRenderer] Toggling reaction...', { devotionalId: id, userId: user.id });
 
         // Optimistic UI
         const newLikeState = !hasLiked;
@@ -194,11 +202,14 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
         setLikes(prev => newLikeState ? prev + 1 : prev - 1);
 
         const res = await interactionService.toggleDevotionalReaction(id!, user.id);
+        console.log('[DevotionalContentRenderer] Toggle result:', res);
+
         if (res) {
             setLikes(res.count);
             setHasLiked(res.reacted);
         } else {
             // Revert on error
+            toast.error('Erro ao registrar Amém. Tente novamente.');
             setHasLiked(!newLikeState);
             setLikes(prev => newLikeState ? prev - 1 : prev + 1);
         }
