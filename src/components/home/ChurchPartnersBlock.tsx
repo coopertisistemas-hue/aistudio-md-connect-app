@@ -29,7 +29,7 @@ export function ChurchPartnersBlock() {
                 <button
                     onClick={() => {
                         track('church_erp');
-                        navigate('/coming-soon');
+                        navigate(APP_ROUTES.CHURCH_SHOWCASE);
                     }}
                     className="group relative flex flex-col items-center p-4 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100/50 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-[0.98] overflow-hidden"
                 >
