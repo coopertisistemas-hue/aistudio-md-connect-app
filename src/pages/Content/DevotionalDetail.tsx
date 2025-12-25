@@ -81,7 +81,7 @@ export default function DevotionalDetail() {
 
     return (
         <InternalPageLayout
-            title="Devocional"
+            title={item?.title || "Devocional"}
             subtitle="Leia, medite e compartilhe."
             icon={BookOpen}
             iconClassName="text-indigo-600"
