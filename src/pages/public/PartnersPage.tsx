@@ -4,14 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
     Heart, Copy, CheckCircle2, MessageCircle,
-    Zap, Globe, Smartphone, Info, ArrowRight, ArrowLeft
+    Zap, Globe, Smartphone, Info, ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import QRCode from 'react-qr-code';
 import { PixPayload } from '@/lib/pix';
 import { APP_ROUTES } from '@/lib/routes';
 import { analytics } from '@/lib/analytics';
-import { SEOHead } from '@/components/SEO/SEOHead';
+import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function PartnersPage() {
     const navigate = useNavigate();
@@ -74,18 +74,14 @@ export default function PartnersPage() {
 
 
     return (
-        <>
-            <SEOHead />
-            <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-white pt-20 pb-24 px-4 animate-in fade-in duration-500 max-w-2xl mx-auto">
-
-                {/* Botão Voltar Fixo */}
-                <button
-                    onClick={() => navigate(-1)}
-                    className="fixed top-4 left-4 z-50 p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white shadow-sm transition-all active:scale-95"
-                    aria-label="Voltar"
-                >
-                    <ArrowLeft className="w-5 h-5 text-slate-700" />
-                </button>
+        <InternalPageLayout
+            title="Parcerias"
+            subtitle="Junte-se ao propósito com transparência."
+            icon={Heart}
+            iconClassName="text-amber-600"
+            backPath="/home"
+        >
+            <div className="max-w-2xl mx-auto px-4 space-y-8">
 
                 {/* A) HERO com Vídeo Background */}
                 <div className="relative text-center mb-8">
@@ -304,7 +300,7 @@ export default function PartnersPage() {
                 </div>
 
             </div>
-        </>
+        </InternalPageLayout>
     );
 }
 
