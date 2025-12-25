@@ -186,27 +186,33 @@ export function DevotionalContentRenderer({ id, title, subtitle, content, author
     const handleLike = async () => {
         console.log('[DevotionalContentRenderer] handleLike called', { user, id });
 
-        if (!user) {
-            toast.info('Faça login para registrar seu Amém', {
-                description: 'Entre na sua conta para curtir devocionais',
-                duration: 3000
-            });
-            return;
-        }
 
-        console.log('[DevotionalContentRenderer] Toggling reaction...', { devotionalId: id, userId: user.id });
+
+        console.log('[DevotionalContentRenderer] Toggling reaction...', {
+            devotionalId: id,
+            userId: user?.id,
+            isAnonymous: !user
+        });
 
         // Optimistic UI
         const newLikeState = !hasLiked;
         setHasLiked(newLikeState);
         setLikes(prev => newLikeState ? prev + 1 : prev - 1);
 
-        const res = await interactionService.toggleDevotionalReaction(id!, user.id);
+        const res = await interactionService.toggleDevotionalReaction(id!, user?.id);
         console.log('[DevotionalContentRenderer] Toggle result:', res);
 
         if (res) {
             setLikes(res.count);
             setHasLiked(res.reacted);
+
+            // Show success feedback
+            if (res.reacted) {
+                toast.success('Amém registrado!', {
+                    description: user ? 'Sua reação foi salva' : 'Reação salva localmente',
+                    duration: 2000
+                });
+            }
         } else {
             // Revert on error
             toast.error('Erro ao registrar Amém. Tente novamente.');

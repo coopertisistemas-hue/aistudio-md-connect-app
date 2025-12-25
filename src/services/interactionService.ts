@@ -6,28 +6,50 @@ import { supabase } from '@/lib/supabase';
 export const interactionService = {
     // --- Devotionals ---
 
-    // Toggle Reaction (Like/Amém) via RPC
-    toggleDevotionalReaction: async (devotionalId: string, _userId: string): Promise<{ reacted: boolean, count: number } | null> => {
+    // Toggle Reaction (Like/Amém) - Supports both authenticated and anonymous users
+    toggleDevotionalReaction: async (devotionalId: string, userId?: string): Promise<{ reacted: boolean, count: number } | null> => {
         try {
-            // Updated to use 'toggle_devotional_amen' as per strict spec
-            // Note: Function expects _devotional_id (authed user from context)
-            const { data, error } = await supabase.rpc('toggle_devotional_amen', {
-                _devotional_id: devotionalId
-            });
+            if (userId) {
+                // Authenticated: Use RPC
+                const { data, error } = await supabase.rpc('toggle_devotional_amen', {
+                    _devotional_id: devotionalId
+                });
 
-            if (error) throw error;
-            // Map RPC result { liked, count } to internal { reacted, count }
-            return { reacted: data.liked, count: data.count };
+                if (error) throw error;
+                return { reacted: data.liked, count: data.count };
+            } else {
+                // Anonymous: Use localStorage to track reactions
+                const storageKey = `amen_${devotionalId}`;
+                const hasReacted = localStorage.getItem(storageKey) === 'true';
+
+                // Toggle local state
+                if (hasReacted) {
+                    localStorage.removeItem(storageKey);
+                } else {
+                    localStorage.setItem(storageKey, 'true');
+                }
+
+                // Get current count from API (read-only, no auth needed)
+                const { data: details } = await supabase.rpc('get_devotional_social_combined', {
+                    _devotional_id: devotionalId,
+                    _read_date: new Date().toISOString().split('T')[0]
+                });
+
+                // Return optimistic result (local state + server count)
+                return {
+                    reacted: !hasReacted,
+                    count: details?.amen_count || 0
+                };
+            }
         } catch (error) {
             console.error('Error toggling reaction:', error);
             return null;
         }
     },
 
-    // Get Devotional Details (Likes + Views) via RPC
-    getDevotionalDetails: async (devotionalId: string, _userId?: string) => {
+    // Get Devotional Details (Likes + Views) - Supports anonymous users
+    getDevotionalDetails: async (devotionalId: string, userId?: string) => {
         try {
-            // Updated to use 'get_devotional_social_combined' for total counts
             const { data, error } = await supabase.rpc('get_devotional_social_combined', {
                 _devotional_id: devotionalId,
                 _read_date: new Date().toISOString().split('T')[0]
@@ -35,10 +57,17 @@ export const interactionService = {
 
             if (error) throw error;
 
+            // Check localStorage for anonymous reactions
+            let hasLiked = data.liked; // Server value for authenticated users
+            if (!userId) {
+                const storageKey = `amen_${devotionalId}`;
+                hasLiked = localStorage.getItem(storageKey) === 'true';
+            }
+
             return {
                 likes: data.amen_count,
-                has_liked: data.liked,
-                views_today: data.reads_count // This is now Auth + Public
+                has_liked: hasLiked,
+                views_today: data.reads_count
             };
         } catch (error) {
             console.error('Error fetching details:', error);
