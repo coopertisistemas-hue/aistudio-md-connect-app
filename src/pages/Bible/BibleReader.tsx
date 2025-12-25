@@ -203,7 +203,7 @@ export default function BibleReader() {
 
     return (
         <InternalPageLayout
-            title="Bíblia Sagrada"
+            title={`${displayBookName} ${currentChapter}`}
             subtitle="Leia com atenção e medite."
             icon={ScrollText}
             iconClassName="text-indigo-600"
