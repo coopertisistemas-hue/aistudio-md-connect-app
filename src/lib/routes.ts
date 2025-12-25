@@ -23,6 +23,8 @@ export const APP_ROUTES = {
     ABOUT: '/entenda',
     DONATE: '/doe',
     PARTNERS: '/parceiros',
+    PARTNERS_PAGE: '/partners',
+    PARTNER_LEAD: '/partners/lead',
     PARTNER_JOIN: '/seja-parceiro',
     MISSION: '/missao',
     CHURCH_SHOWCASE: '/sou-igreja',
