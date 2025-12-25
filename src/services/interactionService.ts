@@ -50,12 +50,19 @@ export const interactionService = {
     logDevotionalRead: async (devotionalId: string, userId?: string) => {
         try {
             if (userId) {
-                // Authenticated: Direct DB Insert
+                // Authenticated: Use UPSERT to avoid 409 conflicts
+                // UNIQUE constraint: (devotional_id, user_id, read_date)
+                const readDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
                 await supabase
                     .from('devotional_reads')
-                    .insert({
+                    .upsert({
                         devotional_id: devotionalId,
-                        user_id: userId
+                        user_id: userId,
+                        read_date: readDate
+                    }, {
+                        onConflict: 'devotional_id,user_id,read_date',
+                        ignoreDuplicates: true // Don't update if exists, just ignore
                     });
             } else {
                 // Anonymous: Call Edge Function
