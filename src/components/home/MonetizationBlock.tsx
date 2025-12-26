@@ -97,7 +97,7 @@ export function MonetizationBlock({ monetization, churchId }: MonetizationBlockP
             <div className="px-5 mb-8">
                 <SectionHeader
                     title="Apoie a Obra"
-                    subtitle="Sua contribuição mantém o projeto no ar"
+                    subtitle="O MD Connect é gratuito para igrejas. Sua contribuição mantém servidores, segurança e suporte — e acelera a implantação do ERP (Admin + App do membro)."
                     icon={HandHeart}
                     iconColor="text-emerald-500"
                     actionLabel="Entenda"
@@ -106,6 +106,24 @@ export function MonetizationBlock({ monetization, churchId }: MonetizationBlockP
                         navigate(APP_ROUTES.ABOUT);
                     }}
                 />
+
+                {/* Mini Info Block - Bullets */}
+                <div className="bg-white/70 backdrop-blur-sm border border-slate-100 rounded-lg p-3 mb-4 shadow-sm">
+                    <ul className="text-[10px] text-slate-600 space-y-1.5">
+                        <li className="flex items-start gap-2">
+                            <Building2 className="w-3 h-3 text-emerald-500 mt-0.5 shrink-0" />
+                            <span className="leading-tight">Infraestrutura e suporte técnico</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <FileText className="w-3 h-3 text-emerald-500 mt-0.5 shrink-0" />
+                            <span className="leading-tight">Segurança & LGPD (sem venda de dados)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <HandHeart className="w-3 h-3 text-emerald-500 mt-0.5 shrink-0" />
+                            <span className="leading-tight">ERP para Igrejas (Admin + App do membro)</span>
+                        </li>
+                    </ul>
+                </div>
 
                 <div className="space-y-3">
                     {/* 1. Primary: DOE Agora */}
