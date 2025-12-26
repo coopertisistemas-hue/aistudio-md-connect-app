@@ -62,7 +62,19 @@ export function MonetizationBlock({ monetization, churchId }: MonetizationBlockP
     // Auto Scroll Effect
     useEffect(() => {
         const container = scrollRef.current;
-        if (!container || baseItems.length === 0) return;
+
+        console.log('[Carousel Debug] Effect triggered', {
+            hasContainer: !!container,
+            baseItemsLength: baseItems.length,
+            isPaused,
+            scrollWidth: container?.scrollWidth,
+            clientWidth: container?.clientWidth
+        });
+
+        if (!container || baseItems.length === 0) {
+            console.log('[Carousel Debug] Early return - no container or no items');
+            return;
+        }
 
         let animationFrameId: number;
         const speed = 0.6; // Tune for "premium" feel
@@ -85,12 +97,14 @@ export function MonetizationBlock({ monetization, churchId }: MonetizationBlockP
             animationFrameId = requestAnimationFrame(animate);
         };
 
-        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        if (!mediaQuery.matches) {
-            animationFrameId = requestAnimationFrame(animate);
-        }
+        // Start animation (removed reduced motion check for debugging)
+        console.log('[Carousel Debug] Starting animation');
+        animationFrameId = requestAnimationFrame(animate);
 
-        return () => cancelAnimationFrame(animationFrameId);
+        return () => {
+            console.log('[Carousel Debug] Cleanup - canceling animation');
+            cancelAnimationFrame(animationFrameId);
+        };
     }, [isPaused, baseItems.length]);
 
 
