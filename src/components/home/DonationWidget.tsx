@@ -22,10 +22,10 @@ export function DonationWidget() {
                             <Heart className="w-4 h-4 text-rose-500 fill-rose-50" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="font-heading font-bold text-slate-800 text-sm mb-0.5">DOE — Contribuição voluntária</h3>
+                            <h3 className="font-heading font-bold text-slate-800 text-sm mb-0.5">Apoie a Obra</h3>
                             <p className="text-[10px] text-slate-400 mb-2">Tecnologia a serviço do Reino</p>
                             <p className="text-xs text-slate-600 leading-relaxed mb-3">
-                                Sua contribuição mantém nossa infraestrutura, suporte e serviços. E viabiliza a evolução do app e a implantação do ERP gratuito para igrejas.
+                                Seu apoio mantém o MD Connect no ar (infraestrutura, segurança e melhorias). Assim, levamos o Devocional diário e o ERP gratuito para mais igrejas — alcançando mais vidas.
                             </p>
 
                             <div className="flex flex-col gap-3">
