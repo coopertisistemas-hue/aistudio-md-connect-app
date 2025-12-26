@@ -46,7 +46,7 @@ export default function PartnerLeadPage() {
                 subtitle="Vamos conversar e alinhar a melhor forma de apoiar."
                 icon={Handshake}
                 iconClassName="text-emerald-600"
-                backPath={APP_ROUTES.PARTNERS_PAGE}
+                backPath={APP_ROUTES.PARTNERS}
                 showDoe={false}
                 showSponsor={false}
             >
@@ -61,7 +61,7 @@ export default function PartnerLeadPage() {
                                 <p className="text-slate-600 mb-8">
                                     Obrigado pelo interesse em apoiar a obra. Nossa equipe entrará em contato pelo WhatsApp em breve.
                                 </p>
-                                <Button onClick={() => navigate(APP_ROUTES.PARTNERS_PAGE)} className="w-full bg-slate-900 text-white font-bold h-12 rounded-xl">
+                                <Button onClick={() => navigate(APP_ROUTES.PARTNERS)} className="w-full bg-slate-900 text-white font-bold h-12 rounded-xl">
                                     Voltar para Parcerias
                                 </Button>
                             </CardContent>
