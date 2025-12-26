@@ -40,7 +40,7 @@ export function ChurchPartnersBlock() {
                         Sou Igreja
                     </h3>
                     <p className="text-[10px] text-slate-500 text-center font-medium leading-tight">
-                        Gestão completa e app
+                        ERP completo + App do membro
                     </p>
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <ArrowRight className="w-3 h-3 text-indigo-400" />
