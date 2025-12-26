@@ -49,6 +49,16 @@ export function MonetizationBlock({ monetization, churchId }: MonetizationBlockP
     // If list is small, replicate more. 
     const loopItems = [...baseItems, ...baseItems, ...baseItems, ...baseItems];
 
+    // Page Visibility API: pause when tab is hidden
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            setIsPaused(document.hidden);
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, []);
+
     // Auto Scroll Effect
     useEffect(() => {
         const container = scrollRef.current;
