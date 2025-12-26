@@ -107,20 +107,24 @@ export function MonetizationBlock({ monetization, churchId }: MonetizationBlockP
                     }}
                 />
 
-                {/* Mini Info Block - Bullets */}
-                <div className="bg-white/70 backdrop-blur-sm border border-slate-100 rounded-lg p-3 mb-4 shadow-sm">
-                    <ul className="text-[10px] text-slate-600 space-y-1.5">
-                        <li className="flex items-start gap-2">
-                            <Building2 className="w-3 h-3 text-emerald-500 mt-0.5 shrink-0" />
-                            <span className="leading-tight">Infraestrutura e suporte técnico</span>
+                {/* Mini Info Block - Bullets (Premium Legibility) */}
+                <div className="bg-white/85 backdrop-blur-md border border-white/40 rounded-xl p-4 mb-4 shadow-lg shadow-slate-200/50">
+                    <ul className="text-xs text-slate-700 space-y-2">
+                        <li className="flex items-start gap-2.5">
+                            <Building2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                            <span className="leading-snug font-medium">Infraestrutura e suporte técnico</span>
                         </li>
-                        <li className="flex items-start gap-2">
-                            <FileText className="w-3 h-3 text-emerald-500 mt-0.5 shrink-0" />
-                            <span className="leading-tight">Segurança & LGPD (sem venda de dados)</span>
+                        <li className="flex items-start gap-2.5">
+                            <FileText className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                            <span className="leading-snug font-medium">Segurança & LGPD (sem venda de dados)</span>
                         </li>
-                        <li className="flex items-start gap-2">
-                            <HandHeart className="w-3 h-3 text-emerald-500 mt-0.5 shrink-0" />
-                            <span className="leading-tight">ERP para Igrejas (Admin + App do membro)</span>
+                        <li className="flex items-start gap-2.5">
+                            <HandHeart className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                            <span className="leading-snug font-medium">ERP para Igrejas (Admin + App do membro)</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                            <Info className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                            <span className="leading-snug font-medium">Serviços digitais para igrejas e parceiros (sites, conteúdo e automações)</span>
                         </li>
                     </ul>
                 </div>
