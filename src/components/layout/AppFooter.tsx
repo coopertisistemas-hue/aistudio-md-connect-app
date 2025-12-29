@@ -48,10 +48,10 @@ export function AppFooter() {
                                 </svg>
                             </a>
                             <a
-                                href="https://instagram.com/projetomomentodevocional"
+                                href="https://instagram.com/mdconnect.ofc"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                onClick={() => trackFooterClick('instagram', 'instagram.com/projetomomentodevocional', true)}
+                                onClick={() => trackFooterClick('instagram', 'instagram.com/mdconnect.ofc', true)}
                                 className="w-7 h-7 rounded-full bg-slate-100 hover:bg-white text-slate-400 hover:text-pink-600 border border-transparent hover:border-slate-200 flex items-center justify-center transition-all active:scale-95"
                                 aria-label="Siga no Instagram"
                             >
