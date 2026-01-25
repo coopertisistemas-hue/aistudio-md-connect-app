@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { getChurchContext, invokeBff } from '@/lib/bff';
 import type { Post, ContentSeries, ContentMessage, ReadingPlan, ReadingPlanDay } from '@/types/content';
 
 export const contentService = {
@@ -6,155 +7,160 @@ export const contentService = {
     getDevotionals: async (limit = 10) => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return [];
-        const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', session.user.id).single();
-        if (!profile?.church_id) return [];
+        const { church_id } = await getChurchContext();
+        if (!church_id) return [];
 
-        const { data } = await supabase
-            .from('posts')
-            .select('*')
-            .eq('church_id', profile.church_id)
-            .eq('type', 'devotional')
-            .eq('status', 'published')
-            .order('published_at', { ascending: false })
-            .limit(limit);
-        return (data as Post[]) || [];
+        const data = await invokeBff<Post[]>('church-posts-list', {
+            type: 'devotional',
+            limit
+        });
+        return data || [];
     },
 
     getDevotionalById: async (id: string) => {
-        const { data } = await supabase.from('posts').select('*').eq('id', id).single();
-        return data as Post;
+        try {
+            const data = await invokeBff<Post>('church-post-detail', { id, type: 'devotional' });
+            return data as Post;
+        } catch (error) {
+            console.error('Erro ao buscar devocional:', error);
+            return null as unknown as Post;
+        }
     },
 
     markContentAsRead: async (contentId: string, contentType: 'devotional' | 'message') => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return false;
-
-        const { error } = await supabase.from('user_content_history').insert({
-            user_id: session.user.id,
-            content_id: contentId,
-            content_type: contentType,
-            read_at: new Date().toISOString()
-        });
-        return !error;
+        try {
+            await invokeBff('church-content-mark-read', {
+                content_id: contentId,
+                content_type: contentType
+            });
+            return true;
+        } catch (error) {
+            console.error('Erro ao marcar conteúdo como lido:', error);
+            return false;
+        }
     },
 
     getContentHistory: async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return [];
-        const { data } = await supabase.from('user_content_history').select('content_id').eq('user_id', session.user.id);
-        return data?.map(d => d.content_id) || [];
+        try {
+            const data = await invokeBff<{ content_id: string }[]>('church-content-history');
+            return data?.map(d => d.content_id) || [];
+        } catch (error) {
+            console.error('Erro ao buscar histórico de conteúdo:', error);
+            return [];
+        }
     },
 
     // SERIES
     getSeries: async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return [];
-        const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', session.user.id).single();
-        if (!profile?.church_id) return [];
+        const { church_id } = await getChurchContext();
+        if (!church_id) return [];
 
-        const { data } = await supabase
-            .from('content_series')
-            .select('*')
-            .eq('church_id', profile.church_id)
-            .eq('status', 'published')
-            .order('created_at', { ascending: false });
-        return (data as ContentSeries[]) || [];
+        try {
+            const data = await invokeBff<ContentSeries[]>('church-series-list');
+            return (data as ContentSeries[]) || [];
+        } catch (error) {
+            console.error('Erro ao buscar séries:', error);
+            return [];
+        }
     },
 
     getSeriesById: async (id: string) => {
-        const { data } = await supabase.from('content_series').select('*').eq('id', id).single();
-        return data as ContentSeries;
+        try {
+            const data = await invokeBff<ContentSeries>('church-series-detail', { id });
+            return data as ContentSeries;
+        } catch (error) {
+            console.error('Erro ao buscar série:', error);
+            return null as unknown as ContentSeries;
+        }
     },
 
     getMessagesBySeries: async (seriesId: string) => {
-        const { data } = await supabase
-            .from('content_messages')
-            .select('*')
-            .eq('series_id', seriesId)
-            .eq('status', 'published')
-            .order('published_at', { ascending: false }); // Or episode order
-        return (data as ContentMessage[]) || [];
+        try {
+            const data = await invokeBff<ContentMessage[]>('church-messages-by-series', { series_id: seriesId });
+            return (data as ContentMessage[]) || [];
+        } catch (error) {
+            console.error('Erro ao buscar mensagens da série:', error);
+            return [];
+        }
     },
 
     getMessageById: async (id: string) => {
-        const { data } = await supabase.from('content_messages').select('*').eq('id', id).single();
-        return data as ContentMessage;
+        try {
+            const data = await invokeBff<ContentMessage>('church-message-detail', { id });
+            return data as ContentMessage;
+        } catch (error) {
+            console.error('Erro ao buscar mensagem:', error);
+            return null as unknown as ContentMessage;
+        }
     },
 
     // PLANS
     getReadingPlans: async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return [];
-        const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', session.user.id).single();
-        if (!profile?.church_id) return [];
+        const { church_id } = await getChurchContext();
+        if (!church_id) return [];
 
-        const { data } = await supabase
-            .from('reading_plans')
-            .select('*')
-            .eq('church_id', profile.church_id)
-            .eq('status', 'published')
-            .order('created_at', { ascending: false });
-        // Future: Fetch user progress to show %
-        return (data as ReadingPlan[]) || [];
+        try {
+            const data = await invokeBff<ReadingPlan[]>('church-reading-plans-list');
+            return (data as ReadingPlan[]) || [];
+        } catch (error) {
+            console.error('Erro ao buscar planos de leitura:', error);
+            return [];
+        }
     },
 
     getPlanById: async (id: string) => {
-        const { data } = await supabase.from('reading_plans').select('*').eq('id', id).single();
-        return data as ReadingPlan;
+        try {
+            const data = await invokeBff<ReadingPlan>('church-reading-plan-detail', { id });
+            return data as ReadingPlan;
+        } catch (error) {
+            console.error('Erro ao buscar plano:', error);
+            return null as unknown as ReadingPlan;
+        }
     },
 
     getPlanDays: async (planId: string) => {
-        const { data } = await supabase
-            .from('reading_plan_days')
-            .select('*')
-            .eq('plan_id', planId)
-            .order('day_number', { ascending: true });
-        return (data as ReadingPlanDay[]) || [];
+        try {
+            const data = await invokeBff<ReadingPlanDay[]>('church-plan-days-list', { plan_id: planId });
+            return (data as ReadingPlanDay[]) || [];
+        } catch (error) {
+            console.error('Erro ao buscar dias do plano:', error);
+            return [];
+        }
     },
 
     // PLAN PROGRESS
     getPlanProgress: async (planId: string) => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return { completed_days: [] };
-
-        const { data } = await supabase
-            .from('user_plan_progress')
-            .select('completed_days')
-            .eq('user_id', session.user.id)
-            .eq('plan_id', planId)
-            .single();
-        return data || { completed_days: [] };
+        try {
+            const data = await invokeBff<{ completed_days: number[] }>('church-plan-progress-get', { plan_id: planId });
+            return data || { completed_days: [] };
+        } catch (error) {
+            console.error('Erro ao buscar progresso do plano:', error);
+            return { completed_days: [] };
+        }
     },
 
     markPlanDayComplete: async (planId: string, dayNumber: number) => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
-
-        // Check existing
-        const { data: existing } = await supabase
-            .from('user_plan_progress')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .eq('plan_id', planId)
-            .single();
-
-        let completed = existing?.completed_days || [];
-        if (!completed.includes(dayNumber)) {
-            completed.push(dayNumber);
-
-            const payload = {
-                user_id: session.user.id,
+        try {
+            const data = await invokeBff<{ completed_days: number[] }>('church-plan-progress-upsert', {
                 plan_id: planId,
-                completed_days: completed,
-                last_accessed_at: new Date().toISOString()
-            };
-
-            if (existing) {
-                await supabase.from('user_plan_progress').update(payload).eq('id', existing.id);
-            } else {
-                await supabase.from('user_plan_progress').insert({ ...payload, started_at: new Date().toISOString() });
-            }
+                day_number: dayNumber
+            });
+            return data?.completed_days || [];
+        } catch (error) {
+            console.error('Erro ao atualizar progresso do plano:', error);
+            return;
         }
-        return completed;
     }
 };

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { getChurchContext, invokeBff } from '@/lib/bff';
 
 export interface FeedItem {
     id: string;
@@ -26,71 +27,48 @@ export const feedService = {
             console.log("No session found for feed");
             return [];
         }
+        const { church_id } = await getChurchContext();
+        if (!church_id) return [];
 
-        // Fetch profile to get church_id
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('church_id')
-            .eq('id', session.user.id)
-            .single();
-
-        if (!profile?.church_id) return [];
-
-        const now = new Date().toISOString();
-
-        const { data, error } = await supabase
-            .from('posts')
-            .select('*')
-            .eq('church_id', profile.church_id)
-            .eq('status', 'published')
-            .or(`expires_at.is.null,expires_at.gte.${now}`)
-            .order('is_pinned', { ascending: false }) // Pinned first
-            .order('priority', { ascending: true }) // 'high' < 'normal', so ASC puts high first
-            .order('starts_at', { ascending: false }) // Newest first
-            .limit(limit);
-
-        if (error) {
+        try {
+            const data = await invokeBff<FeedItem[]>('church-posts-list', {
+                limit,
+                include_expired: false
+            });
+            return data as FeedItem[];
+        } catch (error) {
             console.error('Feed error:', error);
-            throw error;
+            return [];
         }
-
-        return data as FeedItem[];
     },
 
     getNotices: async (page = 0, limit = 20) => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return [];
+        const { church_id } = await getChurchContext();
+        if (!church_id) return [];
 
-        const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', session.user.id).single();
-        if (!profile?.church_id) return [];
-
-        const now = new Date().toISOString();
-        const from = page * limit;
-        const to = from + limit - 1;
-
-        const { data, error } = await supabase
-            .from('posts')
-            .select('*')
-            .eq('church_id', profile.church_id)
-            .eq('status', 'published')
-            .or(`expires_at.is.null,expires_at.gte.${now}`)
-            .order('is_pinned', { ascending: false })
-            .order('priority', { ascending: true })
-            .order('starts_at', { ascending: false })
-            .range(from, to);
-
-        if (error) throw error;
-        return data as FeedItem[];
+        try {
+            const data = await invokeBff<FeedItem[]>('church-posts-list', {
+                type: 'notice',
+                page,
+                limit,
+                include_expired: false
+            });
+            return data as FeedItem[];
+        } catch (error) {
+            console.error('Erro ao buscar avisos:', error);
+            return [];
+        }
     },
 
     getNoticeById: async (id: string) => {
-        const { data, error } = await supabase
-            .from('posts')
-            .select('*') // We might want to select specific fields or join with creator if needed
-            .eq('id', id)
-            .single();
-
-        if (error) throw error;
-        return data as FeedItem;
+        try {
+            const data = await invokeBff<FeedItem>('church-post-detail', { id, type: 'notice' });
+            return data as FeedItem;
+        } catch (error) {
+            console.error('Erro ao buscar aviso:', error);
+            return null as unknown as FeedItem;
+        }
     }
 };

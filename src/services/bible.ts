@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { invokeBff } from '@/lib/bff';
 
 export interface BibleBookData {
     id: string;
@@ -317,8 +318,7 @@ export const bibleService = {
             const match = reference.match(/^((?:[123I]{1,3}\s*)?[A-Za-zÀ-ÿ]+)/);
             const cleanRef = match ? match[1].toLowerCase().replace(/\./g, '') : '';
             const normalizedInput = cleanRef.replace(/\s+/g, '');
-            const { data, error } = await supabase.from('bible_books').select('*');
-            if (error) throw error;
+            const data = await invokeBff<BibleBookData[]>('public-bible-books');
             if (!data) return null;
             const book = data.find(b => {
                 return b.abbrev.some((a: string) => {

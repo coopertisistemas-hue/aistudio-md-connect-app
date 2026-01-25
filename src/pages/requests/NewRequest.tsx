@@ -4,6 +4,7 @@ import { Lock, Users, Eye, CheckCircle2, Heart, Calendar, MessageCircle } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
+import { getChurchContext, invokeBff } from '@/lib/bff';
 import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 
 export default function NewRequest() {
@@ -46,13 +47,14 @@ export default function NewRequest() {
         setIsSubmitting(true);
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) throw new Error('Not authenticated');
+            if (!session) throw new Error('Não autenticado');
 
-            const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', session.user.id).single();
+            const { church_id } = await getChurchContext();
+            if (!church_id) throw new Error('Igreja não encontrada para o seu usuário.');
 
             const payload = {
-                church_id: profile?.church_id,
-                member_id: session.user.id, // Only if member link exists, but let's assume implementation detail
+                church_id,
+                member_id: session.user.id,
                 request_type: type,
                 title: formData.title || (type === 'oracao' ? 'Pedido de Oração' : 'Solicitação'),
                 description: formData.description,
@@ -67,8 +69,7 @@ export default function NewRequest() {
                 contact_phone: formData.phone,
             };
 
-            const { error } = await supabase.from('pastoral_requests').insert(payload);
-            if (error) throw error;
+            await invokeBff('church-pastoral-requests-create', payload);
 
             setSuccess(true);
         } catch (error) {
