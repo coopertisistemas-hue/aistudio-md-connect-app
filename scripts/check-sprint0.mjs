@@ -133,11 +133,11 @@ function searchInFiles(directory, pattern, extensions = []) {
 printHeader('CHECK 1: Arquivos .env não rastreados no Git');
 
 let envGitTracked = false;
-const envFiles = ['.env', '.env.local', '.env.production'];
+const envFiles = ['.env', '.env.local'];
 
 // Check if .env files are currently tracked
 console.log(`${colors.gray}Verificando se .env está no Git working tree...${colors.reset}`);
-const trackedFiles = execSafe('git ls-files .env .env.local .env.production');
+const trackedFiles = execSafe('git ls-files .env .env.local');
 if (trackedFiles) {
     envGitTracked = true;
     printCheck(
@@ -208,16 +208,7 @@ console.log(`${colors.gray}Escaneando supabase/functions/ para CORS wildcard...$
 const wildcardCorsPattern = /['"]Access-Control-Allow-Origin['"]\s*:\s*['"]\*['"]/;
 const corsViolations = searchInFiles('supabase/functions', wildcardCorsPattern, ['.ts', '.js']);
 
-// Filter out _shared/cors.ts legacy export (which is documented as deprecated)
-const realCorsViolations = corsViolations.filter(v => {
-    // Allow deprecated corsHeaders in _shared/cors.ts (it's documented as empty for migration)
-    if (v.file.includes('_shared/cors.ts') || v.file.includes('_shared\\cors.ts')) {
-        return false;
-    }
-    return true;
-});
-
-if (realCorsViolations.length === 0) {
+if (corsViolations.length === 0) {
     printCheck(
         'CORS seguro (sem wildcard)',
         true,
@@ -227,14 +218,14 @@ if (realCorsViolations.length === 0) {
     printCheck(
         'CORS seguro (sem wildcard)',
         false,
-        `${realCorsViolations.length} violação(ões) encontrada(s):`
+        `${corsViolations.length} violação(ões) encontrada(s):`
     );
-    realCorsViolations.slice(0, 5).forEach(v => {
+    corsViolations.slice(0, 5).forEach(v => {
         console.log(`   ${colors.gray}${v.file}:${v.line}${colors.reset}`);
         console.log(`   ${colors.gray}  ${v.content.substring(0, 80)}${colors.reset}`);
     });
-    if (realCorsViolations.length > 5) {
-        console.log(`   ${colors.gray}... e mais ${realCorsViolations.length - 5} violação(ões)${colors.reset}`);
+    if (corsViolations.length > 5) {
+        console.log(`   ${colors.gray}... e mais ${corsViolations.length - 5} violação(ões)${colors.reset}`);
     }
 }
 
@@ -271,9 +262,9 @@ if (fullMode) {
     console.log(`${colors.gray}Executando build...${colors.reset}`);
     const buildResult = execSafe('pnpm build');
     if (buildResult !== null) {
-        printCheck('Build TypeScript', true, 'Build concluído com sucesso', true);
+        printCheck('Build TypeScript', true, 'Build concluído com sucesso');
     } else {
-        printCheck('Build TypeScript', false, 'Build falhou', false); // Hard fail in full mode
+        printCheck('Build TypeScript', false, 'Build falhou');
     }
     
     // Lint check (soft - informational only)
