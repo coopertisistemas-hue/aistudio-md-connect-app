@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Newspaper, BookOpen, Zap } from 'lucide-react';
 import { PortalSection, PortalCard } from '@/components/ui/PortalComponents';
@@ -8,13 +8,24 @@ import { feedService, type FeedItem } from '@/services/feed';
 import { HomeHeader } from '@/components/home/HomeHeader';
 import { HomeHero } from '@/components/home/HomeHero';
 import { ContentsHub } from '@/components/home/ContentsHub';
-import { ServicesSection } from '@/components/home/ServicesSection';
 import { NextEventsWidget } from '@/components/home/NextEventsWidget';
 import { QuickActions } from '@/components/ui/QuickActions';
 import { ScrollCue } from '@/components/ui/ScrollCue';
 import { NotificationTicker } from '@/components/home/NotificationTicker';
 import { BackToTop } from '@/components/ui/BackToTop';
-import { DonationWidget } from '@/components/home/DonationWidget';
+
+// Lazy load below-the-fold sections (convert named exports to default)
+const ServicesSection = lazy(() => 
+  import('@/components/home/ServicesSection').then(mod => ({ default: mod.ServicesSection }))
+);
+const DonationWidget = lazy(() => 
+  import('@/components/home/DonationWidget').then(mod => ({ default: mod.DonationWidget }))
+);
+
+// Mini skeleton for lazy components
+const SectionSkeleton = () => (
+  <div className="animate-pulse bg-slate-50 rounded-xl border border-slate-100 p-4 h-32" />
+);
 
 export default function Home() {
     const [feed, setFeed] = useState<FeedItem[]>([]);
@@ -134,9 +145,13 @@ export default function Home() {
                     </div>
                 </PortalSection>
 
-                {/* 7. Services & Monetization */}
-                <ServicesSection />
-                <DonationWidget />
+                {/* 7. Services & Monetization - Lazy Loaded */}
+                <Suspense fallback={<SectionSkeleton />}>
+                    <ServicesSection />
+                </Suspense>
+                <Suspense fallback={<SectionSkeleton />}>
+                    <DonationWidget />
+                </Suspense>
 
                 {/* Footer Info */}
                 <footer className="py-8 text-center mt-6">

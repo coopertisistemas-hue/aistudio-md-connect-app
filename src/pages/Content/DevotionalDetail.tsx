@@ -7,6 +7,7 @@ import { Calendar, BookOpen, Loader2 } from 'lucide-react';
 import { FLAGS } from '@/lib/flags';
 import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 import { DevotionalContentRenderer } from '@/components/Devotional/DevotionalContentRenderer';
+import { getCachedDevotional, cacheDevotional } from '@/lib/cache';
 
 // Fallback Data for V1
 const FALLBACK_DEVOTIONAL: Post = {
@@ -41,6 +42,14 @@ export default function DevotionalDetail() {
     const loadData = async (postId: string) => {
         setIsLoading(true);
         console.log('[DevotionalDetail] loadData started:', postId);
+
+        // Check cache first for instant display
+        const cached = getCachedDevotional(postId);
+        if (cached) {
+            setItem(cached);
+            setIsLoading(false);
+        }
+
         try {
             let data: Post | null = null;
             if (FLAGS.FEATURE_DEVOTIONAL_API) {
@@ -70,12 +79,15 @@ export default function DevotionalDetail() {
             console.log('[DevotionalDetail] Data loaded:', data ? 'success' : 'null, using fallback');
             if (data) {
                 setItem(data);
-            } else {
+                cacheDevotional(postId, data);
+            } else if (!cached) {
                 setItem(FALLBACK_DEVOTIONAL);
             }
         } catch (error) {
             console.error("[DevotionalDetail] Load Failed due to error:", error);
-            setItem(FALLBACK_DEVOTIONAL);
+            if (!cached) {
+                setItem(FALLBACK_DEVOTIONAL);
+            }
         } finally {
             console.log('[DevotionalDetail] Loading complete');
             setIsLoading(false);

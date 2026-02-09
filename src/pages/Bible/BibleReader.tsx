@@ -13,6 +13,7 @@ import { useBibleAudio } from '@/hooks/useBibleAudio';
 import { interactionService } from '@/services/interactionService';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { getCachedChapter, cacheChapter } from '@/lib/cache';
 
 export default function BibleReader() {
     const { bookId, chapterId } = useParams();
@@ -47,20 +48,32 @@ export default function BibleReader() {
         const load = async () => {
             setIsLoading(true);
             setError(false);
-            window.scrollTo(0, 0); // Reset scroll on change
+            window.scrollTo(0, 0);
 
+            const chapterNum = Number(chapterId);
+
+            // Check cache first for instant display
+            const cached = getCachedChapter(bookId, chapterNum);
+            if (cached) {
+                setData(cached);
+                setIsLoading(false);
+            }
+
+            // Fetch fresh data (background refresh if cached)
             try {
-                const res = await bibleService.getChapter(bookId, Number(chapterId));
+                const res = await bibleService.getChapter(bookId, chapterNum);
                 if (res) {
                     setData(res);
-                    // Persist Progress on successful load
-                    saveProgress(bookId, Number(chapterId));
-                } else {
+                    cacheChapter(bookId, chapterNum, res);
+                    saveProgress(bookId, chapterNum);
+                } else if (!cached) {
                     setError(true);
                 }
             } catch (err) {
                 console.error(err);
-                setError(true);
+                if (!cached) {
+                    setError(true);
+                }
             } finally {
                 setIsLoading(false);
             }

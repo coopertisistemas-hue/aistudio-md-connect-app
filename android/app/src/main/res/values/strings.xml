@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <!-- App Name: Displayed under the app icon -->
+    <string name="app_name">MD Connect</string>
+    <!-- Short Name: Used when space is limited -->
+    <string name="app_name_short">MD Connect</string>
+    <!-- Activity Title -->
+    <string name="title_activity_main">MD Connect</string>
+    <!-- Package Name (reverse domain) -->
+    <string name="package_name">com.mdconnect.app</string>
+    <!-- Custom URL Scheme for deep linking -->
+    <string name="custom_url_scheme">com.mdconnect.app</string>
+    <!-- App Description -->
+    <string name="app_description">Momento Devocional - Palavra, Comunidade e Apoio</string>
+</resources>

@@ -1,15 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { homeService, type HomeData } from '@/lib/api/home';
 // import { AppBackground } from '@/components/layout/AppBackground'; // Removed, global now
 import { MuralCompact } from '@/components/home/MuralCompact';
 import { VerseCard } from '@/components/home/VerseCard';
 import { QuickActions } from '@/components/ui/QuickActions';
-import { MonetizationBlock } from '@/components/home/MonetizationBlock';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FLAGS } from '@/lib/flags';
-import { ChurchPartnersBlock } from '@/components/home/ChurchPartnersBlock';
 import { SEOHead } from '@/components/SEO/SEOHead';
 import { generateOrganizationSchema, generateWebSiteSchema } from '@/lib/seo';
+
+// Lazy load below-the-fold components (convert named exports to default)
+const MonetizationBlock = lazy(() =>
+  import('@/components/home/MonetizationBlock').then(mod => ({ default: mod.MonetizationBlock }))
+);
+const ChurchPartnersBlock = lazy(() =>
+  import('@/components/home/ChurchPartnersBlock').then(mod => ({ default: mod.ChurchPartnersBlock }))
+);
+
+// Mini skeleton for lazy components
+const BlockSkeleton = () => (
+  <div className="mt-6 px-4">
+    <Skeleton className="h-[200px] w-full rounded-2xl bg-white/5" />
+  </div>
+);
 
 export default function LandingPage() {
     const [data, setData] = useState<HomeData | null>(null);
@@ -134,14 +147,18 @@ export default function LandingPage() {
                         <QuickActions actions={data.quick_actions} />
                     )}
 
-                    {/* 3.1 Church & Partners Premium Section (NEW) */}
+                    {/* 3.1 Church & Partners Premium Section (NEW) - Lazy Loaded */}
                     {FLAGS.FEATURE_HOME_PARTNERS_SECTION && (
-                        <ChurchPartnersBlock />
+                        <Suspense fallback={<BlockSkeleton />}>
+                            <ChurchPartnersBlock />
+                        </Suspense>
                     )}
 
-                    {/* 4. Monetization (Glass & Discrete) */}
+                    {/* 4. Monetization (Glass & Discrete) - Lazy Loaded */}
                     {FLAGS.FEATURE_HOME_DONATE_SECTION && (
-                        <MonetizationBlock monetization={data.monetization} churchId={data.church?.id} />
+                        <Suspense fallback={<BlockSkeleton />}>
+                            <MonetizationBlock monetization={data.monetization} churchId={data.church?.id} />
+                        </Suspense>
                     )}
 
                     {/* 5. Verse Card (Simple Card at Bottom) */}
