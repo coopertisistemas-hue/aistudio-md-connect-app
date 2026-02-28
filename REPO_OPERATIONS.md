@@ -1,17 +1,39 @@
 # REPO_OPERATIONS.md
 > MD Connect App — aistudio-md-connect-app
-> Last updated: 2026-02-28
+> Last updated: 2026-02-28 (Node pinned v24.12.0)
 
 ---
 
 ## Environment Requirements
 
-| Tool | Required Version | Check |
-|------|-----------------|-------|
-| Node.js | ≥ 20.x | `node --version` |
-| pnpm | ≥ 9.x | `pnpm --version` |
+| Tool | **Pinned Version** | Check |
+|------|-------------------|-------|
+| Node.js | **24.12.0** (see `.nvmrc`) | `node --version` |
+| pnpm | **10.30.3** | `pnpm --version` |
 | Supabase CLI | ≥ 1.x | `supabase --version` |
 | Capacitor CLI | ≥ 8.x | `npx cap --version` |
+
+> Node version is pinned in `.nvmrc`. Using a different Node major version **will cause lockfile churn**.
+
+### Activating the pinned Node version
+
+```bash
+# With nvm (Linux/macOS)
+nvm use           # reads .nvmrc automatically
+
+# With fnm (Windows-friendly)
+fnm use           # reads .nvmrc automatically
+
+# With Volta
+volta pin node@24.12.0
+```
+
+### Enforcing pnpm version via Corepack (recommended)
+
+```bash
+corepack enable
+corepack prepare pnpm@10.30.3 --activate
+```
 
 ---
 
@@ -125,12 +147,15 @@ aistudio-md-connect-app/
 │   ├── functions/          # Deno Edge Functions
 │   │   └── _shared/        # Shared utilities (cors.ts)
 │   └── migrations/         # SQL migration files
-├── scripts/                # Build/validation scripts
+├── scripts/                # Build/validation Node scripts
 ├── docs/                   # Documentation
 │   ├── sprints/            # Sprint reports and summaries
-│   └── qa/                 # QA evidence documents
+│   ├── qa/                 # QA evidence documents
+│   ├── ops/                # Local dev and operational guides
+│   └── reports/            # Security, CORS, remediation reports
 ├── android/                # Capacitor Android project
 ├── public/                 # Static assets
+├── .nvmrc                  # Pinned Node.js version (24.12.0)
 ├── CONNECT_AGENT.md        # CONNECT global bootstrap (mandatory)
 ├── REPO_OPERATIONS.md      # This file
 ├── .env.example            # Environment variable template
