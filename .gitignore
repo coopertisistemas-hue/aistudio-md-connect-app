@@ -7,9 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
+
+# Environment files
 *.local
 .env
 .env.*
@@ -20,11 +25,39 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
+# pnpm
+.pnpm-store/
+.pnpm-debug.log*
+
+# Vite
+.vite/
+vite.config.ts.timestamp-*
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Android build artifacts
+android/app/build/
+android/.gradle/
+android/local.properties
+
+# Capacitor
+.capacitor/
+
 # Claude Code
 .claude/
+
+# AGV scratch / test files
+AGV_TEST*.txt
+
+# OS
+.DS_Store
+Thumbs.db
