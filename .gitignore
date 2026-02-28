@@ -32,9 +32,12 @@ Thumbs.db
 *.sln
 *.sw?
 
-# pnpm
+# pnpm (project standard — do not use npm or yarn)
 .pnpm-store/
 .pnpm-debug.log*
+
+# npm lockfile — not used in this project (pnpm standard)
+package-lock.json
 
 # Vite
 .vite/
