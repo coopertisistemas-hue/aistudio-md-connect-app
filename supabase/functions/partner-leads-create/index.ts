@@ -7,6 +7,9 @@ serve(async (req) => {
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
 
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');
+
     try {
         const { name, whatsapp, message } = await req.json()
 
@@ -29,9 +32,9 @@ serve(async (req) => {
         if (error) throw error
 
         // Corrected typo 'daa' to 'data' in previous implementation
-        return jsonResponse({ success: true, data }, 200)
+        return jsonResponse({ success: true, data }, 200, origin)
 
     } catch (error: any) {
-        return jsonResponse({ error: error.message }, 400)
+        return jsonResponse({ error: error.message }, 400, origin)
     }
 })

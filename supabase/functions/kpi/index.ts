@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-}
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
 
 interface KPIQueryParams {
     tenant_id: string;
@@ -36,12 +31,11 @@ function validateDateRange(from: string, to: string): { valid: boolean; error?: 
 
 serve(async (req) => {
     // Handle CORS preflight
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', {
-            headers: { ...corsHeaders },
-            status: 204
-        })
-    }
+    const corsResponse = handleCors(req);
+    if (corsResponse) return corsResponse;
+
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');
 
     try {
         // Parse query parameters
@@ -52,28 +46,16 @@ serve(async (req) => {
 
         // Validate required parameters
         if (!tenant_id || !from || !to) {
-            return new Response(
-                JSON.stringify({
-                    error: 'Missing required parameters',
-                    required: ['tenant_id', 'from', 'to']
-                }),
-                {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 400
-                }
-            )
+            return jsonResponse({
+                error: 'Missing required parameters',
+                required: ['tenant_id', 'from', 'to']
+            }, 400, origin)
         }
 
         // Validate date range
         const dateValidation = validateDateRange(from, to);
         if (!dateValidation.valid) {
-            return new Response(
-                JSON.stringify({ error: dateValidation.error }),
-                {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 400
-                }
-            )
+            return jsonResponse({ error: dateValidation.error }, 400, origin)
         }
 
         // Create Supabase client
@@ -93,16 +75,10 @@ serve(async (req) => {
 
         if (dailyError) {
             console.error('Database error:', dailyError);
-            return new Response(
-                JSON.stringify({
-                    error: 'Failed to fetch KPI data',
-                    message: dailyError.message
-                }),
-                {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 500
-                }
-            )
+            return jsonResponse({
+                error: 'Failed to fetch KPI data',
+                message: dailyError.message
+            }, 500, origin)
         }
 
         // Calculate summary metrics
@@ -128,25 +104,13 @@ serve(async (req) => {
             }
         };
 
-        return new Response(
-            JSON.stringify(response),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200
-            }
-        )
+        return jsonResponse(response, 200, origin)
 
     } catch (error) {
         console.error('Unexpected error:', error);
-        return new Response(
-            JSON.stringify({
-                error: 'Internal server error',
-                message: error instanceof Error ? error.message : 'Unknown error'
-            }),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 500
-            }
-        )
+        return jsonResponse({
+            error: 'Internal server error',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        }, 500, origin)
     }
 })

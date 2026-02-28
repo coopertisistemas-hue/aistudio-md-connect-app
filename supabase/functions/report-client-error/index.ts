@@ -2,12 +2,8 @@
 // Premium error reporting with validation, sanitization, rate limiting, and deduplication
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 interface ErrorReportPayload {
     env: string;
@@ -77,9 +73,11 @@ function validatePayload(payload: any): { valid: boolean; error?: string } {
 
 serve(async (req) => {
     // Handle CORS preflight
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders });
-    }
+    const corsResponse = handleCors(req);
+    if (corsResponse) return corsResponse;
+
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');
 
     try {
         // Parse payload
@@ -88,10 +86,7 @@ serve(async (req) => {
         // Validate
         const validation = validatePayload(payload);
         if (!validation.valid) {
-            return new Response(
-                JSON.stringify({ ok: false, reason: 'validation_error', details: validation.error }),
-                { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
+            return jsonResponse({ ok: false, reason: 'validation_error', details: validation.error }, 400, origin);
         }
 
         // Initialize Supabase client with service role
@@ -109,10 +104,7 @@ serve(async (req) => {
                 .gte('created_at', sixtySecondsAgo);
 
             if (count && count >= 20) {
-                return new Response(
-                    JSON.stringify({ ok: false, reason: 'rate_limited' }),
-                    { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                );
+                return jsonResponse({ ok: false, reason: 'rate_limited' }, 429, origin);
             }
         }
 
@@ -147,10 +139,7 @@ serve(async (req) => {
 
             if (updateError) throw updateError;
 
-            return new Response(
-                JSON.stringify({ ok: true, action: 'deduped' }),
-                { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
+            return jsonResponse({ ok: true, action: 'deduped' }, 200, origin);
         }
 
         // Insert new error report
@@ -176,16 +165,10 @@ serve(async (req) => {
 
         if (insertError) throw insertError;
 
-        return new Response(
-            JSON.stringify({ ok: true, action: 'inserted' }),
-            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return jsonResponse({ ok: true, action: 'inserted' }, 200, origin);
 
     } catch (error) {
         console.error('Error reporting function error:', error);
-        return new Response(
-            JSON.stringify({ ok: false, reason: 'internal_error' }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return jsonResponse({ ok: false, reason: 'internal_error' }, 500, origin);
     }
 });

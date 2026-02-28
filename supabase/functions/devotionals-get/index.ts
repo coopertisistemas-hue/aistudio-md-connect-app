@@ -6,6 +6,9 @@ Deno.serve(async (req: Request) => {
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
 
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');
+
     try {
         const supabase = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
@@ -43,7 +46,7 @@ Deno.serve(async (req: Request) => {
                 .maybeSingle()
 
             if (error) throw error
-            return jsonResponse(data, 200)
+            return jsonResponse(data, 200, origin)
         }
         else if (latest === 'true') {
             // [SMART FALLBACK LOGIC]
@@ -90,7 +93,7 @@ Deno.serve(async (req: Request) => {
                         brazilDate,
                         source: 'database'
                     }
-                }, 200)
+                }, 200, origin)
             }
 
             // 3. Fallback: Get absolute latest published (any date in past)
@@ -114,11 +117,11 @@ Deno.serve(async (req: Request) => {
                         fallbackUsed: true,
                         source: 'database'
                     }
-                }, 200)
+                }, 200, origin)
             }
 
             // 4. Truly Empty
-            return jsonResponse({ error: 'No devotionals found', meta: { empty: true } }, 404);
+            return jsonResponse({ error: 'No devotionals found', meta: { empty: true } }, 404, origin);
         }
         else {
             const { data, error } = await query
@@ -126,7 +129,7 @@ Deno.serve(async (req: Request) => {
                 .limit(10)
 
             if (error) throw error
-            return jsonResponse(data, 200)
+            return jsonResponse(data, 200, origin)
         }
 
 
@@ -136,6 +139,6 @@ Deno.serve(async (req: Request) => {
             error: error.message || 'Unknown error',
             stack: error.stack,
             details: error
-        }, 400)
+        }, 400, origin)
     }
 })

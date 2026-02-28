@@ -1,14 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
 serve(async (req) => {
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders })
+    const corsResponse = handleCors(req);
+    if (corsResponse) return corsResponse;
+
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');)
     }
 
     try {
@@ -36,23 +35,14 @@ serve(async (req) => {
         if (error) {
             // Ignore unique violation (23505)
             if (error.code === '23505') {
-                return new Response(
-                    JSON.stringify({ message: 'Already recorded today' }),
-                    { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-                )
+                return jsonResponse({ message: 'Already recorded today' }, 200, origin)
             }
             throw error
         }
 
-        return new Response(
-            JSON.stringify({ message: 'Read recorded' }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-        )
+        return jsonResponse({ message: 'Read recorded' }, 200, origin)
 
     } catch (error) {
-        return new Response(
-            JSON.stringify({ error: error.message }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-        )
+        return jsonResponse({ error: error.message }, 400, origin)
     }
 })

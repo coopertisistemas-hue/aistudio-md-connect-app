@@ -6,6 +6,9 @@ Deno.serve(async (req: Request) => {
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
 
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');
+
     try {
         const supabase = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
@@ -16,11 +19,11 @@ Deno.serve(async (req: Request) => {
 
         // 1. Validation (Hardened)
         if (!description || description.trim().length < 10) {
-            return jsonResponse({ error: "Descrição muito curta (min 10 caracteres)." }, 400)
+            return jsonResponse({ error: "Descrição muito curta (min 10 caracteres)." }, 400, origin)
         }
 
         if (description.length > 500) {
-            return jsonResponse({ error: "Descrição muito longa (max 500 caracteres)." }, 400)
+            return jsonResponse({ error: "Descrição muito longa (max 500 caracteres)." }, 400, origin)
         }
 
         // 2. Anti-Spam
@@ -42,9 +45,9 @@ Deno.serve(async (req: Request) => {
 
         if (error) throw error
 
-        return jsonResponse(data, 201)
+        return jsonResponse(data, 201, origin)
 
     } catch (error: any) {
-        return jsonResponse({ error: error.message || 'Unknown error' }, 400)
+        return jsonResponse({ error: error.message || 'Unknown error' }, 400, origin)
     }
 })

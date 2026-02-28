@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { handleCors, jsonResponse } from "../_shared/cors.ts";
+import { handleCors, jsonResponse } from '../_shared/cors.ts';
 
 /**
  * generate-verse-commentary
@@ -13,7 +13,9 @@ import { handleCors, jsonResponse } from "../_shared/cors.ts";
 
 serve(async (req: Request) => {
     const corsResponse = handleCors(req);
+    // Get origin for CORS validation    const origin = req.headers.get('origin');
     if (corsResponse) return corsResponse;
+    // Get origin for CORS validation    const origin = req.headers.get('origin');
 
     try {
         const body = await req.json();

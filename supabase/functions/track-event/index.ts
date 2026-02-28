@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
 
 // Simple in-memory rate limiter
 const rateLimiter = new Map<string, { count: number; resetAt: number }>();
@@ -62,12 +57,11 @@ interface TrackEventPayload {
 
 serve(async (req) => {
     // Handle CORS preflight
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', {
-            headers: { ...corsHeaders },
-            status: 204
-        })
-    }
+    const corsResponse = handleCors(req);
+    if (corsResponse) return corsResponse;
+
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');
 
     try {
         // Parse payload
@@ -78,30 +72,18 @@ serve(async (req) => {
         const missingFields = requiredFields.filter(field => !payload[field as keyof TrackEventPayload]);
 
         if (missingFields.length > 0) {
-            return new Response(
-                JSON.stringify({
-                    error: 'Missing required fields',
-                    missing: missingFields
-                }),
-                {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 400
-                }
-            )
+            return jsonResponse({
+                error: 'Missing required fields',
+                missing: missingFields
+            }, 400, origin)
         }
 
         // Check rate limit
         if (!checkRateLimit(payload.session_id)) {
-            return new Response(
-                JSON.stringify({
-                    error: 'Rate limit exceeded',
-                    message: `Maximum ${RATE_LIMIT_MAX_EVENTS} events per minute per session`
-                }),
-                {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 429
-                }
-            )
+            return jsonResponse({
+                error: 'Rate limit exceeded',
+                message: `Maximum ${RATE_LIMIT_MAX_EVENTS} events per minute per session`
+            }, 429, origin)
         }
 
         // Create Supabase client with service role
@@ -133,41 +115,23 @@ serve(async (req) => {
 
         if (error) {
             console.error('Database error:', error)
-            return new Response(
-                JSON.stringify({
-                    error: 'Failed to insert event',
-                    message: error.message
-                }),
-                {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 500
-                }
-            )
+            return jsonResponse({
+                error: 'Failed to insert event',
+                message: error.message
+            }, 500, origin)
         }
 
-        return new Response(
-            JSON.stringify({
-                success: true,
-                event_id: data.id,
-                message: 'Event tracked successfully'
-            }),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 201
-            }
-        )
+        return jsonResponse({
+            success: true,
+            event_id: data.id,
+            message: 'Event tracked successfully'
+        }, 201, origin)
 
     } catch (error) {
         console.error('Unexpected error:', error)
-        return new Response(
-            JSON.stringify({
-                error: 'Internal server error',
-                message: error instanceof Error ? error.message : 'Unknown error'
-            }),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 500
-            }
-        )
+        return jsonResponse({
+            error: 'Internal server error',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        }, 500, origin)
     }
 })

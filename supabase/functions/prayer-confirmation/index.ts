@@ -1,10 +1,6 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
 
 interface EmailPayload {
   contact_value: string;
@@ -13,9 +9,11 @@ interface EmailPayload {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const corsResponse = handleCors(req);
+  if (corsResponse) return corsResponse;
+
+  // Get origin for CORS validation
+  const origin = req.headers.get('origin');
 
   try {
     const { contact_value, protocol, category } = await req.json() as EmailPayload;
@@ -24,14 +22,8 @@ Deno.serve(async (req: Request) => {
     console.log(`[Prayer Confirmation] Protocol: ${protocol}, Category: ${category}`);
 
     // Mock response
-    return new Response(
-      JSON.stringify({ message: "Email queued (mock)", protocol }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    )
+    return jsonResponse({ message: "Email queued (mock)", protocol }, 200, origin)
   } catch (error: any) {
-    return new Response(
-      JSON.stringify({ error: error.message || 'Unknown error' }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    )
+    return jsonResponse({ error: error.message || 'Unknown error' }, 400, origin)
   }
 })

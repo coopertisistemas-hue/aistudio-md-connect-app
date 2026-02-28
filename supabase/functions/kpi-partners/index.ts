@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-}
 
 function validateDateRange(from: string, to: string): { valid: boolean; error?: string } {
     const fromDate = new Date(from);
@@ -28,9 +23,11 @@ function validateDateRange(from: string, to: string): { valid: boolean; error?: 
 }
 
 serve(async (req) => {
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', {
-            headers: { ...corsHeaders },
+    const corsResponse = handleCors(req);
+    if (corsResponse) return corsResponse;
+
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');,
             status: 204
         })
     }
@@ -42,27 +39,15 @@ serve(async (req) => {
         const to = url.searchParams.get('to');
 
         if (!tenant_id || !from || !to) {
-            return new Response(
-                JSON.stringify({
+            return jsonResponse({
                     error: 'Missing required parameters',
                     required: ['tenant_id', 'from', 'to']
-                }),
-                {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 400
-                }
-            )
+                }, 400, origin)
         }
 
         const dateValidation = validateDateRange(from, to);
         if (!dateValidation.valid) {
-            return new Response(
-                JSON.stringify({ error: dateValidation.error }),
-                {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 400
-                }
-            )
+            return jsonResponse({ error: dateValidation.error }, 400, origin)
         }
 
         const supabaseClient = createClient(
@@ -81,16 +66,10 @@ serve(async (req) => {
 
         if (partnersError) {
             console.error('Database error:', partnersError);
-            return new Response(
-                JSON.stringify({
+            return jsonResponse({
                     error: 'Failed to fetch partners KPI data',
                     message: partnersError.message
-                }),
-                {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 500
-                }
-            )
+                }, 500, origin)
         }
 
         // Aggregate by partner
@@ -136,25 +115,13 @@ serve(async (req) => {
             }
         };
 
-        return new Response(
-            JSON.stringify(response),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200
-            }
-        )
+        return jsonResponse(response, 200, origin)
 
     } catch (error) {
         console.error('Unexpected error:', error);
-        return new Response(
-            JSON.stringify({
+        return jsonResponse({
                 error: 'Internal server error',
                 message: error instanceof Error ? error.message : 'Unknown error'
-            }),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 500
-            }
-        )
+            }, 500, origin)
     }
 })

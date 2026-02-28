@@ -1,12 +1,14 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { corsHeaders } from "../_shared/cors.ts"
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
 
 serve(async (req) => {
-  // Handle CORS
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  // Handle CORS preflight
+  const corsResponse = handleCors(req);
+  if (corsResponse) return corsResponse;
+
+  // Get origin for CORS validation
+  const origin = req.headers.get('origin');
 
   try {
     // In a real implementation, we would query the database here.
@@ -40,20 +42,8 @@ serve(async (req) => {
       }
     ]
 
-    return new Response(
-      JSON.stringify({ data: events }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      },
-    )
+    return jsonResponse({ data: events }, 200, origin)
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      },
-    )
+    return jsonResponse({ error: error.message }, 400, origin)
   }
 })

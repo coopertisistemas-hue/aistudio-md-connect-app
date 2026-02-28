@@ -1,15 +1,13 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-}
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
 
 Deno.serve(async (req: Request) => {
     // 1. Handle CORS Preflight (OPTIONS)
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders, status: 204 })
+    const corsResponse = handleCors(req);
+    if (corsResponse) return corsResponse;
+
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');)
     }
 
     try {
@@ -29,16 +27,10 @@ Deno.serve(async (req: Request) => {
         }
 
         // 2. Return JSON with CORS headers
-        return new Response(JSON.stringify(data || []), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200
-        });
+        return jsonResponse(data || [], 200, origin);
 
     } catch (error: any) {
         console.error('[public-churches-list] Error:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400
-        });
+        return jsonResponse({ error: error.message }, 400, origin);
     }
 })

@@ -7,6 +7,9 @@ serve(async (req) => {
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
 
+    // Get origin for CORS validation
+    const origin = req.headers.get('origin');
+
     try {
         const supabaseClient = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
@@ -22,8 +25,8 @@ serve(async (req) => {
 
         if (error) throw error
 
-        return jsonResponse({ partners }, 200)
+        return jsonResponse({ partners }, 200, origin)
     } catch (error: any) {
-        return jsonResponse({ error: error.message }, 400)
+        return jsonResponse({ error: error.message }, 400, origin)
     }
 })
