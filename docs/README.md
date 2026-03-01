@@ -41,6 +41,7 @@
 
 ### Operational Guides
 - [Local Dev Setup](ops/LOCAL_DEV.md) — full pnpm + Supabase setup for Windows
+- [ENV Setup Guide](ops/ENV_SETUP.md) — all environment variables, required vs optional, Deno secrets
 - [Repo Operations](../REPO_OPERATIONS.md) — commands, env keys, Git workflow
 
 ### Security & Reports
@@ -57,6 +58,7 @@
 | [`scripts/dev.ps1`](../scripts/dev.ps1) | `.\scripts\dev.ps1` | Install guard + `pnpm dev` |
 | [`scripts/build.ps1`](../scripts/build.ps1) | `.\scripts\build.ps1` | Install guard + `pnpm build` + exit reporting |
 | [`scripts/typecheck.ps1`](../scripts/typecheck.ps1) | `.\scripts\typecheck.ps1` | `pnpm type-check` with pass/fail |
+| [`scripts/smoke.ps1`](../scripts/smoke.ps1) | `.\\scripts\\smoke.ps1` | Full smoke gate: type-check + build (CONNECT STOP-03) |
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\dev.ps1
