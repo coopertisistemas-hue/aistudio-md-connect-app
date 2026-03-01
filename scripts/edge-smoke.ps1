@@ -1,5 +1,5 @@
 # scripts/edge-smoke.ps1
-# MD Connect — Edge Contract Smoke Gate
+# MD Connect - Edge Contract Smoke Gate
 # Validates edge function response shape { ok, error }
 # Usage: powershell -ExecutionPolicy Bypass -File scripts\edge-smoke.ps1
 # Exit code: 0 = all checks pass, 1 = any check failed
@@ -26,8 +26,7 @@ function Write-Test($msg, $color = "White") {
     Write-Host "  $msg" -ForegroundColor $color
 }
 
-function Test-ResponseShape($response, $testName) {
-    param([int]$expectedStatus, [bool]$expectOk, [bool]$expectError = $false)
+function Test-ResponseShape($response, $testName, $expectedStatus, $expectOk, $expectError = $false) {
     
     Write-Test "Testing: $testName" "Cyan"
     
@@ -92,7 +91,7 @@ function Test-ResponseShape($response, $testName) {
 }
 
 # ── Guard: Check for supabase CLI ─────────────────────────────────────────────
-Write-Banner "MD Connect — Edge Contract Smoke Gate"
+Write-Banner "MD Connect Edge Contract Smoke Gate"
 
 if (-not (Test-Command "supabase")) {
     Write-Host "ERROR: supabase CLI not found." -ForegroundColor Red
@@ -159,7 +158,7 @@ Write-Host ""
 Write-Test "Test 1: devotionals-get?latest=true" "Cyan"
 try {
     $response = Invoke-WebRequest -Uri "$BaseUrl/functions/v1/devotionals-get?latest=true" -Method GET -Headers $headers -TimeoutSec 10
-    $passed = Test-ResponseShape $response "devotionals-get success" -expectedStatus 200 -expectOk $true
+    $passed = Test-ResponseShape $response "devotionals-get success" 200 $true
     if (-not $passed) { $failed++ }
 }
 catch {
@@ -185,7 +184,7 @@ Write-Host ""
 Write-Test "Test 3: public-monetization-services" "Cyan"
 try {
     $response = Invoke-WebRequest -Uri "$BaseUrl/functions/v1/public-monetization-services" -Method GET -Headers $headers -TimeoutSec 10
-    $passed = Test-ResponseShape $response "public-monetization-services" -expectedStatus 200 -expectOk $true
+    $passed = Test-ResponseShape $response "public-monetization-services" 200 $true
     if (-not $passed) { $failed++ }
 }
 catch {
@@ -212,7 +211,7 @@ Write-Host ""
 Write-Test "Test 5: church-series-list (error expected - no church context)" "Cyan"
 try {
     $response = Invoke-WebRequest -Uri "$BaseUrl/functions/v1/church-series-list" -Method GET -Headers $headers -TimeoutSec 10
-    $passed = Test-ResponseShape $response "church-series-list error" -expectedStatus 200 -expectOk $false -expectError $true
+    $passed = Test-ResponseShape $response "church-series-list error" 200 $false $true
     if (-not $passed) { $failed++ }
 }
 catch {
