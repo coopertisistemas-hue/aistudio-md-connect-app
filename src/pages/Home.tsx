@@ -15,16 +15,16 @@ import { NotificationTicker } from '@/components/home/NotificationTicker';
 import { BackToTop } from '@/components/ui/BackToTop';
 
 // Lazy load below-the-fold sections (convert named exports to default)
-const ServicesSection = lazy(() => 
-  import('@/components/home/ServicesSection').then(mod => ({ default: mod.ServicesSection }))
+const ServicesSection = lazy(() =>
+    import('@/components/home/ServicesSection').then(mod => ({ default: mod.ServicesSection }))
 );
-const DonationWidget = lazy(() => 
-  import('@/components/home/DonationWidget').then(mod => ({ default: mod.DonationWidget }))
+const DonationWidget = lazy(() =>
+    import('@/components/home/DonationWidget').then(mod => ({ default: mod.DonationWidget }))
 );
 
 // Mini skeleton for lazy components
 const SectionSkeleton = () => (
-  <div className="animate-pulse bg-slate-50 rounded-xl border border-slate-100 p-4 h-32" />
+    <div className="animate-pulse bg-slate-50 rounded-xl border border-slate-100 p-4 h-32" />
 );
 
 export default function Home() {
@@ -119,7 +119,7 @@ export default function Home() {
                                     <button onClick={() => window.open('https://wa.me/?text=Ola', '_blank')} className="text-xs font-bold text-green-600 bg-green-50 py-2 rounded-lg">
                                         Receber no WhatsApp
                                     </button>
-                                    <button onClick={() => console.log('Radio')} className="text-xs font-bold text-blue-600 bg-blue-50 py-2 rounded-lg">
+                                    <button className="text-xs font-bold text-blue-600 bg-blue-50 py-2 rounded-lg">
                                         Ouvir Rádio Deus é Amor
                                     </button>
                                 </div>

@@ -71,7 +71,7 @@ export default function SelectChurch() {
                 }, { onConflict: 'user_id, church_id' });
 
             // If error, ignore for now as RLS might block if not permitted
-            if (memberError) console.log("Member creation warning:", memberError);
+            if (memberError && import.meta.env.DEV) console.warn("Member creation warning:", memberError);
 
             // 3. Redirect
             navigate(`/c/${church.slug}`);

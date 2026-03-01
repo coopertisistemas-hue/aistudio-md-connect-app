@@ -47,7 +47,7 @@ class AnalyticsService {
 
     constructor() {
         this.measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID || '';
-        this.isEnabled = !!this.measurementId && import.meta.env.VITE_ANALYTICS_ENABLED !== 'false';
+        this.isEnabled = !!this.measurementId && import.meta.env.VITE_ANALYTICS_ENABLED === 'true';
         this.debugMode = import.meta.env.DEV;
 
         // Initialize session and UTM tracking

@@ -30,7 +30,7 @@ export default function DevotionalDetail() {
 
     useEffect(() => {
         const targetId = id === 'today' ? 'latest' : id;
-        console.log('[DevotionalDetail] Loading:', { id, targetId });
+        if (import.meta.env.DEV) console.log('[DevotionalDetail] Loading:', { id, targetId });
         if (targetId) {
             loadData(targetId);
         } else {
@@ -41,7 +41,7 @@ export default function DevotionalDetail() {
 
     const loadData = async (postId: string) => {
         setIsLoading(true);
-        console.log('[DevotionalDetail] loadData started:', postId);
+        if (import.meta.env.DEV) console.log('[DevotionalDetail] loadData started:', postId);
 
         // Check cache first for instant display
         const cached = getCachedDevotional(postId);
@@ -53,7 +53,7 @@ export default function DevotionalDetail() {
         try {
             let data: Post | null = null;
             if (FLAGS.FEATURE_DEVOTIONAL_API) {
-                console.log('[DevotionalDetail] Using API');
+                if (import.meta.env.DEV) console.log('[DevotionalDetail] Using API');
                 if (postId === 'latest') {
                     data = await devotionalsApi.getLatest().catch((err) => {
                         console.error('[DevotionalDetail] API getLatest failed:', err);
@@ -66,7 +66,7 @@ export default function DevotionalDetail() {
                     });
                 }
             } else {
-                console.log('[DevotionalDetail] Using legacy path');
+                if (import.meta.env.DEV) console.log('[DevotionalDetail] Using legacy path');
                 // Legacy path
                 if (postId === 'latest') {
                     await new Promise(r => setTimeout(r, 600));
@@ -76,7 +76,7 @@ export default function DevotionalDetail() {
                 }
             }
 
-            console.log('[DevotionalDetail] Data loaded:', data ? 'success' : 'null, using fallback');
+            if (import.meta.env.DEV) console.log('[DevotionalDetail] Data loaded:', data ? 'success' : 'null, using fallback');
             if (data) {
                 setItem(data);
                 cacheDevotional(postId, data);
@@ -89,7 +89,7 @@ export default function DevotionalDetail() {
                 setItem(FALLBACK_DEVOTIONAL);
             }
         } finally {
-            console.log('[DevotionalDetail] Loading complete');
+            if (import.meta.env.DEV) console.log('[DevotionalDetail] Loading complete');
             setIsLoading(false);
         }
     };

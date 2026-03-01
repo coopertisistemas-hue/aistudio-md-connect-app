@@ -63,7 +63,7 @@ export function MonetizationBlock({ monetization, churchId }: MonetizationBlockP
     useEffect(() => {
         const container = scrollRef.current;
 
-        console.log('[Carousel Debug] Effect triggered', {
+        if (import.meta.env.DEV) console.log('[Carousel Debug] Effect triggered', {
             hasContainer: !!container,
             baseItemsLength: baseItems.length,
             isPaused,
@@ -72,7 +72,7 @@ export function MonetizationBlock({ monetization, churchId }: MonetizationBlockP
         });
 
         if (!container || baseItems.length === 0) {
-            console.log('[Carousel Debug] Early return - no container or no items');
+            if (import.meta.env.DEV) console.log('[Carousel Debug] Early return - no container or no items');
             return;
         }
 
@@ -98,11 +98,11 @@ export function MonetizationBlock({ monetization, churchId }: MonetizationBlockP
         };
 
         // Start animation (removed reduced motion check for debugging)
-        console.log('[Carousel Debug] Starting animation');
+        if (import.meta.env.DEV) console.log('[Carousel Debug] Starting animation');
         animationFrameId = requestAnimationFrame(animate);
 
         return () => {
-            console.log('[Carousel Debug] Cleanup - canceling animation');
+            if (import.meta.env.DEV) console.log('[Carousel Debug] Cleanup - canceling animation');
             cancelAnimationFrame(animationFrameId);
         };
     }, [isPaused, baseItems.length]);
