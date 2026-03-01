@@ -3,6 +3,23 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { errBody, ERR } from '../_shared/error.ts';
 
+const TIMEOUT_MS = 12000
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string): Promise<T> {
+    const timeout = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error(`${operation} timed out after ${ms}ms`)), ms)
+    )
+    try {
+        return await Promise.race([promise, timeout])
+    } catch (err: any) {
+        if (err.message.includes('timed out')) {
+            console.error(`[devotionals-generate-cover] Timeout: ${operation}`)
+            throw new Error('Request timed out')
+        }
+        throw err
+    }
+}
+
 serve(async (req: Request) => {
     // 1. CORS
     const corsResponse = handleCors(req);
@@ -35,11 +52,13 @@ serve(async (req: Request) => {
         }
 
         // 5. Fetch Devotional Data
-        const { data: item, error: fetchError } = await supabase
+        const fetchQuery = supabase
             .from('devotionals')
             .select('title, subtitle, published_at, lang')
             .eq('id', devotional_id)
-            .single();
+            .single()
+        
+        const { data: item, error: fetchError } = await withTimeout(fetchQuery, TIMEOUT_MS, 'fetch devotional')
 
         if (fetchError || !item) {
             console.error(`[devotionals-generate-cover] Devotional not found: ${devotional_id}`);
@@ -70,8 +89,10 @@ serve(async (req: Request) => {
         const seed = `${devotional_id}-${month}-${dayOfWeek}`;
         const fallbackUrl = `https://picsum.photos/seed/${seed}/1920/1080?grayscale`;
 
-        // 8. Upload to Storage
-        const imageRes = await fetch(fallbackUrl);
+        // 8. Upload to Storage (with timeout)
+        const imageFetchPromise = fetch(fallbackUrl)
+        const imageRes = await withTimeout(imageFetchPromise, TIMEOUT_MS, 'fetch image from provider')
+
         if (!imageRes.ok) {
             throw new Error(`Upstream image provider failed: ${imageRes.statusText}`);
         }
@@ -79,9 +100,11 @@ serve(async (req: Request) => {
         const blob = await imageRes.blob();
         const path = `${item.lang || 'pt'}/${date.toISOString().split('T')[0]}_${devotional_id}.jpg`;
 
-        const { error: uploadError } = await supabase.storage
+        const uploadPromise = supabase.storage
             .from('devotional-covers')
-            .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+            .upload(path, blob, { contentType: 'image/jpeg', upsert: true })
+        
+        const { error: uploadError } = await withTimeout(uploadPromise, TIMEOUT_MS, 'upload to storage')
 
         if (uploadError) {
             console.error("[devotionals-generate-cover] Storage upload failed:", uploadError);
@@ -92,11 +115,13 @@ serve(async (req: Request) => {
             .from('devotional-covers')
             .getPublicUrl(path);
 
-        // 9. Update Record
-        const { error: updateError } = await supabase
+        // 9. Update Record (with timeout)
+        const updatePromise = supabase
             .from('devotionals')
             .update({ cover_image_url: publicUrl })
-            .eq('id', devotional_id);
+            .eq('id', devotional_id)
+        
+        const { error: updateError } = await withTimeout(updatePromise, TIMEOUT_MS, 'update devotional record')
 
         if (updateError) {
             console.error("[devotionals-generate-cover] Database update failed:", updateError);

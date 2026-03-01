@@ -3,6 +3,23 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { errBody, ERR } from '../_shared/error.ts';
 
+const TIMEOUT_MS = 12000
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string): Promise<T> {
+    const timeout = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error(`${operation} timed out after ${ms}ms`)), ms)
+    )
+    try {
+        return await Promise.race([promise, timeout])
+    } catch (err: any) {
+        if (err.message.includes('timed out')) {
+            console.error(`[generate-verse-commentary] Timeout: ${operation}`)
+            throw new Error('Request timed out')
+        }
+        throw err
+    }
+}
+
 /**
  * generate-verse-commentary
  *
@@ -38,14 +55,16 @@ serve(async (req: Request) => {
 
         const supabase = createClient(sbUrl, sbKey);
 
-        // 2. Check Existence first
-        const { data: existing } = await supabase
+        // 2. Check Existence first (with timeout)
+        const checkQuery = supabase
             .from('bible_commentaries')
             .select('*')
             .eq('book_id', book_id)
             .eq('chapter', chapter)
             .eq('verse', verse)
-            .maybeSingle();
+            .maybeSingle()
+
+        const { data: existing } = await withTimeout(checkQuery, TIMEOUT_MS, 'check existing commentary')
 
         if (existing) {
             return jsonResponse({ ok: true, data: existing, source: 'cache' }, 200, origin);
@@ -83,8 +102,8 @@ serve(async (req: Request) => {
             }
         `;
 
-        // 4. Call OpenAI
-        const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        // 4. Call OpenAI (with timeout)
+        const aiFetchPromise = fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -98,7 +117,9 @@ serve(async (req: Request) => {
                 ],
                 temperature: 0.4
             })
-        });
+        })
+
+        const aiResponse = await withTimeout(aiFetchPromise, TIMEOUT_MS, 'call OpenAI API')
 
         if (!aiResponse.ok) {
             const errText = await aiResponse.text();
@@ -118,25 +139,29 @@ serve(async (req: Request) => {
             throw new Error('Failed to parse AI response');
         }
 
-        // 5. Insert
+        // 5. Insert (with timeout)
         const record = { book_id, chapter, verse, ...generatedData };
 
-        const { data: inserted, error: insertError } = await supabase
+        const insertPromise = supabase
             .from('bible_commentaries')
             .insert(record)
             .select()
-            .single();
+            .single()
+
+        const { data: inserted, error: insertError } = await withTimeout(insertPromise, TIMEOUT_MS, 'insert commentary')
 
         if (insertError) {
             // Handle Race Condition
             if (insertError.code === '23505') {
-                const { data: retry } = await supabase
+                const retryQuery = supabase
                     .from('bible_commentaries')
                     .select('*')
                     .eq('book_id', book_id)
                     .eq('chapter', chapter)
                     .eq('verse', verse)
-                    .single();
+                    .single()
+                
+                const { data: retry } = await withTimeout(retryQuery, TIMEOUT_MS, 'retry fetch commentary')
                 return jsonResponse({ ok: true, data: retry, source: 'retry_cache' }, 200, origin);
             }
             throw insertError;

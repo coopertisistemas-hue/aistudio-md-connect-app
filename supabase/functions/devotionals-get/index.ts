@@ -2,6 +2,29 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { handleCors, jsonResponse } from '../_shared/cors.ts'
 import { errBody, ERR } from '../_shared/error.ts'
 
+const TIMEOUT_MS = 12000
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string): Promise<T> {
+    const timeout = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error(`${operation} timed out after ${ms}ms`)), ms)
+    )
+    try {
+        return await Promise.race([promise, timeout])
+    } catch (err: any) {
+        if (err.message.includes('timed out')) {
+            console.error(`[devotionals-get] Timeout: ${operation}`)
+            throw new Error('Request timed out')
+        }
+        throw err
+    }
+}
+
+function jsonResponseWithCache(data: unknown, status = 200, requestOrigin: string | null = null): Response {
+    const response = jsonResponse(data, status, requestOrigin)
+    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600')
+    return response
+}
+
 Deno.serve(async (req: Request) => {
     // 1. Handle CORS Preflight
     const corsResponse = handleCors(req);
@@ -33,15 +56,17 @@ Deno.serve(async (req: Request) => {
         lang = lang || 'pt';
 
         if (id) {
-            const { data, error } = await supabase
+            const query = supabase
                 .from('devotionals')
                 .select('*')
                 .eq('id', id)
                 .maybeSingle()
+            
+            const { data, error } = await withTimeout(query, TIMEOUT_MS, 'fetch devotional by id')
 
             if (error) throw error
-            if (!data) return jsonResponse(errBody(ERR.NOT_FOUND, 'Devotional not found'), 404, origin)
-            return jsonResponse({ ok: true, data }, 200, origin)
+            if (!data) return jsonResponseWithCache(errBody(ERR.NOT_FOUND, 'Devotional not found'), 404, origin)
+            return jsonResponseWithCache({ ok: true, data }, 200, origin)
         }
         else if (latest === 'true') {
             // [SMART FALLBACK LOGIC]
@@ -53,7 +78,7 @@ Deno.serve(async (req: Request) => {
             const nowIso = new Date().toISOString();
 
             // Try finding one published TODAY
-            const { data: todayData } = await supabase
+            const todayQuery = supabase
                 .from('devotionals')
                 .select('*')
                 .eq('lang', lang)
@@ -62,16 +87,18 @@ Deno.serve(async (req: Request) => {
                 .order('published_at', { ascending: false })
                 .limit(1)
                 .maybeSingle();
+            
+            const { data: todayData } = await withTimeout(todayQuery, TIMEOUT_MS, 'fetch today devotional')
 
             if (todayData) {
-                return jsonResponse({
+                return jsonResponseWithCache({
                     ok: true,
                     data: { ...todayData, meta: { resolved: 'today_match', brazilDate } }
                 }, 200, origin)
             }
 
             // Fallback: Get absolute latest published (any date in past)
-            const { data: latestData, error: latestError } = await supabase
+            const latestQuery = supabase
                 .from('devotionals')
                 .select('*')
                 .eq('lang', lang)
@@ -79,21 +106,23 @@ Deno.serve(async (req: Request) => {
                 .order('published_at', { ascending: false })
                 .limit(1)
                 .maybeSingle();
+            
+            const { data: latestData, error: latestError } = await withTimeout(latestQuery, TIMEOUT_MS, 'fetch latest devotional')
 
             if (latestError) throw latestError;
 
             if (latestData) {
-                return jsonResponse({
+                return jsonResponseWithCache({
                     ok: true,
                     data: { ...latestData, meta: { resolved: 'latest_fallback', requestedDate: brazilDate, fallbackUsed: true } }
                 }, 200, origin)
             }
 
             // Truly Empty
-            return jsonResponse(errBody(ERR.NOT_FOUND, 'No devotionals found'), 404, origin);
+            return jsonResponseWithCache(errBody(ERR.NOT_FOUND, 'No devotionals found'), 404, origin);
         }
         else {
-            const { data, error } = await supabase
+            const listQuery = supabase
                 .from('devotionals')
                 .select('*')
                 .eq('lang', lang)
@@ -101,8 +130,10 @@ Deno.serve(async (req: Request) => {
                 .order('published_at', { ascending: false })
                 .limit(10)
 
+            const { data, error } = await withTimeout(listQuery, TIMEOUT_MS, 'fetch devotional list')
+
             if (error) throw error
-            return jsonResponse({ ok: true, data: data || [] }, 200, origin)
+            return jsonResponseWithCache({ ok: true, data: data || [] }, 200, origin)
         }
 
 
