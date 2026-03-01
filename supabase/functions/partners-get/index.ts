@@ -1,13 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts'
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
+import { errBody, ERR } from '../_shared/error.ts'
 
 serve(async (req) => {
     // 1. Handle CORS Preflight
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
 
-    // Get origin for CORS validation
     const origin = req.headers.get('origin');
 
     try {
@@ -25,8 +25,9 @@ serve(async (req) => {
 
         if (error) throw error
 
-        return jsonResponse({ partners }, 200, origin)
+        return jsonResponse({ ok: true, data: { partners } }, 200, origin)
     } catch (error: any) {
-        return jsonResponse({ error: error.message }, 400, origin)
+        console.error('[partners-get] Error:', error)
+        return jsonResponse(errBody(ERR.DATABASE_ERROR, 'Failed to fetch partners'), 500, origin)
     }
 })

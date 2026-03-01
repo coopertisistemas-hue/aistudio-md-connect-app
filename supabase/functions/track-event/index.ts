@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { handleCors, jsonResponse } from '../_shared/cors.ts'
+import { errBody, ERR } from '../_shared/error.ts'
 
 // Simple in-memory rate limiter
 const rateLimiter = new Map<string, { count: number; resetAt: number }>();
@@ -72,18 +73,12 @@ serve(async (req) => {
         const missingFields = requiredFields.filter(field => !payload[field as keyof TrackEventPayload]);
 
         if (missingFields.length > 0) {
-            return jsonResponse({
-                error: 'Missing required fields',
-                missing: missingFields
-            }, 400, origin)
+            return jsonResponse(errBody(ERR.INVALID_REQUEST, `Missing required fields: ${missingFields.join(', ')}`), 400, origin)
         }
 
         // Check rate limit
         if (!checkRateLimit(payload.session_id)) {
-            return jsonResponse({
-                error: 'Rate limit exceeded',
-                message: `Maximum ${RATE_LIMIT_MAX_EVENTS} events per minute per session`
-            }, 429, origin)
+            return jsonResponse(errBody(ERR.RATE_LIMITED, 'Rate limit exceeded'), 429, origin)
         }
 
         // Create Supabase client with service role
@@ -114,11 +109,8 @@ serve(async (req) => {
             .single()
 
         if (error) {
-            console.error('Database error:', error)
-            return jsonResponse({
-                error: 'Failed to insert event',
-                message: error.message
-            }, 500, origin)
+            console.error('[track-event] Database error:', error)
+            return jsonResponse(errBody(ERR.DATABASE_ERROR, 'Failed to record event'), 500, origin)
         }
 
         return jsonResponse({
@@ -128,10 +120,7 @@ serve(async (req) => {
         }, 201, origin)
 
     } catch (error) {
-        console.error('Unexpected error:', error)
-        return jsonResponse({
-            error: 'Internal server error',
-            message: error instanceof Error ? error.message : 'Unknown error'
-        }, 500, origin)
+        console.error('[track-event] Unexpected error:', error)
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin)
     }
 })

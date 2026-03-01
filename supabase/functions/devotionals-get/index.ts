@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts'
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
+import { errBody, ERR } from '../_shared/error.ts'
 
 Deno.serve(async (req: Request) => {
     // 1. Handle CORS Preflight
@@ -31,13 +32,6 @@ Deno.serve(async (req: Request) => {
 
         lang = lang || 'pt';
 
-        let query = supabase
-            .from('devotionals')
-            .select('*')
-            .eq('lang', lang)
-            .lte('published_at', new Date().toISOString())
-
-
         if (id) {
             const { data, error } = await supabase
                 .from('devotionals')
@@ -46,57 +40,37 @@ Deno.serve(async (req: Request) => {
                 .maybeSingle()
 
             if (error) throw error
-            return jsonResponse(data, 200, origin)
+            if (!data) return jsonResponse(errBody(ERR.NOT_FOUND, 'Devotional not found'), 404, origin)
+            return jsonResponse({ ok: true, data }, 200, origin)
         }
         else if (latest === 'true') {
             // [SMART FALLBACK LOGIC]
             // Objective: Get "Today's" devotional (Brazil Time). If missing, get Latest.
 
-            // 1. Calculate Today in Brazil (UTC-3)
-            // Note: Simplistic offset calc, robust way uses libraries but avoiding deps for Edge if possible.
-            // Deno Deploy supports Intl, let's use it.
             const brazilDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }); // YYYY-MM-DD
 
-            // 2. Try to get Devotional strictly published for TODAY (or <= Now but ideally matches 'today' relevance)
-            // Ideally we want something published today. But 'published_at' is Timestamp.
-            // Let's search for published_at >= Brazil Day Start AND <= Now.
-            // Actually, simplified: Get the most recent one.
-            // If the most recent one is from TODAY, great.
-            // If it's from yesterday, we still return it but maybe mark it?
-            // "Today" route usually means "Give me the most relevant one for today". 
-            // If we missed posting today, showing yesterday's is better than 404.
-
-            // Re-evaluating User Request: "se a rota usa today, converter para uma data YYYY-MM-DD... tentar buscar o devocional do dia... se não existir, buscar automaticamente o último"
-
-            // Query for specific date range (Brazil Day)
             const startOfDay = new Date(`${brazilDate}T00:00:00-03:00`).toISOString();
-            const endOfDay = new Date(`${brazilDate}T23:59:59.999-03:00`).toISOString();
             const nowIso = new Date().toISOString();
 
-            // Try finding one published TODAY (between StartOfDay and MIN(EndOfDay, Now))
-            // We use 'lte' nowIso to avoid future posts.
-            const { data: todayData, error: todayError } = await supabase
+            // Try finding one published TODAY
+            const { data: todayData } = await supabase
                 .from('devotionals')
                 .select('*')
                 .eq('lang', lang)
                 .gte('published_at', startOfDay)
-                .lte('published_at', nowIso) // Must be published already
+                .lte('published_at', nowIso)
                 .order('published_at', { ascending: false })
                 .limit(1)
                 .maybeSingle();
 
             if (todayData) {
                 return jsonResponse({
-                    ...todayData,
-                    meta: {
-                        resolved: 'today_match',
-                        brazilDate,
-                        source: 'database'
-                    }
+                    ok: true,
+                    data: { ...todayData, meta: { resolved: 'today_match', brazilDate } }
                 }, 200, origin)
             }
 
-            // 3. Fallback: Get absolute latest published (any date in past)
+            // Fallback: Get absolute latest published (any date in past)
             const { data: latestData, error: latestError } = await supabase
                 .from('devotionals')
                 .select('*')
@@ -110,35 +84,30 @@ Deno.serve(async (req: Request) => {
 
             if (latestData) {
                 return jsonResponse({
-                    ...latestData,
-                    meta: {
-                        resolved: 'latest_fallback',
-                        requestedDate: brazilDate,
-                        fallbackUsed: true,
-                        source: 'database'
-                    }
+                    ok: true,
+                    data: { ...latestData, meta: { resolved: 'latest_fallback', requestedDate: brazilDate, fallbackUsed: true } }
                 }, 200, origin)
             }
 
-            // 4. Truly Empty
-            return jsonResponse({ error: 'No devotionals found', meta: { empty: true } }, 404, origin);
+            // Truly Empty
+            return jsonResponse(errBody(ERR.NOT_FOUND, 'No devotionals found'), 404, origin);
         }
         else {
-            const { data, error } = await query
+            const { data, error } = await supabase
+                .from('devotionals')
+                .select('*')
+                .eq('lang', lang)
+                .lte('published_at', new Date().toISOString())
                 .order('published_at', { ascending: false })
                 .limit(10)
 
             if (error) throw error
-            return jsonResponse(data, 200, origin)
+            return jsonResponse({ ok: true, data: data || [] }, 200, origin)
         }
 
 
     } catch (error: any) {
         console.error('[devotionals-get] Error:', error);
-        return jsonResponse({
-            error: error.message || 'Unknown error',
-            stack: error.stack,
-            details: error
-        }, 400, origin)
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin)
     }
 })

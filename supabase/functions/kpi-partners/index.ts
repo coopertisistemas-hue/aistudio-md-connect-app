@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { handleCors, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { errBody, ERR } from '../_shared/error.ts'
 
 function validateDateRange(from: string, to: string): { valid: boolean; error?: string } {
     const fromDate = new Date(from);
@@ -26,11 +27,7 @@ serve(async (req) => {
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
 
-    // Get origin for CORS validation
-    const origin = req.headers.get('origin');,
-            status: 204
-        })
-    }
+    const origin = req.headers.get('origin');
 
     try {
         const url = new URL(req.url);
@@ -39,15 +36,12 @@ serve(async (req) => {
         const to = url.searchParams.get('to');
 
         if (!tenant_id || !from || !to) {
-            return jsonResponse({
-                    error: 'Missing required parameters',
-                    required: ['tenant_id', 'from', 'to']
-                }, 400, origin)
+            return jsonResponse(errBody(ERR.INVALID_REQUEST, 'Missing required parameters: tenant_id, from, to'), 400, origin)
         }
 
         const dateValidation = validateDateRange(from, to);
         if (!dateValidation.valid) {
-            return jsonResponse({ error: dateValidation.error }, 400, origin)
+            return jsonResponse(errBody(ERR.VALIDATION_ERROR, dateValidation.error ?? 'Invalid date range'), 400, origin)
         }
 
         const supabaseClient = createClient(
@@ -65,11 +59,8 @@ serve(async (req) => {
             .order('date', { ascending: true });
 
         if (partnersError) {
-            console.error('Database error:', partnersError);
-            return jsonResponse({
-                    error: 'Failed to fetch partners KPI data',
-                    message: partnersError.message
-                }, 500, origin)
+            console.error('[kpi-partners] Database error:', partnersError);
+            return jsonResponse(errBody(ERR.DATABASE_ERROR, 'Failed to fetch partners KPI data'), 500, origin)
         }
 
         // Aggregate by partner
@@ -103,25 +94,23 @@ serve(async (req) => {
             summary.overall_ctr = Number(((summary.total_partner_clicks / summary.total_partner_views) * 100).toFixed(2));
         }
 
-        const response = {
-            summary,
-            partners,
-            daily: partnersData || [],
-            metadata: {
-                tenant_id,
-                from,
-                to,
-                partners_count: partners.length
+        return jsonResponse({
+            ok: true,
+            data: {
+                summary,
+                partners,
+                daily: partnersData || [],
+                metadata: {
+                    tenant_id,
+                    from,
+                    to,
+                    partners_count: partners.length
+                }
             }
-        };
-
-        return jsonResponse(response, 200, origin)
+        }, 200, origin)
 
     } catch (error) {
-        console.error('Unexpected error:', error);
-        return jsonResponse({
-                error: 'Internal server error',
-                message: error instanceof Error ? error.message : 'Unknown error'
-            }, 500, origin)
+        console.error('[kpi-partners] Unexpected error:', error);
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin)
     }
 })

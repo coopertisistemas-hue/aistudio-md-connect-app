@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { handleCors, jsonResponse } from '../_shared/cors.ts'
+import { errBody, ERR } from '../_shared/error.ts'
 
 interface KPIQueryParams {
     tenant_id: string;
@@ -46,16 +47,13 @@ serve(async (req) => {
 
         // Validate required parameters
         if (!tenant_id || !from || !to) {
-            return jsonResponse({
-                error: 'Missing required parameters',
-                required: ['tenant_id', 'from', 'to']
-            }, 400, origin)
+            return jsonResponse(errBody(ERR.INVALID_REQUEST, 'Missing required parameters: tenant_id, from, to'), 400, origin)
         }
 
         // Validate date range
         const dateValidation = validateDateRange(from, to);
         if (!dateValidation.valid) {
-            return jsonResponse({ error: dateValidation.error }, 400, origin)
+            return jsonResponse(errBody(ERR.VALIDATION_ERROR, dateValidation.error ?? 'Invalid date range'), 400, origin)
         }
 
         // Create Supabase client
@@ -74,11 +72,8 @@ serve(async (req) => {
             .order('date', { ascending: true });
 
         if (dailyError) {
-            console.error('Database error:', dailyError);
-            return jsonResponse({
-                error: 'Failed to fetch KPI data',
-                message: dailyError.message
-            }, 500, origin)
+            console.error('[kpi] Database error:', dailyError);
+            return jsonResponse(errBody(ERR.DATABASE_ERROR, 'Failed to fetch KPI data'), 500, origin)
         }
 
         // Calculate summary metrics
@@ -94,23 +89,23 @@ serve(async (req) => {
 
         // Format response
         const response = {
-            summary,
-            daily: dailyData || [],
-            metadata: {
-                tenant_id,
-                from,
-                to,
-                days_count: dailyData?.length || 0
+            ok: true,
+            data: {
+                summary,
+                daily: dailyData || [],
+                metadata: {
+                    tenant_id,
+                    from,
+                    to,
+                    days_count: dailyData?.length || 0
+                }
             }
         };
 
         return jsonResponse(response, 200, origin)
 
     } catch (error) {
-        console.error('Unexpected error:', error);
-        return jsonResponse({
-            error: 'Internal server error',
-            message: error instanceof Error ? error.message : 'Unknown error'
-        }, 500, origin)
+        console.error('[kpi] Unexpected error:', error);
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin)
     }
 })

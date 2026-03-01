@@ -4,6 +4,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { errBody, ERR } from '../_shared/error.ts';
 
 interface ErrorReportPayload {
     env: string;
@@ -86,7 +87,7 @@ serve(async (req) => {
         // Validate
         const validation = validatePayload(payload);
         if (!validation.valid) {
-            return jsonResponse({ ok: false, reason: 'validation_error', details: validation.error }, 400, origin);
+            return jsonResponse(errBody(ERR.VALIDATION_ERROR, validation.error ?? 'Invalid payload'), 400, origin);
         }
 
         // Initialize Supabase client with service role
@@ -104,7 +105,7 @@ serve(async (req) => {
                 .gte('created_at', sixtySecondsAgo);
 
             if (count && count >= 20) {
-                return jsonResponse({ ok: false, reason: 'rate_limited' }, 429, origin);
+                return jsonResponse(errBody(ERR.RATE_LIMITED, 'Rate limit exceeded'), 429, origin);
             }
         }
 
@@ -168,7 +169,7 @@ serve(async (req) => {
         return jsonResponse({ ok: true, action: 'inserted' }, 200, origin);
 
     } catch (error) {
-        console.error('Error reporting function error:', error);
-        return jsonResponse({ ok: false, reason: 'internal_error' }, 500, origin);
+        console.error('[report-client-error] Error:', error);
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin);
     }
 });

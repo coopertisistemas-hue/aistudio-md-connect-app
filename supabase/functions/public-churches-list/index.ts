@@ -1,14 +1,13 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { handleCors, jsonResponse } from '../_shared/cors.ts'
+import { errBody, ERR } from '../_shared/error.ts'
 
 Deno.serve(async (req: Request) => {
     // 1. Handle CORS Preflight (OPTIONS)
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
 
-    // Get origin for CORS validation
-    const origin = req.headers.get('origin');)
-    }
+    const origin = req.headers.get('origin');
 
     try {
         const supabase = createClient(
@@ -22,15 +21,14 @@ Deno.serve(async (req: Request) => {
             .order('name');
 
         if (error) {
-            console.error('Supabase Error:', error);
+            console.error('[public-churches-list] Supabase error:', error);
             throw error;
         }
 
-        // 2. Return JSON with CORS headers
-        return jsonResponse(data || [], 200, origin);
+        return jsonResponse({ ok: true, data: data || [] }, 200, origin);
 
     } catch (error: any) {
         console.error('[public-churches-list] Error:', error);
-        return jsonResponse({ error: error.message }, 400, origin);
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin);
     }
 })

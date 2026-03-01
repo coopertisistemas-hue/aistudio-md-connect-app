@@ -1,28 +1,27 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { errBody, ERR } from '../_shared/error.ts';
 
 /**
  * generate-verse-commentary
- * 
- * Generates theological study context involved renowned evangelical authors
- * for a specific Bible verse.
- * 
+ *
+ * Generates theological study context for a specific Bible verse.
  * Payload: { book_id: string, chapter: number, verse: number, text: string }
  */
 
 serve(async (req: Request) => {
     const corsResponse = handleCors(req);
-    // Get origin for CORS validation    const origin = req.headers.get('origin');
     if (corsResponse) return corsResponse;
-    // Get origin for CORS validation    const origin = req.headers.get('origin');
+
+    const origin = req.headers.get('origin');
 
     try {
         const body = await req.json();
         const { book_id, chapter, verse, text } = body;
 
         if (!book_id || !chapter || !verse || !text) {
-            return jsonResponse({ ok: false, error: "Missing required fields: book_id, chapter, verse, text" }, 400);
+            return jsonResponse(errBody(ERR.INVALID_REQUEST, 'Missing required fields: book_id, chapter, verse, text'), 400, origin);
         }
 
         // 1. Setup Clients
@@ -31,10 +30,10 @@ serve(async (req: Request) => {
         const openAiKey = Deno.env.get("OPENAI_API_KEY");
 
         if (!sbUrl || !sbKey) {
-            return jsonResponse({ ok: false, error: "Server Configuration Error: Supabase keys missing" }, 500);
+            return jsonResponse(errBody(ERR.CONFIG_MISSING, 'Server configuration error'), 500, origin);
         }
         if (!openAiKey) {
-            return jsonResponse({ ok: false, error: "Server Configuration Error: OPENAI_API_KEY missing" }, 500);
+            return jsonResponse(errBody(ERR.CONFIG_MISSING, 'Server configuration error'), 500, origin);
         }
 
         const supabase = createClient(sbUrl, sbKey);
@@ -49,10 +48,10 @@ serve(async (req: Request) => {
             .maybeSingle();
 
         if (existing) {
-            return jsonResponse({ ok: true, data: existing, source: 'cache' });
+            return jsonResponse({ ok: true, data: existing, source: 'cache' }, 200, origin);
         }
 
-        console.log(`Generating commentary for: ${book_id} ${chapter}:${verse}`);
+        console.log(`[generate-verse-commentary] Generating commentary for: ${book_id} ${chapter}:${verse}`);
 
         // 3. Prompt Construction
         const prompt = `
@@ -103,7 +102,8 @@ serve(async (req: Request) => {
 
         if (!aiResponse.ok) {
             const errText = await aiResponse.text();
-            throw new Error(`OpenAI Error: ${aiResponse.status} - ${errText}`);
+            console.error(`[generate-verse-commentary] OpenAI error: ${aiResponse.status} - ${errText}`);
+            throw new Error('AI generation failed');
         }
 
         const aiData = await aiResponse.json();
@@ -114,17 +114,12 @@ serve(async (req: Request) => {
         try {
             generatedData = JSON.parse(contentStr);
         } catch (e) {
-            console.error("JSON Parse Error", contentStr);
-            throw new Error("Failed to parse AI response");
+            console.error("[generate-verse-commentary] JSON parse error", contentStr);
+            throw new Error('Failed to parse AI response');
         }
 
         // 5. Insert
-        const record = {
-            book_id,
-            chapter,
-            verse,
-            ...generatedData
-        };
+        const record = { book_id, chapter, verse, ...generatedData };
 
         const { data: inserted, error: insertError } = await supabase
             .from('bible_commentaries')
@@ -142,15 +137,15 @@ serve(async (req: Request) => {
                     .eq('chapter', chapter)
                     .eq('verse', verse)
                     .single();
-                return jsonResponse({ ok: true, data: retry, source: 'retry_cache' });
+                return jsonResponse({ ok: true, data: retry, source: 'retry_cache' }, 200, origin);
             }
             throw insertError;
         }
 
-        return jsonResponse({ ok: true, data: inserted, source: 'generated' });
+        return jsonResponse({ ok: true, data: inserted, source: 'generated' }, 200, origin);
 
     } catch (error: any) {
-        console.error("Generate Verse Error:", error);
-        return jsonResponse({ ok: false, error: error.message }, 500);
+        console.error("[generate-verse-commentary] Error:", error);
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin);
     }
 });

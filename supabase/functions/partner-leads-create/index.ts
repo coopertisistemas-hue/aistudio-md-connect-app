@@ -1,20 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts'
+import { handleCors, jsonResponse } from '../_shared/cors.ts'
+import { errBody, ERR } from '../_shared/error.ts'
 
 serve(async (req) => {
     // 1. Handle CORS Preflight
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
 
-    // Get origin for CORS validation
     const origin = req.headers.get('origin');
 
     try {
         const { name, whatsapp, message } = await req.json()
 
         if (!name || !whatsapp) {
-            throw new Error('Nome e WhatsApp são obrigatórios')
+            return jsonResponse(errBody(ERR.INVALID_REQUEST, 'Nome e WhatsApp são obrigatórios'), 400, origin)
         }
 
         const supabaseClient = createClient(
@@ -31,10 +31,10 @@ serve(async (req) => {
 
         if (error) throw error
 
-        // Corrected typo 'daa' to 'data' in previous implementation
-        return jsonResponse({ success: true, data }, 200, origin)
+        return jsonResponse({ ok: true, data }, 200, origin)
 
     } catch (error: any) {
-        return jsonResponse({ error: error.message }, 400, origin)
+        console.error('[partner-leads-create] Error:', error)
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin)
     }
 })

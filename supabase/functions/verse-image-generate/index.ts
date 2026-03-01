@@ -1,36 +1,34 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { errBody, ERR } from '../_shared/error.ts';
 
 /**
  * CONTRACT:
- * - Always return 200 (unless critical system failure).
- * - If AI fails or keys missing -> Fallback to Picsum.
- * - Always return JSON: { ok: true, image_url: string, provider: string, cached?: boolean }
- *                      { ok: false, error: string }
+ * - Success: { ok: true, data: { image_url, provider, cached } }
+ * - Error:   { ok: false, error: { code, message } }
+ * - Always attempts fallback to Picsum on AI failure.
  */
 
 const VALID_STYLES = [
-    'humanized_nature', 'epic_landscape', 'warm_cozy', // Sprint 7 Updated Styles
-    'minimal_premium', 'cinematic_light', 'soft_illustration', 'watercolor', 'nature_symbolic' // Legacy/Random
+    'humanized_nature', 'epic_landscape', 'warm_cozy',
+    'minimal_premium', 'cinematic_light', 'soft_illustration', 'watercolor', 'nature_symbolic'
 ];
 
 serve(async (req: Request) => {
     // 1. CORS Preflight
     const corsResponse = handleCors(req);
-    // Get origin for CORS validation    const origin = req.headers.get('origin');
     if (corsResponse) return corsResponse;
-    // Get origin for CORS validation    const origin = req.headers.get('origin');
+
+    const origin = req.headers.get('origin');
 
     try {
         const { verse_text, reference, style, language = 'pt' } = await req.json();
 
         // 2. Validation
         if (!verse_text || !reference) {
-            return jsonResponse({ ok: false, error: "verse_text and reference are required" }, 400);
+            return jsonResponse(errBody(ERR.INVALID_REQUEST, 'verse_text and reference are required'), 400, origin);
         }
-        // Strict style check disabled for now to allow random experiments, or use loose check
-        // if (style && !VALID_STYLES.includes(style)) ...
 
         // 3. Hash Generation
         const inputString = `${verse_text}:${reference}:${style || 'default'}:${language}`;
@@ -41,7 +39,6 @@ serve(async (req: Request) => {
         const hash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
         // 4. Supabase Client
-        // We try/catch Supabase creation just in case env vars are totally borked
         let supabase;
         try {
             const url = Deno.env.get("SUPABASE_URL");
@@ -50,7 +47,7 @@ serve(async (req: Request) => {
                 supabase = createClient(url, key);
             }
         } catch (e) {
-            console.error("Supabase Init Fatal:", e);
+            console.error("[verse-image-generate] Supabase init failed:", e);
         }
 
         // 5. Check Cache (Only if Supabase is alive)
@@ -63,37 +60,29 @@ serve(async (req: Request) => {
                     .single();
 
                 if (cached) {
-                    console.log(`Cache hit: ${hash}`);
-                    return jsonResponse({ ok: true, image_url: cached.image_url, provider: "cache", cached: true });
+                    console.log(`[verse-image-generate] Cache hit: ${hash}`);
+                    return jsonResponse({ ok: true, data: { image_url: cached.image_url, provider: "cache", cached: true } }, 200, origin);
                 }
             } catch (e) {
-                console.warn("Cache check failed:", e);
+                console.warn("[verse-image-generate] Cache check failed:", e);
                 // Non-blocking, proceed to generate
             }
         }
 
-        console.log(`Generating: ${style} (Hash: ${hash})`);
+        console.log(`[verse-image-generate] Generating: ${style} (Hash: ${hash})`);
 
         // 6. Generate Logic (Fallback-First Approach)
-        // We default to the fallback logic immediately if anything goes wrong or keys missing
-
-        // Premium Prompt Construction (Logic from Sprint 7, ensured here)
         let prompt = `A cinematic, premium background for a Bible verse poster. Style: ${style || 'cinematic'}. GOLDEN HOUR, NATURE, WARM LIGHTING. NO TEXT, NO LETTERS.`;
         if (style === 'humanized_nature') prompt += " A person silhouette in nature, contemplating.";
         if (style === 'epic_landscape') prompt += " Vast mountains, soft sunlight, majestic view.";
         if (style === 'warm_cozy') prompt += " Coffee table, open bible, warm indoor lighting, cozy atmosphere.";
 
-        // Stub/Fallback URL (Deterministic)
-        // Picsum seed allows same image for same hash
+        // Deterministic fallback URL
         const fallbackUrl = `https://picsum.photos/seed/${hash.substring(0, 10)}/1080/1350`;
         let finalImageUrl = fallbackUrl;
         let provider = "fallback-picsum";
 
-        // AI Generation placeholder (Future Sprint)
-
         // 7. Upload to Storage (If Supabase is alive)
-        // We WANT to upload the picsum image to our bucket so we have a permanent URL
-        // and don't rely on Picsum availability forever.
         if (supabase) {
             try {
                 const imageRes = await fetch(fallbackUrl);
@@ -114,14 +103,13 @@ serve(async (req: Request) => {
                             .getPublicUrl(fileName);
 
                         finalImageUrl = publicUrl;
-                        provider = "fallback-storage"; // Promoted to internal storage
+                        provider = "fallback-storage";
                     } else {
-                        console.error("Upload failed:", uploadError);
+                        console.error("[verse-image-generate] Upload failed:", uploadError);
                     }
                 }
             } catch (e) {
-                console.error("Storage/Fetch pipeline failed:", e);
-                // finalImageUrl remains picsum URL, which is fine
+                console.error("[verse-image-generate] Storage/fetch pipeline failed:", e);
             }
 
             // 8. Save Metadata
@@ -133,19 +121,18 @@ serve(async (req: Request) => {
                     language,
                     image_url: finalImageUrl,
                     hash,
-                    prompt: prompt
+                    prompt
                 });
             } catch (e) {
-                console.error("Metadata save failed:", e);
+                console.error("[verse-image-generate] Metadata save failed:", e);
             }
         }
 
         // 9. Final Response
-        return jsonResponse({ ok: true, image_url: finalImageUrl, provider, cached: false });
+        return jsonResponse({ ok: true, data: { image_url: finalImageUrl, provider, cached: false } }, 200, origin);
 
     } catch (error: any) {
-        console.error("Fatal Function Error:", error);
-        // Even in fatal error, try to return valid JSON
-        return jsonResponse({ ok: false, error: `Internal Error: ${error.message}` }, 500);
+        console.error("[verse-image-generate] Fatal error:", error);
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin);
     }
 });

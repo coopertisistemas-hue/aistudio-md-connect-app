@@ -1,38 +1,26 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { errBody, ERR } from '../_shared/error.ts';
 
 serve(async (req: Request) => {
     // 1. CORS
     const corsResponse = handleCors(req);
-    // Get origin for CORS validation    const origin = req.headers.get('origin');
     if (corsResponse) return corsResponse;
-    // Get origin for CORS validation    const origin = req.headers.get('origin');
+
+    const origin = req.headers.get('origin');
 
     try {
         // 2. Validate Environment
-        // User requested: 500 if OPENAI_API_KEY is missing (even if we are currently using Picsum as fallback, we respect the rule)
-        // If we want to actually use OpenAI in the future, it's ready.
         if (!Deno.env.get("OPENAI_API_KEY")) {
-            // throw new Error("Missing OPENAI_API_KEY configuration"); 
-            // Commented out to avoid breaking current functionality if user hasn't set it yet, 
-            // BUT user explicitly asked for this check. I will enable it.
-            return jsonResponse({
-                ok: false,
-                error: "Server Configuration Error: OPENAI_API_KEY is missing",
-                error_code: "CONFIG_MISSING"
-            }, 500);
+            return jsonResponse(errBody(ERR.CONFIG_MISSING, 'Server configuration error'), 500, origin);
         }
 
         const SB_KEY = Deno.env.get("SB_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
         const SB_URL = Deno.env.get("SUPABASE_URL");
 
         if (!SB_KEY || !SB_URL) {
-            return jsonResponse({
-                ok: false,
-                error: "Server Configuration Error: Supabase keys missing",
-                error_code: "CONFIG_MISSING"
-            }, 500);
+            return jsonResponse(errBody(ERR.CONFIG_MISSING, 'Server configuration error'), 500, origin);
         }
 
         // 3. Setup Supabase
@@ -43,11 +31,7 @@ serve(async (req: Request) => {
         const { devotional_id } = body;
 
         if (!devotional_id) {
-            return jsonResponse({
-                ok: false,
-                error: "devotional_id is required",
-                error_code: "BAD_REQUEST"
-            }, 400);
+            return jsonResponse(errBody(ERR.INVALID_REQUEST, 'devotional_id is required'), 400, origin);
         }
 
         // 5. Fetch Devotional Data
@@ -58,12 +42,8 @@ serve(async (req: Request) => {
             .single();
 
         if (fetchError || !item) {
-            console.error(`Devotional not found: ${devotional_id}`, fetchError);
-            return jsonResponse({
-                ok: false,
-                error: "Devotional not found",
-                error_code: "NOT_FOUND"
-            }, 404);
+            console.error(`[devotionals-generate-cover] Devotional not found: ${devotional_id}`);
+            return jsonResponse(errBody(ERR.NOT_FOUND, 'Devotional not found'), 404, origin);
         }
 
         // 6. Generate Prompt & Logic
@@ -84,16 +64,16 @@ serve(async (req: Request) => {
         const theme = `${MONTH_THEMES[month]} mixed with ${DAY_THEMES[dayOfWeek]}`;
         const prompt = `Cinematic, soft light, no text. Theme: ${theme}. Keywords: ${item.title}.`;
 
-        console.log(`Generating for [${item.title}]: ${prompt}`);
+        console.log(`[devotionals-generate-cover] Generating for [${item.title}]: ${prompt}`);
 
-        // 7. Generate Image (Using Picsum Deterministic as robust fallback/implementation)
+        // 7. Generate Image (Picsum deterministic fallback)
         const seed = `${devotional_id}-${month}-${dayOfWeek}`;
         const fallbackUrl = `https://picsum.photos/seed/${seed}/1920/1080?grayscale`;
 
         // 8. Upload to Storage
         const imageRes = await fetch(fallbackUrl);
         if (!imageRes.ok) {
-            throw new Error(`Upstream Image Provider Failed: ${imageRes.statusText}`);
+            throw new Error(`Upstream image provider failed: ${imageRes.statusText}`);
         }
 
         const blob = await imageRes.blob();
@@ -104,8 +84,8 @@ serve(async (req: Request) => {
             .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
 
         if (uploadError) {
-            console.error("Storage Upload Failed:", uploadError);
-            throw new Error(`Storage Upload Failed: ${uploadError.message}`);
+            console.error("[devotionals-generate-cover] Storage upload failed:", uploadError);
+            throw new Error('Storage upload failed');
         }
 
         const { data: { publicUrl } } = supabase.storage
@@ -119,22 +99,14 @@ serve(async (req: Request) => {
             .eq('id', devotional_id);
 
         if (updateError) {
-            console.error("Database Update Failed:", updateError);
-            throw new Error(`Database Update Failed: ${updateError.message}`);
+            console.error("[devotionals-generate-cover] Database update failed:", updateError);
+            throw new Error('Database update failed');
         }
 
-        return jsonResponse({
-            ok: true,
-            image_url: publicUrl,
-            prompt_used: prompt
-        });
+        return jsonResponse({ ok: true, data: { image_url: publicUrl, prompt_used: prompt } }, 200, origin);
 
     } catch (error: any) {
-        console.error("Unhandled Edge Function Error:", error);
-        return jsonResponse({
-            ok: false,
-            error: error.message || "Internal Server Error",
-            error_code: "INTERNAL_ERROR"
-        }, 500);
+        console.error("[devotionals-generate-cover] Unhandled error:", error);
+        return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin);
     }
 });

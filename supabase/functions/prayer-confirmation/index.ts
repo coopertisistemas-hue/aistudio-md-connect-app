@@ -1,6 +1,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { handleCors, jsonResponse } from '../_shared/cors.ts'
+import { errBody, ERR } from '../_shared/error.ts'
 
 interface EmailPayload {
   contact_value: string;
@@ -24,6 +25,7 @@ Deno.serve(async (req: Request) => {
     // Mock response
     return jsonResponse({ message: "Email queued (mock)", protocol }, 200, origin)
   } catch (error: any) {
-    return jsonResponse({ error: error.message || 'Unknown error' }, 400, origin)
+    console.error('[prayer-confirmation] Error:', error)
+    return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin)
   }
 })

@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { handleCors, jsonResponse } from '../_shared/cors.ts'
+import { errBody, ERR } from '../_shared/error.ts'
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -44,6 +45,7 @@ serve(async (req) => {
 
     return jsonResponse({ data: events }, 200, origin)
   } catch (error) {
-    return jsonResponse({ error: error.message }, 400, origin)
+    console.error('[member-events] Error:', error)
+    return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin)
   }
 })
