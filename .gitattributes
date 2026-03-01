@@ -1,0 +1,48 @@
+# .gitattributes
+# Enforce consistent line endings across platforms
+# text=auto normalizes line endings on commit/checkout
+
+* text=auto
+
+# Markdown — always LF
+*.md text eol=lf
+
+# TypeScript / JavaScript source — always LF
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+
+# JSON / YAML — always LF
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# CSS / HTML — always LF
+*.css text eol=lf
+*.html text eol=lf
+
+# PowerShell — CRLF (Windows native)
+*.ps1 text eol=crlf
+
+# SQL migrations — always LF
+*.sql text eol=lf
+
+# Images + binaries — no line-ending conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+
+# Android / Capacitor binaries
+*.apk binary
+*.aab binary
+*.keystore binary

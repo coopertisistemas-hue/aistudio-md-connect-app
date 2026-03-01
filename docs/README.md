@@ -50,6 +50,22 @@
 
 ---
 
+## PowerShell Scripts (Windows)
+
+| Script | Command | Purpose |
+|--------|---------|---------|
+| [`scripts/dev.ps1`](../scripts/dev.ps1) | `.\scripts\dev.ps1` | Install guard + `pnpm dev` |
+| [`scripts/build.ps1`](../scripts/build.ps1) | `.\scripts\build.ps1` | Install guard + `pnpm build` + exit reporting |
+| [`scripts/typecheck.ps1`](../scripts/typecheck.ps1) | `.\scripts\typecheck.ps1` | `pnpm type-check` with pass/fail |
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\dev.ps1
+powershell -ExecutionPolicy Bypass -File scripts\build.ps1
+powershell -ExecutionPolicy Bypass -File scripts\typecheck.ps1
+```
+
+---
+
 ## CONNECT Gates Reference
 
 Before any commit you must pass:
