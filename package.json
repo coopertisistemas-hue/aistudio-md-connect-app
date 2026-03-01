@@ -12,7 +12,7 @@
     "check:ui": "node scripts/audit-internal-pages.mjs",
     "check:sprint0": "node scripts/check-sprint0.mjs",
     "check:sprint0:full": "node scripts/check-sprint0.mjs --full",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -b --noEmit",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",
