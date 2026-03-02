@@ -1,14 +1,25 @@
-import { Heart, Users, Headphones, TrendingUp } from 'lucide-react';
+import { Heart, TrendingUp, Users, Headphones } from 'lucide-react';
 import type { RevenueMetrics } from '@/lib/api/revenue';
 import { calculateRevenueScore } from '@/lib/api/revenue';
 
 interface RevenueDashboardProps {
-    metrics: RevenueMetrics;
+    metrics: RevenueMetrics | null;
     loading?: boolean;
 }
 
+const DEFAULT_METRICS: RevenueMetrics = {
+    total_donations: 0,
+    donation_views: 0,
+    donation_clicks: 0,
+    donation_conversion_rate: 0,
+    partner_inquiries: 0,
+    service_requests: 0,
+    affiliate_clicks: 0,
+};
+
 export function RevenueDashboard({ metrics, loading }: RevenueDashboardProps) {
-    const score = calculateRevenueScore(metrics);
+    const safeMetrics = metrics ?? DEFAULT_METRICS;
+    const score = calculateRevenueScore(safeMetrics);
 
     if (loading) {
         return (
@@ -26,28 +37,28 @@ export function RevenueDashboard({ metrics, loading }: RevenueDashboardProps) {
     const cards = [
         {
             label: 'Visualizações',
-            value: metrics.donation_views,
+            value: safeMetrics.donation_views,
             icon: Heart,
             color: 'text-rose-500',
             bg: 'bg-rose-50',
         },
         {
             label: 'Cliques',
-            value: metrics.donation_clicks,
+            value: safeMetrics.donation_clicks,
             icon: TrendingUp,
             color: 'text-blue-500',
             bg: 'bg-blue-50',
         },
         {
             label: 'Inquiries',
-            value: metrics.partner_inquiries,
+            value: safeMetrics.partner_inquiries,
             icon: Users,
             color: 'text-emerald-500',
             bg: 'bg-emerald-50',
         },
         {
             label: 'Serviços',
-            value: metrics.service_requests,
+            value: safeMetrics.service_requests,
             icon: Headphones,
             color: 'text-purple-500',
             bg: 'bg-purple-50',
@@ -106,21 +117,21 @@ export function RevenueDashboard({ metrics, loading }: RevenueDashboardProps) {
                     <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
                             <p className="text-xs text-slate-500">Affiliates</p>
-                            <p className="font-semibold text-slate-900">{metrics.affiliate_clicks}</p>
+                            <p className="font-semibold text-slate-900">{safeMetrics.affiliate_clicks}</p>
                         </div>
                         <div>
                             <p className="text-xs text-slate-500">Taxa Conversão</p>
-                            <p className="font-semibold text-slate-900">{metrics.donation_conversion_rate}%</p>
+                            <p className="font-semibold text-slate-900">{safeMetrics.donation_conversion_rate}%</p>
                         </div>
                         <div>
                             <p className="text-xs text-slate-500">Total Doações</p>
-                            <p className="font-semibold text-slate-900">{metrics.total_donations}</p>
+                            <p className="font-semibold text-slate-900">{safeMetrics.total_donations}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {metrics.partner_inquiries === 0 && metrics.service_requests === 0 && (
+            {safeMetrics.partner_inquiries === 0 && safeMetrics.service_requests === 0 && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
                     <p className="text-sm text-amber-800">
                         💡 Para aumentar a receita, invista em parcerias e divulgue os serviços da igreja.
