@@ -40,6 +40,10 @@ class AnalyticsService {
     private measurementId: string;
     private isInitialized: boolean = false;
 
+    // Dedupe guard: track recently fired events to prevent double firing
+    private recentEvents = new Map<string, number>();
+    private readonly DEDUP_WINDOW_MS = 1000; // 1 second dedupe window
+
     // Backend analytics properties
     private sessionId: string | null = null;
     private utmParams: UTMParams = {};
@@ -53,6 +57,31 @@ class AnalyticsService {
         // Initialize session and UTM tracking
         this.initSession();
         this.captureUTMParams();
+    }
+
+    private isEventDuplicate(eventKey: string): boolean {
+        const now = Date.now();
+        const lastFired = this.recentEvents.get(eventKey);
+        
+        if (lastFired && (now - lastFired) < this.DEDUP_WINDOW_MS) {
+            if (this.debugMode) {
+                console.log(`📊 [Analytics] Dedupe: skipping duplicate event ${eventKey}`);
+            }
+            return true;
+        }
+        
+        this.recentEvents.set(eventKey, now);
+        
+        // Cleanup old entries periodically
+        if (this.recentEvents.size > 100) {
+            for (const [key, ts] of this.recentEvents.entries()) {
+                if (now - ts > this.DEDUP_WINDOW_MS * 2) {
+                    this.recentEvents.delete(key);
+                }
+            }
+        }
+        
+        return false;
     }
 
     public init() {
@@ -96,12 +125,18 @@ class AnalyticsService {
             return;
         }
 
+        const dedupeKey = `track:${event.name}:${event.element || ''}`;
+        if (this.isEventDuplicate(dedupeKey)) return;
+
         const { name, metadata, ...params } = event;
-        window.gtag('event', name, { ...params, ...metadata });
+        const cleanParams = Object.fromEntries(
+            Object.entries(params).filter(([_, v]) => v !== undefined)
+        );
+        window.gtag('event', name, { ...cleanParams, ...metadata });
 
         if (this.debugMode) {
             console.groupCollapsed(`📊 [Member] Analytics Sent: ${name}`);
-            console.log('Params:', params);
+            console.log('Params:', cleanParams);
             console.groupEnd();
         }
     }
@@ -146,12 +181,8 @@ class AnalyticsService {
     // Backend Event Tracking
     public async trackEvent(
         eventName: AnalyticsEventName,
-        params?: {
-            partner_id?: string;
-            user_id?: string;
-            user_key?: string;
-            meta?: Record<string, any>;
-        }
+        payload?: Record<string, unknown>,
+        context?: string
     ): Promise<void> {
         // Disable backend tracking in development due to CORS
         // Enable in production by setting VITE_ENABLE_BACKEND_ANALYTICS=true
@@ -164,24 +195,44 @@ class AnalyticsService {
             return;
         }
 
+        // Dedupe guard for backend events
+        const dedupeKey = `trackEvent:${eventName}:${JSON.stringify(payload || {})}`;
+        if (this.isEventDuplicate(dedupeKey)) return;
+
         try {
-            const payload = {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            const eventPayload: Record<string, unknown> = {
                 event_name: eventName,
                 page_path: window.location.pathname,
                 tenant_id: this.tenantId,
                 session_id: this.sessionId,
                 ...this.utmParams,
-                ...params
             };
 
+            // Add payload and context if provided, stripping undefined values
+            if (payload) {
+                const cleanPayload = Object.fromEntries(
+                    Object.entries(payload).filter(([_, v]) => v !== undefined)
+                );
+                if (Object.keys(cleanPayload).length > 0) {
+                    eventPayload.payload = cleanPayload;
+                }
+            }
+            if (context !== undefined) {
+                eventPayload.context = context;
+            }
+
             if (this.debugMode) {
-                console.log(`📊 [Analytics] trackEvent: ${eventName}`, payload);
+                console.log(`📊 [Analytics] trackEvent: ${eventName}`, eventPayload);
             }
 
             const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
             const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
             if (!supabaseUrl || !supabaseAnonKey) {
+                clearTimeout(timeoutId);
                 if (this.debugMode) console.warn('📊 [Analytics] Supabase credentials not configured');
                 return;
             }
@@ -192,8 +243,11 @@ class AnalyticsService {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${supabaseAnonKey}`
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(eventPayload),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
         } catch (error) {
             // Fail silently to not disrupt user experience
             if (this.debugMode) {
