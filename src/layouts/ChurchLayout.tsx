@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { ChurchProvider, useChurch } from '@/contexts/ChurchContext';
 import ChurchNotFound from '@/pages/ChurchNotFound';
 import { MobileLayout } from '@/layouts/MobileLayout';
@@ -6,12 +7,12 @@ import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { MembershipProvider } from '@/contexts/MembershipContext';
 import { MembershipGate } from '@/components/auth/MembershipGate';
-import ChurchShowcase from '@/pages/ChurchShowcase';
+const ChurchShowcase = lazy(() => import('@/pages/ChurchShowcase'));
 import { AppBackground } from '@/components/layout/AppBackground';
 
 function ChurchLayoutContent() {
     const { church, isLoading, error } = useChurch();
-    const { user, loading: authLoading } = useAuth(); // Assuming useAuth provides loading state
+    const { user, loading: authLoading } = useAuth();
 
     if (isLoading || authLoading) {
         return (
@@ -27,7 +28,11 @@ function ChurchLayoutContent() {
 
     // Unauthenticated -> Show Showcase
     if (!user) {
-        return <ChurchShowcase />;
+        return (
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-8 h-8 text-blue-600 animate-spin" /></div>}>
+                <ChurchShowcase />
+            </Suspense>
+        );
     }
 
     // Authenticated -> Show Full App (Wrapped in Membership Context & Gate)
