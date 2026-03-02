@@ -30,7 +30,9 @@ export type AnalyticsEventName =
     | 'onboarding_complete'
     | 'first_login'
     | 'return_visit'
-    | 'app_session';
+    | 'app_session'
+    | 'attribution_captured'
+    | 'campaign_conversion';
 
 interface UTMParams {
     utm_source?: string;

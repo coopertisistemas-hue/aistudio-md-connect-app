@@ -20,6 +20,22 @@ export function AnalyticsTracker() {
         } else {
             analytics.trackEvent('return_visit', { session_count: sessionCount });
         }
+
+        // Capture UTM parameters on first session
+        const utmCaptured = sessionStorage.getItem('mdc_utm_captured');
+        if (!utmCaptured) {
+            const utmParams = analytics.getUTMParams();
+            if (utmParams.utm_source || utmParams.utm_medium || utmParams.utm_campaign) {
+                analytics.trackEvent('attribution_captured', {
+                    utm_source: utmParams.utm_source,
+                    utm_medium: utmParams.utm_medium,
+                    utm_campaign: utmParams.utm_campaign,
+                    utm_term: utmParams.utm_term,
+                    utm_content: utmParams.utm_content,
+                });
+                sessionStorage.setItem('mdc_utm_captured', 'true');
+            }
+        }
     }, []);
 
     useEffect(() => {

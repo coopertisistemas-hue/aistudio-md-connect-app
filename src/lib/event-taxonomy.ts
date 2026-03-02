@@ -157,6 +157,20 @@ export const BACKEND_EVENTS = {
         description: 'App session start',
         parameters: ['session_duration_estimate'],
     },
+    
+    // Attribution
+    ATTRIBUTION_CAPTURED: {
+        name: 'attribution_captured' as const,
+        category: EVENT_CATEGORIES.ACQUISITION,
+        description: 'UTM parameters captured from URL',
+        parameters: ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'],
+    },
+    CAMPAIGN_CONVERSION: {
+        name: 'campaign_conversion' as const,
+        category: EVENT_CATEGORIES.CONVERSION,
+        description: 'User converts from campaign',
+        parameters: ['utm_source', 'utm_campaign', 'conversion_type'],
+    },
 } as const;
 
 /**
