@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Calendar, Loader2 } from 'lucide-react';
+import { BookOpen, Calendar, Loader2, RefreshCw } from 'lucide-react';
 import { devotionalsApi } from '@/lib/api/devotionals';
 import type { Post } from '@/types/content';
 import { FLAGS } from '@/lib/flags';
@@ -10,6 +10,7 @@ export default function DevotionalList() {
     const navigate = useNavigate();
     const [items, setItems] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
@@ -17,6 +18,7 @@ export default function DevotionalList() {
 
     const loadData = async () => {
         setIsLoading(true);
+        setError(null);
         try {
             if (FLAGS.FEATURE_DEVOTIONAL_API) {
                 const data = await devotionalsApi.getList();
@@ -25,8 +27,10 @@ export default function DevotionalList() {
                 await new Promise(r => setTimeout(r, 800));
                 setItems([]);
             }
-        } catch (error) {
-            console.error("List load failed", error);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+            console.error("List load failed", errorMessage);
+            setError(errorMessage);
             setItems([]);
         } finally {
             setIsLoading(false);
@@ -46,6 +50,23 @@ export default function DevotionalList() {
                     <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
                         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
                         <span className="text-sm">Carregando inspiração...</span>
+                    </div>
+                ) : error ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+                            <BookOpen className="w-8 h-8 text-red-400" />
+                        </div>
+                        <h3 className="text-lg font-medium text-slate-900 mb-2">Erro ao carregar</h3>
+                        <p className="text-slate-500 text-sm mb-6 max-w-[280px]">
+                            {error || 'Tente novamente em alguns instantes.'}
+                        </p>
+                        <button
+                            onClick={loadData}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                            Tentar novamente
+                        </button>
                     </div>
                 ) : items.length > 0 ? (
                     <div className="space-y-4">

@@ -1,6 +1,50 @@
 import { supabase } from '@/lib/supabase';
 import { invokeBff } from '@/lib/bff';
 
+const AI_TIMEOUT_MS = 12000;
+
+async function invokeWithTimeout<T>(
+    functionName: string, 
+    body: Record<string, unknown>,
+    timeoutMs: number = AI_TIMEOUT_MS
+): Promise<T | null> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const response = await supabase.functions.invoke(functionName, {
+            body,
+            signal: controller.signal
+        } as Parameters<typeof supabase.functions.invoke>[1]);
+        
+        clearTimeout(timeoutId);
+
+        if (response.error) {
+            console.error(`[bible] ${functionName} error:`, response.error);
+            return null;
+        }
+
+        const result = response.data as { ok: boolean; data?: T };
+        
+        if (result.ok === false || !result.data) {
+            console.error(`[bible] ${functionName} returned ok:false`);
+            return null;
+        }
+
+        return result.data as T;
+    } catch (err: unknown) {
+        clearTimeout(timeoutId);
+        const error = err as { name?: string; message?: string };
+        
+        if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+            console.error(`[bible] ${functionName} timed out after ${timeoutMs}ms`);
+        } else {
+            console.error(`[bible] ${functionName} exception:`, error.message);
+        }
+        return null;
+    }
+}
+
 export interface BibleBookData {
     id: string;
     name: string;
@@ -389,16 +433,14 @@ export const bibleService = {
                 // For MVP Speed + Robustness, let's prioritize Cloud AI if keys exist, else Local.
                 // Assuming we want to TRY cloud first:
                 try {
-                    const { data: genData } = await supabase.functions.invoke('generate-verse-commentary', {
-                        body: {
-                            book_id: searchId,
-                            chapter,
-                            verse,
-                            text: verseText
-                        }
+                    const genData = await invokeWithTimeout<BibleCommentary>('generate-verse-commentary', {
+                        book_id: searchId,
+                        chapter,
+                        verse,
+                        text: verseText
                     });
-                    if (genData?.data) {
-                        result = genData.data as BibleCommentary;
+                    if (genData) {
+                        result = genData;
                     }
                 } catch (e) {
                     // AI failed, proceed to local fallback

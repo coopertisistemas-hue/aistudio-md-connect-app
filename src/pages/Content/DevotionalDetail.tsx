@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { contentService } from '@/services/content';
 import { devotionalsApi } from '@/lib/api/devotionals';
 import type { Post } from '@/types/content';
-import { Calendar, BookOpen, Loader2 } from 'lucide-react';
+import { Calendar, BookOpen, Loader2, RefreshCw } from 'lucide-react';
 import { FLAGS } from '@/lib/flags';
 import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 import { DevotionalContentRenderer } from '@/components/Devotional/DevotionalContentRenderer';
@@ -27,6 +27,7 @@ export default function DevotionalDetail() {
     const { id } = useParams();
     const [item, setItem] = useState<Post | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const targetId = id === 'today' ? 'latest' : id;
@@ -41,6 +42,7 @@ export default function DevotionalDetail() {
 
     const loadData = async (postId: string) => {
         setIsLoading(true);
+        setError(null);
         if (import.meta.env.DEV) console.log('[DevotionalDetail] loadData started:', postId);
 
         // Check cache first for instant display
@@ -55,13 +57,15 @@ export default function DevotionalDetail() {
             if (FLAGS.FEATURE_DEVOTIONAL_API) {
                 if (import.meta.env.DEV) console.log('[DevotionalDetail] Using API');
                 if (postId === 'latest') {
-                    data = await devotionalsApi.getLatest().catch((err) => {
-                        console.error('[DevotionalDetail] API getLatest failed:', err);
+                    data = await devotionalsApi.getLatest().catch((err: Error) => {
+                        if (import.meta.env.DEV) console.error('[DevotionalDetail] API getLatest failed:', err);
+                        setError(err.message);
                         return null;
                     });
                 } else {
-                    data = await devotionalsApi.getById(postId).catch((err) => {
-                        console.error('[DevotionalDetail] API getById failed:', err);
+                    data = await devotionalsApi.getById(postId).catch((err: Error) => {
+                        if (import.meta.env.DEV) console.error('[DevotionalDetail] API getById failed:', err);
+                        setError(err.message);
                         return null;
                     });
                 }
@@ -83,8 +87,10 @@ export default function DevotionalDetail() {
             } else if (!cached) {
                 setItem(FALLBACK_DEVOTIONAL);
             }
-        } catch (error) {
-            console.error("[DevotionalDetail] Load Failed due to error:", error);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+            console.error("[DevotionalDetail] Load Failed due to error:", errorMessage);
+            setError(errorMessage);
             if (!cached) {
                 setItem(FALLBACK_DEVOTIONAL);
             }
@@ -107,8 +113,26 @@ export default function DevotionalDetail() {
             iconClassName="text-indigo-600"
         >
             {isLoading ? (
-                <div className="flex items-center justify-center py-20">
+                <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
                     <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                    <span className="text-sm">Carregando...</span>
+                </div>
+            ) : error && !item ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+                        <BookOpen className="w-8 h-8 text-red-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">Não foi possível carregar</h3>
+                    <p className="text-slate-500 text-sm mb-6 max-w-[280px]">
+                        {error || 'Tente novamente em alguns instantes.'}
+                    </p>
+                    <button
+                        onClick={() => loadData(id === 'today' ? 'latest' : id || '')}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                        Tentar novamente
+                    </button>
                 </div>
             ) : !item ? (
                 <div className="p-10 text-center text-slate-500">Conteúdo indisponível.</div>
