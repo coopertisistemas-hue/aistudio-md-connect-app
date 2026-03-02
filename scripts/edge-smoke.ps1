@@ -219,6 +219,48 @@ catch {
     $failed++
 }
 
+# Test 6: devotionals-generate-cover (validation - missing devotional_id)
+Write-Host ""
+Write-Test "Test 6: devotionals-generate-cover (validation error)" "Cyan"
+try {
+    $body = @{} | ConvertTo-Json
+    $response = Invoke-WebRequest -Uri "$BaseUrl/functions/v1/devotionals-generate-cover" -Method POST -Headers $headers -Body $body -TimeoutSec 10
+    $passed = Test-ResponseShape $response "devotionals-generate-cover validation" 400 $false $true
+    if (-not $passed) { $failed++ }
+}
+catch {
+    Write-Test "  FAIL: $($_.Exception.Message)" "Red"
+    $failed++
+}
+
+# Test 7: generate-verse-commentary (validation - missing fields)
+Write-Host ""
+Write-Test "Test 7: generate-verse-commentary (validation error)" "Cyan"
+try {
+    $body = @{ book_id = "gn" } | Convert    $response = Invoke-WebRequest -To-Json
+Uri "$BaseUrl/functions/v1/generate-verse-commentary" -Method POST -Headers $headers -Body $body -TimeoutSec 10
+    $passed = Test-ResponseShape $response "generate-verse-commentary validation" 400 $false $true
+    if (-not $passed) { $failed++ }
+}
+catch {
+    Write-Test "  FAIL: $($_.Exception.Message)" "Red"
+    $failed++
+}
+
+# Test 8: generate-book-context (validation - missing book_name)
+Write-Host ""
+Write-Test "Test 8: generate-book-context (validation error)" "Cyan"
+try {
+    $body = @{} | ConvertTo-Json
+    $response = Invoke-WebRequest -Uri "$BaseUrl/functions/v1/generate-book-context" -Method POST -Headers $headers -Body $body -TimeoutSec 10
+    $passed = Test-ResponseShape $response "generate-book-context validation" 400 $false $true
+    if (-not $passed) { $failed++ }
+}
+catch {
+    Write-Test "  FAIL: $($_.Exception.Message)" "Red"
+    $failed++
+}
+
 # ── Summary ─────────────────────────────────────────────────────────────────
 Write-Banner "Smoke Summary"
 

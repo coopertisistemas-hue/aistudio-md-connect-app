@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { errBody, ERR } from '../_shared/error.ts';
+import { checkRateLimit, getClientIp, generateRequestId } from '../_shared/rate-limit.ts';
 
 const TIMEOUT_MS = 12000
 
@@ -21,6 +22,18 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string
 }
 
 serve(async (req: Request) => {
+    const requestId = generateRequestId();
+    const startTime = Date.now();
+    
+    // 0. Rate Limiting
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp);
+    if (!rateLimit.allowed) {
+        const durationMs = Date.now() - startTime;
+        console.log(`[devotionals-generate-cover] request_id=${requestId} duration_ms=${durationMs} status=rate_limited ip=${clientIp}`);
+        return jsonResponse(rateLimit.error!, 429, req.headers.get('origin'));
+    }
+
     // 1. CORS
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
@@ -51,7 +64,29 @@ serve(async (req: Request) => {
             return jsonResponse(errBody(ERR.INVALID_REQUEST, 'devotional_id is required'), 400, origin);
         }
 
-        // 5. Fetch Devotional Data
+        // 5. DEDUPE: Check if cover already exists
+        const dedupeQuery = supabase
+            .from('devotionals')
+            .select('cover_image_url, title')
+            .eq('id', devotional_id)
+            .single()
+        
+        const { data: existingDevotional, error: dedupeError } = await withTimeout(dedupeQuery, TIMEOUT_MS, 'check existing cover')
+
+        if (!dedupeError && existingDevotional?.cover_image_url) {
+            const durationMs = Date.now() - startTime;
+            console.log(`[devotionals-generate-cover] request_id=${requestId} duration_ms=${durationMs} status=skipped_duplicate devotional_id=${devotional_id}`);
+            return jsonResponse({ 
+                ok: true, 
+                data: { 
+                    image_url: existingDevotional.cover_image_url, 
+                    prompt_used: 'existing',
+                    deduped: true
+                } 
+            }, 200, origin);
+        }
+
+        // 6. Fetch Devotional Data
         const fetchQuery = supabase
             .from('devotionals')
             .select('title, subtitle, published_at, lang')
@@ -65,7 +100,7 @@ serve(async (req: Request) => {
             return jsonResponse(errBody(ERR.NOT_FOUND, 'Devotional not found'), 404, origin);
         }
 
-        // 6. Generate Prompt & Logic
+        // 7. Generate Prompt & Logic
         const date = new Date(item.published_at);
         const dayOfWeek = date.getDay();
         const month = date.getMonth();
@@ -85,11 +120,11 @@ serve(async (req: Request) => {
 
         console.log(`[devotionals-generate-cover] Generating for [${item.title}]: ${prompt}`);
 
-        // 7. Generate Image (Picsum deterministic fallback)
+        // 8. Generate Image (Picsum deterministic fallback)
         const seed = `${devotional_id}-${month}-${dayOfWeek}`;
         const fallbackUrl = `https://picsum.photos/seed/${seed}/1920/1080?grayscale`;
 
-        // 8. Upload to Storage (with timeout)
+        // 9. Upload to Storage (with timeout)
         const imageFetchPromise = fetch(fallbackUrl)
         const imageRes = await withTimeout(imageFetchPromise, TIMEOUT_MS, 'fetch image from provider')
 
@@ -115,7 +150,7 @@ serve(async (req: Request) => {
             .from('devotional-covers')
             .getPublicUrl(path);
 
-        // 9. Update Record (with timeout)
+        // 10. Update Record (with timeout)
         const updatePromise = supabase
             .from('devotionals')
             .update({ cover_image_url: publicUrl })
@@ -128,10 +163,14 @@ serve(async (req: Request) => {
             throw new Error('Database update failed');
         }
 
+        const durationMs = Date.now() - startTime;
+        console.log(`[devotionals-generate-cover] request_id=${requestId} duration_ms=${durationMs} status=success`);
+
         return jsonResponse({ ok: true, data: { image_url: publicUrl, prompt_used: prompt } }, 200, origin);
 
     } catch (error: any) {
-        console.error("[devotionals-generate-cover] Unhandled error:", error);
+        const durationMs = Date.now() - startTime;
+        console.error(`[devotionals-generate-cover] request_id=${requestId} duration_ms=${durationMs} status=error:`, error.message);
         return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin);
     }
 });

@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { errBody, ERR } from '../_shared/error.ts';
+import { checkRateLimit, getClientIp, generateRequestId } from '../_shared/rate-limit.ts';
 
 const TIMEOUT_MS = 12000
 
@@ -28,6 +29,18 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string
  */
 
 serve(async (req: Request) => {
+    const requestId = generateRequestId();
+    const startTime = Date.now();
+    
+    // 0. Rate Limiting
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp);
+    if (!rateLimit.allowed) {
+        const durationMs = Date.now() - startTime;
+        console.log(`[generate-verse-commentary] request_id=${requestId} duration_ms=${durationMs} status=rate_limited ip=${clientIp}`);
+        return jsonResponse(rateLimit.error!, 429, req.headers.get('origin'));
+    }
+
     const corsResponse = handleCors(req);
     if (corsResponse) return corsResponse;
 
@@ -55,7 +68,7 @@ serve(async (req: Request) => {
 
         const supabase = createClient(sbUrl, sbKey);
 
-        // 2. Check Existence first (with timeout)
+        // 2. Check Existence first (with timeout) - DEDUPE
         const checkQuery = supabase
             .from('bible_commentaries')
             .select('*')
@@ -67,6 +80,8 @@ serve(async (req: Request) => {
         const { data: existing } = await withTimeout(checkQuery, TIMEOUT_MS, 'check existing commentary')
 
         if (existing) {
+            const durationMs = Date.now() - startTime;
+            console.log(`[generate-verse-commentary] request_id=${requestId} duration_ms=${durationMs} status=cache_hit`);
             return jsonResponse({ ok: true, data: existing, source: 'cache' }, 200, origin);
         }
 
@@ -162,15 +177,21 @@ serve(async (req: Request) => {
                     .single()
                 
                 const { data: retry } = await withTimeout(retryQuery, TIMEOUT_MS, 'retry fetch commentary')
+                const durationMs = Date.now() - startTime;
+                console.log(`[generate-verse-commentary] request_id=${requestId} duration_ms=${durationMs} status=race_condition`);
                 return jsonResponse({ ok: true, data: retry, source: 'retry_cache' }, 200, origin);
             }
             throw insertError;
         }
 
+        const durationMs = Date.now() - startTime;
+        console.log(`[generate-verse-commentary] request_id=${requestId} duration_ms=${durationMs} status=success`);
+
         return jsonResponse({ ok: true, data: inserted, source: 'generated' }, 200, origin);
 
     } catch (error: any) {
-        console.error("[generate-verse-commentary] Error:", error);
+        const durationMs = Date.now() - startTime;
+        console.error(`[generate-verse-commentary] request_id=${requestId} duration_ms=${durationMs} status=error:`, error.message);
         return jsonResponse(errBody(ERR.INTERNAL, 'Internal error'), 500, origin);
     }
 });
