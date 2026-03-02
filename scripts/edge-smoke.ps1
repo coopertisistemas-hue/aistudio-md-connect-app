@@ -261,6 +261,66 @@ catch {
     $failed++
 }
 
+# Test 9: track-event (valid event)
+Write-Host ""
+Write-Test "Test 9: track-event (valid event)" "Cyan"
+try {
+    $body = @{
+        event_name = "test_event"
+        page_path = "/test"
+        tenant_id = "md-connect"
+        session_id = "test-session-123"
+    } | ConvertTo-Json
+    $response = Invoke-WebRequest -Uri "$BaseUrl/functions/v1/track-event" -Method POST -Headers $headers -Body $body -TimeoutSec 10
+    $passed = Test-ResponseShape $response "track-event success" 201 $true
+    if (-not $passed) { $failed++ }
+}
+catch {
+    Write-Test "  FAIL: $($_.Exception.Message)" "Red"
+    $failed++
+}
+
+# Test 10: track-event (empty event_name - validation error)
+Write-Host ""
+Write-Test "Test 10: track-event (empty event_name)" "Cyan"
+try {
+    $body = @{
+        event_name = ""
+        page_path = "/test"
+        tenant_id = "md-connect"
+        session_id = "test-session-123"
+    } | ConvertTo-Json
+    $response = Invoke-WebRequest -Uri "$BaseUrl/functions/v1/track-event" -Method POST -Headers $headers -Body $body -TimeoutSec 10
+    $passed = Test-ResponseShape $response "track-event empty event_name" 400 $false $true
+    if (-not $passed) { $failed++ }
+}
+catch {
+    Write-Test "  FAIL: $($_.Exception.Message)" "Red"
+    $failed++
+}
+
+# Test 11: track-event (payload too large - validation error)
+Write-Host ""
+Write-Test "Test 11: track-event (payload too large)" "Cyan"
+try {
+    $largePayload = @{
+        event_name = "test_event"
+        page_path = "/test"
+        tenant_id = "md-connect"
+        session_id = "test-session-123"
+        payload = @{
+            data = "x" * 11000  # > 10KB
+        }
+    } | ConvertTo-Json
+    $response = Invoke-WebRequest -Uri "$BaseUrl/functions/v1/track-event" -Method POST -Headers $headers -Body $largePayload -TimeoutSec 10
+    $passed = Test-ResponseShape $response "track-event payload too large" 400 $false $true
+    if (-not $passed) { $failed++ }
+}
+catch {
+    Write-Test "  FAIL: $($_.Exception.Message)" "Red"
+    $failed++
+}
+
 # ── Summary ─────────────────────────────────────────────────────────────────
 Write-Banner "Smoke Summary"
 
