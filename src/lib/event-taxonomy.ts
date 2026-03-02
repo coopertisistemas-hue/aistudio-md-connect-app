@@ -119,6 +119,44 @@ export const BACKEND_EVENTS = {
         description: 'User shares devotional content',
         parameters: [],
     },
+    
+    // Growth / Onboarding
+    ONBOARDING_START: {
+        name: 'onboarding_start' as const,
+        category: EVENT_CATEGORIES.ACQUISITION,
+        description: 'User starts onboarding flow',
+        parameters: [],
+    },
+    CHURCH_SELECTED: {
+        name: 'church_selected' as const,
+        category: EVENT_CATEGORIES.ACQUISITION,
+        description: 'User selects their church',
+        parameters: ['church_id', 'church_slug'],
+    },
+    ONBOARDING_COMPLETE: {
+        name: 'onboarding_complete' as const,
+        category: EVENT_CATEGORIES.ACQUISITION,
+        description: 'User completes onboarding',
+        parameters: ['church_id'],
+    },
+    FIRST_LOGIN: {
+        name: 'first_login' as const,
+        category: EVENT_CATEGORIES.ACQUISITION,
+        description: 'First login by user',
+        parameters: [],
+    },
+    RETURN_VISIT: {
+        name: 'return_visit' as const,
+        category: EVENT_CATEGORIES.RETENTION,
+        description: 'Returning user session',
+        parameters: ['session_count'],
+    },
+    APP_SESSION: {
+        name: 'app_session' as const,
+        category: EVENT_CATEGORIES.ENGAGEMENT,
+        description: 'App session start',
+        parameters: ['session_duration_estimate'],
+    },
 } as const;
 
 /**

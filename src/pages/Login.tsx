@@ -40,13 +40,20 @@ export default function Login() {
                     password,
                 });
                 if (user) {
-                    // Track login event
+                    // Track login event (GA4)
                     analytics.track({
                         name: 'login_status',
                         element: 'login',
                         context: 'public',
                         metadata: { method: 'email', user_id: user.id }
                     });
+
+                    // Track first_login (backend) - check via localStorage flag
+                    const hasLoggedInBefore = localStorage.getItem('mdc_first_login_done');
+                    if (!hasLoggedInBefore) {
+                        analytics.trackEvent('first_login');
+                        localStorage.setItem('mdc_first_login_done', 'true');
+                    }
 
                     await handleLoginSuccess(user.id);
                 }

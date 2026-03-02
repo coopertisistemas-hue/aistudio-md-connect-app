@@ -3,6 +3,7 @@ import { Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
+import { analytics } from '@/lib/analytics';
 
 export function ChurchScopedRoute({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
@@ -56,6 +57,12 @@ export function ChurchScopedRoute({ children }: { children: React.ReactNode }) {
                 // 3. Validation
                 // Is this the correct slug?
                 if (slug === church.slug) {
+                    // Track onboarding_complete on first successful church access
+                    const hasCompletedOnboarding = localStorage.getItem('mdc_onboarding_complete');
+                    if (!hasCompletedOnboarding) {
+                        analytics.trackEvent('onboarding_complete', { church_id: profile.church_id }, 'member');
+                        localStorage.setItem('mdc_onboarding_complete', 'true');
+                    }
                     setIsAllowed(true);
                 } else {
                     // Mismatch. 

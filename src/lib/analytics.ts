@@ -24,7 +24,13 @@ export type AnalyticsEventName =
     | 'view_partner'
     | 'click_donate'
     | 'play_audio'
-    | 'share_devotional';
+    | 'share_devotional'
+    | 'onboarding_start'
+    | 'church_selected'
+    | 'onboarding_complete'
+    | 'first_login'
+    | 'return_visit'
+    | 'app_session';
 
 interface UTMParams {
     utm_source?: string;

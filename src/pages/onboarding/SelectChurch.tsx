@@ -5,6 +5,7 @@ import { Search, MapPin, Loader2, Church, AlertCircle, RefreshCw } from 'lucide-
 import { useAuth } from '@/contexts/AuthContext';
 import { InternalPageLayout } from '@/components/layout/InternalPageLayout';
 import { Button } from '@/components/ui/button';
+import { analytics } from '@/lib/analytics';
 
 interface Church {
     id: string;
@@ -27,6 +28,7 @@ export default function SelectChurch() {
 
     useEffect(() => {
         loadChurches();
+        analytics.trackEvent('onboarding_start');
     }, []);
 
     const loadChurches = async () => {
@@ -73,7 +75,10 @@ export default function SelectChurch() {
             // If error, ignore for now as RLS might block if not permitted
             if (memberError && import.meta.env.DEV) console.warn("Member creation warning:", memberError);
 
-            // 3. Redirect
+            // 3. Track growth event
+            analytics.trackEvent('church_selected', { church_id: church.id }, 'member');
+
+            // 4. Redirect
             navigate(`/c/${church.slug}`);
 
         } catch (err) {

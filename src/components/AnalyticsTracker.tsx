@@ -10,6 +10,16 @@ export function AnalyticsTracker() {
     useEffect(() => {
         // Initialize GA4 once on mount
         analytics.init();
+
+        // Track app session (growth analytics)
+        const sessionCount = parseInt(sessionStorage.getItem('mdc_session_count') || '0', 10) + 1;
+        sessionStorage.setItem('mdc_session_count', sessionCount.toString());
+
+        if (sessionCount === 1) {
+            analytics.trackEvent('app_session', { session_count: sessionCount });
+        } else {
+            analytics.trackEvent('return_visit', { session_count: sessionCount });
+        }
     }, []);
 
     useEffect(() => {
