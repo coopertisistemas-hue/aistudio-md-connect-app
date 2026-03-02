@@ -2,6 +2,7 @@ import React from 'react';
 import type { Partner } from '@/types/monetization';
 import { ExternalLink } from 'lucide-react';
 import { monetizationService } from '@/services/monetization';
+import { analytics } from '@/lib/analytics';
 
 interface AffiliateCardProps {
     partner: Partner;
@@ -11,6 +12,7 @@ interface AffiliateCardProps {
 const AffiliateCard: React.FC<AffiliateCardProps> = ({ partner, source }) => {
     const handleClick = () => {
         monetizationService.trackEvent(partner.id, 'partner', 'click', source);
+        analytics.trackEvent('affiliate_click', { affiliate_id: partner.id, affiliate_category: partner.category || 'general' });
         window.open(partner.external_link, '_blank');
     };
 

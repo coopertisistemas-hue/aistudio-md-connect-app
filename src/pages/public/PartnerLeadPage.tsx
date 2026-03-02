@@ -30,6 +30,7 @@ export default function PartnerLeadPage() {
             setSuccess(true);
             toast.success("Solicitação enviada!");
             analytics.track({ name: 'feature_usage', element: 'partner_lead_submit', context: 'public' });
+            analytics.trackEvent('partner_inquiry', { partner_type: 'general' });
         }
     };
 

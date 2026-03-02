@@ -171,6 +171,50 @@ export const BACKEND_EVENTS = {
         description: 'User converts from campaign',
         parameters: ['utm_source', 'utm_campaign', 'conversion_type'],
     },
+    
+    // Monetization
+    DONATE_VIEW: {
+        name: 'donate_view' as const,
+        category: EVENT_CATEGORIES.ENGAGEMENT,
+        description: 'User views donation page',
+        parameters: ['donation_type'],
+    },
+    DONATE_CLICK: {
+        name: 'donate_click' as const,
+        category: EVENT_CATEGORIES.CONVERSION,
+        description: 'User clicks donation option',
+        parameters: ['donation_type', 'amount'],
+    },
+    DONATE_INITIATED: {
+        name: 'donate_initiated' as const,
+        category: EVENT_CATEGORIES.CONVERSION,
+        description: 'User starts donation process',
+        parameters: ['donation_type', 'payment_method'],
+    },
+    DONATE_COMPLETE: {
+        name: 'donate_complete' as const,
+        category: EVENT_CATEGORIES.CONVERSION,
+        description: 'User completes donation',
+        parameters: ['donation_type', 'amount', 'payment_method'],
+    },
+    PARTNER_INQUIRY: {
+        name: 'partner_inquiry' as const,
+        category: EVENT_CATEGORIES.CONVERSION,
+        description: 'User submits partner inquiry',
+        parameters: ['partner_id', 'partner_type'],
+    },
+    SERVICE_REQUEST: {
+        name: 'service_request' as const,
+        category: EVENT_CATEGORIES.CONVERSION,
+        description: 'User requests church service',
+        parameters: ['service_id', 'service_type'],
+    },
+    AFFILIATE_CLICK: {
+        name: 'affiliate_click' as const,
+        category: EVENT_CATEGORIES.CONVERSION,
+        description: 'User clicks affiliate link',
+        parameters: ['affiliate_id', 'affiliate_category'],
+    },
 } as const;
 
 /**

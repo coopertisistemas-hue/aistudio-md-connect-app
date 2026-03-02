@@ -32,7 +32,14 @@ export type AnalyticsEventName =
     | 'return_visit'
     | 'app_session'
     | 'attribution_captured'
-    | 'campaign_conversion';
+    | 'campaign_conversion'
+    | 'donate_view'
+    | 'donate_click'
+    | 'donate_initiated'
+    | 'donate_complete'
+    | 'partner_inquiry'
+    | 'service_request'
+    | 'affiliate_click';
 
 interface UTMParams {
     utm_source?: string;

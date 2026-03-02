@@ -36,6 +36,7 @@ export default function ServiceDetail() {
 
     const handleWhatsApp = () => {
         monetizationService.trackEvent(service.id, 'service', 'whatsapp', 'detail');
+        analytics.trackEvent('service_request', { service_id: service.id });
         const text = encodeURIComponent(service.whatsapp_message || `Olá, gostaria de saber mais sobre ${service.title}`);
         window.open(`https://wa.me/${service.whatsapp_number}?text=${text}`, '_blank');
     };

@@ -46,7 +46,10 @@ const DonatePage: React.FC = () => {
         } catch (e) {
             console.error("PIX Generation Error", e);
         }
-    }, [currentAmount]);
+        
+        // Track donate view
+        analytics.trackEvent('donate_view', { donation_type: 'pix' });
+    }, []);
 
     // Handlers
     const handleValueSelect = (val: number) => {
